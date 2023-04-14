@@ -13,6 +13,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(ExternalProject)
 include(ValaPrecompile)
 include(ValaVersion)
+include(GNUInstallDirs)
 find_package(Vala)
 ensure_vala_version("0.22.0" MINIMUM)
 find_package(PkgConfig)
@@ -112,9 +113,9 @@ SET(APP_SOURCES, "")
 FILE(GLOB valalist LIST_FILES true */*.vala)
 FOREACH(child ${valalist})
 	file(RELATIVE_PATH
-    file_path
-    ${CMAKE_SOURCE_DIR}
-    ${child}
+		file_path
+		${CMAKE_SOURCE_DIR}
+		${child}
 	)
 	set (APP_SOURCES ${APP_SOURCES} ${file_path})
 ENDFOREACH()
@@ -175,15 +176,11 @@ FOREACH(lang ${dirlist})
 
 ENDFOREACH(lang)
 
-INSTALL (TARGETS ${target} DESTINATION bin)
-INSTALL (PROGRAMS ssh_login.sh DESTINATION lib/${target})
-INSTALL (FILES hicolor/32x32/${target}.png DESTINATION share/icons/hicolor/32x32/apps)
-INSTALL (FILES hicolor/48x48/${target}.png DESTINATION share/icons/hicolor/48x48/apps)
-INSTALL (FILES hicolor/96x96/${target}.png DESTINATION share/icons/hicolor/96x96/apps)
-INSTALL (FILES hicolor/128x128/${target}.png DESTINATION share/icons/hicolor/128x128/apps)
-INSTALL (FILES hicolor/${target}.svg DESTINATION share/icons/hicolor/scalable/apps)
-INSTALL (DIRECTORY image DESTINATION share/${target} FILES_MATCHING PATTERN "*.png")
-INSTALL (DIRECTORY image DESTINATION share/${target} FILES_MATCHING PATTERN "*.svg")
-INSTALL (DIRECTORY theme DESTINATION share/${target} FILES_MATCHING PATTERN "*")
-INSTALL (FILES style.css DESTINATION share/${target})
-INSTALL (FILES ${target}.desktop DESTINATION share/applications)
+INSTALL (TARGETS ${target} DESTINATION ${CMAKE_INSTALL_BINDIR})
+INSTALL (PROGRAMS ssh_login.sh DESTINATION ${CMAKE_INSTALL_LIBEXECDIR})
+INSTALL (DIRECTORY hicolor DESTINATION ${CMAKE_INSTALL_DATADIR}/icons)
+INSTALL (DIRECTORY image DESTINATION ${CMAKE_INSTALL_DATADIR}/${target} FILES_MATCHING PATTERN "*.png")
+INSTALL (DIRECTORY image DESTINATION ${CMAKE_INSTALL_DATADIR}/${target} FILES_MATCHING PATTERN "*.svg")
+INSTALL (DIRECTORY theme DESTINATION ${CMAKE_INSTALL_DATADIR}/${target} FILES_MATCHING PATTERN "*")
+INSTALL (FILES style.css DESTINATION ${CMAKE_INSTALL_DATADIR}/${target})
+INSTALL (FILES ${target}.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
