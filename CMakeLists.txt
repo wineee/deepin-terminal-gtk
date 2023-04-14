@@ -30,24 +30,13 @@ pkg_check_modules(RSVG REQUIRED librsvg-2.0)
 pkg_check_modules(WNCK REQUIRED libwnck-3.0)
 pkg_check_modules(FONTCONFIG REQUIRED fontconfig)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
+pkg_check_modules(VTE REQUIRED vte-2.91)
 
 option(BUILD_TESTING "Build with native testing" OFF)
 
-pkg_check_modules(VTE REQUIRED vte-2.91)
 # There're 3 releases for 0.59.x, only 0.59.0 keeps old behaviour
 if("${VTE_VERSION}" VERSION_GREATER "0.59.0")
     list(APPEND ARGS_DEFINITIONS "VTE_0_60")
-endif()
-
-if (NOT DEFINED VERSION)
-find_package(Git)
-message("generate version from git")
-execute_process(COMMAND ${GIT_EXECUTABLE}
-    describe --abbrev=6 --dirty --tags
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    OUTPUT_VARIABLE VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
 endif()
 
 configure_file(
