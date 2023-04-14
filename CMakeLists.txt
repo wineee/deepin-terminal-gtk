@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.25)
 
-project("dterminal" C)
+project(deepin-terminal-gtk
+    VERSION 5.1.0
+    DESCRIPTION "DDE terminal emulator application"
+    HOMEPAGE_URL "https://github.com/wineee/deepin-terminal-gtk"
+    LANGUAGES C
+)
 
 set(target deepin-terminal)
 
@@ -12,8 +17,8 @@ find_package(Vala)
 ensure_vala_version("0.22.0" MINIMUM)
 find_package(PkgConfig)
 find_package(GLib "2.48" REQUIRED)
-find_package(JsonGlib)
-find_package(Libsecret)
+find_package(JsonGlib REQUIRED)
+find_package(Libsecret REQUIRED)
 find_package(FontConfig)
 find_package(X11)
 find_package(Gettext)
@@ -27,14 +32,11 @@ pkg_check_modules(FONTCONFIG REQUIRED fontconfig)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 option(BUILD_TESTING "Build with native testing" OFF)
-option(USE_VENDOR_LIB "Backport support for debian stretch" OFF)
 
-if (NOT USE_VENDOR_LIB)
 pkg_check_modules(VTE REQUIRED vte-2.91)
 # There're 3 releases for 0.59.x, only 0.59.0 keeps old behaviour
 if("${VTE_VERSION}" VERSION_GREATER "0.59.0")
     list(APPEND ARGS_DEFINITIONS "VTE_0_60")
-endif()
 endif()
 
 if (NOT DEFINED VERSION)
@@ -47,36 +49,27 @@ execute_process(COMMAND ${GIT_EXECUTABLE}
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 endif()
+
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/constant.vala.in
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/constant.vala
 )
 
 if(BUILD_TESTING)
-message("set project_path to native test")
-execute_process(
-    COMMAND sed s|@@PROJECT_PATH@@|\"${CMAKE_SOURCE_DIR}\"|g
-    OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c
-    INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in
-)
-list(APPEND ARGS_DEFINITIONS "TEST_BUILD")
+    message("set project_path to native test")
+    execute_process(
+        COMMAND sed s|@@PROJECT_PATH@@|\"${CMAKE_SOURCE_DIR}\"|g
+        OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c
+        INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in
+    )
+    list(APPEND ARGS_DEFINITIONS "TEST_BUILD")
 else()
-message("set project_path to ${CMAKE_INSTALL_PREFIX}")
-execute_process(
-    COMMAND sed s|@@PROJECT_PATH@@|\"${CMAKE_INSTALL_PREFIX}\"|g
-    OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c
-    INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in
-)
-endif()
-
-if (USE_VENDOR_LIB)
-ExternalProject_Add(Vte-0.52
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/vte-0.52.1
-  CONFIGURE_COMMAND ./configure --enable-static
-  BUILD_COMMAND make
-  INSTALL_COMMAND ""
-  BUILD_IN_SOURCE 1
-  )
+    message("set project_path to ${CMAKE_INSTALL_PREFIX}")
+    execute_process(
+        COMMAND sed s|@@PROJECT_PATH@@|\"${CMAKE_INSTALL_PREFIX}\"|g
+        OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c
+        INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in
+    )
 endif()
 
 set(CFLAGS
@@ -96,16 +89,11 @@ set(INCLUDE_PATHS
 	${GEE_INCLUDE_DIRS}
 	${WNCK_INCLUDE_DIRS}
 	${RSVG_INCLUDE_DIRS}
+	${VTE_INCLUDE_DIRS}
 	${JsonGlib_INCLUDE_DIRS}
 	${LIBSECRET_INCLUDE_DIRS}
 )
 
-if (USE_VENDOR_LIB)
-	list(APPEND INCLUDE_PATHS ${CMAKE_SOURCE_DIR}/3rdparty/vte-0.52.1/src)
-	find_library(VTE_LIB NAMES libvte-2.91.a tcmalloc_minimal)
-else()
-	list(APPEND INCLUDE_PATHS ${VTE_INCLUDE_DIRS})
-endif()
 
 include_directories(${INCLUDE_PATHS})
 set(LIBS
@@ -121,6 +109,7 @@ set(LIBS
 	${XTST_LIBRARIES}
 	${FONTCONFIG_LIBRARY}
 	${M_LIBRARIES}
+	${VTE_LIBRARIES}
 	stdc++
 	m
 	z
@@ -129,9 +118,6 @@ set(LIBS
 	pcre2-8
 )
 
-if (NOT USE_VENDOR_LIB)
-	list(APPEND LIBS ${VTE_LIBRARIES})
-endif()
 
 SET(APP_SOURCES, "")
 FILE(GLOB valalist LIST_FILES true */*.vala)
@@ -159,37 +145,17 @@ set(VALA_PRECOMPILE_PACKAGES
 	librsvg-2.0
 )
 
-if (USE_VENDOR_LIB)
-	list(APPEND VALA_PRECOMPILE_PACKAGES fontconfig)
 
-	vala_precompile(VALA_C
-		./main.vala
-		${APP_SOURCES}
+vala_precompile(VALA_C ./main.vala ${APP_SOURCES}
+	        PACKAGES ${VALA_PRECOMPILE_PACKAGES})
 
-	OPTIONS
-	--vapidir=${CMAKE_SOURCE_DIR}/vapi
+add_executable(${target}
+	${VALA_C}
+	${CMAKE_SOURCE_DIR}/project_path.c
+	${CMAKE_SOURCE_DIR}/lib/font.c)
 
-	PACKAGES
-		${VALA_PRECOMPILE_PACKAGES}
-	)
-else()
-	vala_precompile(VALA_C
-		./main.vala
-		${APP_SOURCES}
 
-	PACKAGES
-		${VALA_PRECOMPILE_PACKAGES}
-	)
-endif()
-
-add_executable(${target} ${VALA_C} ${CMAKE_SOURCE_DIR}/project_path.c ${CMAKE_SOURCE_DIR}/lib/font.c)
-
-if (USE_VENDOR_LIB)
-	target_link_libraries(${target} ${LIBS} ${CMAKE_SOURCE_DIR}/3rdparty/vte-0.52.1/src/.libs/libvte-2.91.a)
-	add_dependencies(${target} Vte-0.52)
-else()
-	target_link_libraries(${target} ${LIBS})
-endif()
+target_link_libraries(${target} ${LIBS})
 
 FILE(GLOB children LIST_DIRECTORIES true po/*)
 SET(dirlist "")

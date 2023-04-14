@@ -22,7 +22,6 @@ And you also need the [`deepin-menu`](https://github.com/linuxdeepin/deepin-menu
 
 `mkdir build; cd build; cmake ..; make; ./deepin-terminal`
 
-Tip: Use `cmake ../ -DUSE_VENDOR_LIB=off` if you don't want to use the vendor lib.
 
 ## Usage
 
