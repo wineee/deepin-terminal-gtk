@@ -9,3 +9,6 @@ build/
 project_path.c
 lib/constant.vala
 .vscode/
+# nix
+.direnv/
+result
