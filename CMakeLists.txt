@@ -1,8 +1,9 @@
+cmake_minimum_required(VERSION 3.25)
+
 project("dterminal" C)
 
 set(target deepin-terminal)
 
-cmake_minimum_required(VERSION 2.6)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(ExternalProject)
 include(ValaPrecompile)
@@ -25,8 +26,8 @@ pkg_check_modules(WNCK REQUIRED libwnck-3.0)
 pkg_check_modules(FONTCONFIG REQUIRED fontconfig)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
 
-option(TEST_BUILD "Build with native testing" ON)
-option(USE_VENDOR_LIB "Backport support for debian stretch" ON)
+option(BUILD_TESTING "Build with native testing" OFF)
+option(USE_VENDOR_LIB "Backport support for debian stretch" OFF)
 
 if (NOT USE_VENDOR_LIB)
 pkg_check_modules(VTE REQUIRED vte-2.91)
@@ -51,7 +52,7 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/constant.vala
 )
 
-if(TEST_BUILD)
+if(BUILD_TESTING)
 message("set project_path to native test")
 execute_process(
     COMMAND sed s|@@PROJECT_PATH@@|\"${CMAKE_SOURCE_DIR}\"|g
