@@ -116,8 +116,8 @@ namespace Widgets {
         public int checkbutton_margin_top = 4;
         public int first_segment_margin_start = 20;
         public int grid_height = 24;
-        public int option_widget_margin_start = 40;
-        public int option_widget_margin_end = 10;
+        public new int option_widget_margin_start = 40;
+        public new int option_widget_margin_end = 10;
         public int preference_name_width = 180;
         public int preference_split_line_margin_start = 2;
         public int preference_widget_width = Constant.PREFERENCE_WIDGET_WIDTH;

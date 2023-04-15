@@ -30,8 +30,8 @@ namespace Widgets {
         public Gtk.Box window_frame_box;
         public Gtk.Box window_widget_box;
         public Widgets.ConfigWindow transient_window;
-        public int option_widget_margin_end = 5;
-        public int option_widget_margin_top = 5;
+        public new int option_widget_margin_end = 5;
+        public new int option_widget_margin_top = 5;
         public int window_frame_margin_bottom = 60;
         public int window_frame_margin_end = 50;
         public int window_frame_margin_start = 50;

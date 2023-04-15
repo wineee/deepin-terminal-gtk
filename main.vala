@@ -39,8 +39,12 @@ public class TerminalApp : Application {
     }
 
     public void exit() {
-        quit();
-        window.quit();
+        try {
+            quit();
+            window.quit();
+        } catch (Error e) {
+            stderr.printf("Service exit error\n");
+        }
     }
 
     public signal void quit();
@@ -57,7 +61,11 @@ public class QuakeTerminalApp : Application {
     }
 
     public void show_or_hide() {
-        this.quake_window.toggle_quake_window();
+        try {
+            this.quake_window.toggle_quake_window();
+        } catch (Error e) {
+            stderr.printf("Could not toggle quake window\n");
+        }
     }
 }
 

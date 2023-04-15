@@ -61,15 +61,11 @@ namespace Widgets {
             content_box.margin_top = homepage_y;
 
             // Add homepage.
-            try {
-                string homepage_name = "www.deepin.org";
-                string homepage_link = "https://" + homepage_name;
+            string homepage_name = "www.deepin.org";
+            string homepage_link = "https://" + homepage_name;
 
-                var homepage_area = new Widgets.LinkButton(homepage_name, homepage_link, "homepage");
-                content_box.pack_start(homepage_area, false, false, 0);
-            } catch (Error e) {
-                print("AboutWidget error: %s", e.message);
-            }
+            var homepage_area = new Widgets.LinkButton(homepage_name, homepage_link, "homepage");
+            content_box.pack_start(homepage_area, false, false, 0);
 
             var acknowledgments_area = new Widgets.LinkButton(_("Acknowledgments"), "https://www.deepin.org/acknowledgments/deepin-terminal", "acknowledgments");
             acknowledgments_area.margin_top = acknowledgments_y;
