@@ -34,22 +34,27 @@ include(ValaVersion)
 include(GNUInstallDirs)
 find_package(Vala)
 ensure_vala_version("0.22.0" MINIMUM)
-find_package(PkgConfig)
+find_package(PkgConfig REQUIRED)
 find_package(GLib "2.48" REQUIRED)
-find_package(JsonGlib REQUIRED)
-find_package(Libsecret REQUIRED)
 find_package(FontConfig)
 find_package(X11)
 find_package(Gettext)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-pkg_check_modules(GEE REQUIRED gee-0.8)
-pkg_check_modules(GIO REQUIRED gio-unix-2.0)
-pkg_check_modules(RSVG REQUIRED librsvg-2.0)
-pkg_check_modules(WNCK REQUIRED libwnck-3.0)
-pkg_check_modules(FONTCONFIG REQUIRED fontconfig)
+pkg_check_modules(GEE REQUIRED IMPORTED_TARGET gee-0.8)
+pkg_check_modules(GIO REQUIRED IMPORTED_TARGET gio-unix-2.0)
+pkg_check_modules(RSVG REQUIRED IMPORTED_TARGET librsvg-2.0)
+pkg_check_modules(WNCK REQUIRED IMPORTED_TARGET libwnck-3.0)
+pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
-pkg_check_modules(VTE REQUIRED vte-2.91)
+pkg_check_modules(VTE REQUIRED IMPORTED_TARGET vte-2.91)
+pkg_check_modules(LIBSECRET IMPORTED_TARGET libsecret-1)
+pkg_check_modules(PCRE REQUIRED IMPORTED_TARGET libpcre2-8)
+pkg_check_modules(GNUTLS REQUIRED IMPORTED_TARGET gnutls)
+pkg_check_modules(JsonGlib REQUIRED IMPORTED_TARGET json-glib-1.0)
+
 
 option(BUILD_TESTING "Build with native testing" OFF)
 
@@ -81,50 +86,17 @@ else()
 endif()
 
 set(CFLAGS
-	${GIO_CFLAGS}
 	${GTK3_CFLAGS} ${GTK3_CFLAGS_OTHER}
-	${GEE_CFLAGS}
 	${X11_CFLAGS} ${X11_CFLAGS_OTHER}
 	-DWNCK_I_KNOW_THIS_IS_UNSTABLE
 	-DGETTEXT_PACKAGE=${target}
 	-s -O3 -w
-	#	-g
 )
 add_compile_options(${CFLAGS})
 set(INCLUDE_PATHS
-	${GIO_INCLUDE_DIRS}
 	${GTK3_INCLUDE_DIRS}
-	${GEE_INCLUDE_DIRS}
-	${WNCK_INCLUDE_DIRS}
-	${RSVG_INCLUDE_DIRS}
-	${VTE_INCLUDE_DIRS}
-	${JsonGlib_INCLUDE_DIRS}
-	${LIBSECRET_INCLUDE_DIRS}
 )
-
-
 include_directories(${INCLUDE_PATHS})
-set(LIBS
-	${GIO_LIBRARIES}
-	${GTK3_LIBRARIES}
-	${GEE_LIBRARIES}
-	${WNCK_LIBRARIES}
-	${RSVG_LIBRARIES}
-	${JsonGlib_LIBRARIES}
-	${LIBSECRET_LIBRARIES}
-	${ZLIB_LIBRARIES}
-	${X11_LIBRARIES}
-	${XTST_LIBRARIES}
-	${FONTCONFIG_LIBRARY}
-	${M_LIBRARIES}
-	${VTE_LIBRARIES}
-	stdc++
-	m
-	z
-	pthread
-	gnutls
-	pcre2-8
-)
 
 
 SET(APP_SOURCES, "")
@@ -162,8 +134,27 @@ add_executable(${target}
 	${CMAKE_SOURCE_DIR}/project_path.c
 	${CMAKE_SOURCE_DIR}/lib/font.c)
 
+target_link_libraries(${target}
+	${GTK3_LIBRARIES}
+	${ZLIB_LIBRARIES}
+	${X11_LIBRARIES}
+	${XTST_LIBRARIES}
+	${M_LIBRARIES}
+	PkgConfig::VTE
+	PkgConfig::GEE
+	PkgConfig::GIO
+	PkgConfig::GNUTLS
+	PkgConfig::RSVG
+	PkgConfig::LIBSECRET
+	PkgConfig::WNCK
+	PkgConfig::PCRE
+	PkgConfig::FONTCONFIG
+	PkgConfig::JsonGlib
+	Threads::Threads
 
-target_link_libraries(${target} ${LIBS})
+	m
+	z
+)
 
 FILE(GLOB children LIST_DIRECTORIES true po/*)
 SET(dirlist "")

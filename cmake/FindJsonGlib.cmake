@@ -8,7 +8,6 @@
 include(LibFindMacros)
 
 # Use pkg-config to get hints about paths
-libfind_pkg_check_modules(JsonGlib_PKGCONF json-glib-1.0)
 
 # Main include dir
 find_path(JsonGlib_INCLUDE_DIR
