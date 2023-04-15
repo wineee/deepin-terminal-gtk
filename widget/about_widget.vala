@@ -50,7 +50,7 @@ namespace Widgets {
             string logo_path = Utils.get_image_path("logo.svg");
             
             about_text = _("Deepin Terminal is an advanced terminal emulator with workspace, multiple windows, remote management, quake mode and other features.\n\nIt sharpens your focus in the world of command line!");
-            product_name_text = _("Deepin Terminal");
+            product_name_text = _("Deepin Terminal Gtk");
 
             icon_surface = Utils.create_image_surface("icon.svg");
             logo_surface = Utils.create_image_surface_from_file(logo_path);
