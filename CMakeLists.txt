@@ -10,7 +10,22 @@ project(deepin-terminal-gtk
 set(target deepin-terminal-gtk)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# C standard can be overridden when this is used as a sub-project.
+if(NOT CMAKE_C_STANDARD)
+  # This project can use C11, but will gracefully decay down to C99.
+  set(CMAKE_C_STANDARD 11)
+  set(CMAKE_C_STANDARD_REQUIRED OFF)
+  set(CMAKE_C_EXTENSIONS OFF)
+endif(NOT CMAKE_C_STANDARD)
 
+# Enabled PIE binaries by default if supported.
+include(CheckPIESupported OPTIONAL RESULT_VARIABLE CHECK_PIE_SUPPORTED)
+if (CHECK_PIE_SUPPORTED)
+  check_pie_supported(LANGUAGES C)
+  if (CMAKE_CXX_LINK_PIE_SUPPORTED)
+    set (CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+  endif ()
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(ExternalProject)
