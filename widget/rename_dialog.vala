@@ -40,7 +40,7 @@ namespace Widgets {
         public signal void rename(string new_title);
 
         public RenameDialog(string title, string content, string cancel_text, string rename_text) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             set_init_size(480, 230);
 

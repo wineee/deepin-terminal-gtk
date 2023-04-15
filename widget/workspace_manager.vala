@@ -35,7 +35,7 @@ namespace Widgets {
         public int workspace_index;
 
         public WorkspaceManager(Tabbar t, string? work_directory) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             tabbar = t;
 

@@ -57,7 +57,7 @@ namespace Widgets {
         public signal void quit_fullscreen();
 
         public Appbar(TerminalApp app, Widgets.Window win, Tabbar tab_bar, WorkspaceManager manager, bool has_start) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             window = win;
             workspace_manager = manager;

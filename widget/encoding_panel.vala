@@ -51,7 +51,7 @@ namespace Widgets {
         public delegate void UpdatePageAfterEdit();
 
         public EncodingPanel(Workspace space, WorkspaceManager manager, Term term) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace = space;
             workspace_manager = manager;

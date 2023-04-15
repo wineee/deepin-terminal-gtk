@@ -55,7 +55,7 @@ namespace Widgets {
         private bool is_show_shortcut_viewer = false;
 
         public ConfigWindow() {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             load_config();
 

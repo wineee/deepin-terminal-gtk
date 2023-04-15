@@ -35,7 +35,7 @@ namespace Widgets {
         public delegate void UpdatePageAfterEdit();
 
         public CommandPanel(Workspace space, WorkspaceManager manager) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace = space;
             workspace_manager = manager;

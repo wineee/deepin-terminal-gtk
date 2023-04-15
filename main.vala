@@ -66,8 +66,8 @@ interface QuakeDaemon : Object {
     public abstract void show_or_hide() throws Error;
 }
 
-
-const string GETTEXT_PACKAGE = "deepin-terminal-gtk";
+[CCode(cname="GETTEXT_PACKAGE")] extern const string GETTEXT_PACKAGE;
+[CCode(cname="LOCALEDIR")] extern const string LOCALEDIR;
 
 public class Application : Object {
 
@@ -101,7 +101,7 @@ public class Application : Object {
 
         Intl.setlocale();
         Intl.bind_textdomain_codeset(GETTEXT_PACKAGE, "utf-8");
-        Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+        Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
         // Need parse -e or -x commands my self, OptionEntry just will got first argument after -e or -x.
         commands = new ArrayList<string>();

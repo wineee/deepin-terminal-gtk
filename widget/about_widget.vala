@@ -45,7 +45,7 @@ namespace Widgets {
         public string product_name_text;
 
         public AboutWidget() {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             string logo_path = Utils.get_image_path("logo.svg");
             

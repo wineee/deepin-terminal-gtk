@@ -91,7 +91,7 @@ namespace Widgets {
         public signal void delete_server(string address, string username);
 
         public RemoteServerDialog(Widgets.ConfigWindow window, Gtk.Widget? widget, string? info=null, KeyFile? config_file=null) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             set_init_size(480, 360);
 

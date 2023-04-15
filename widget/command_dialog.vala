@@ -73,7 +73,7 @@ namespace Widgets {
         public signal void delete_command(string name);
 
         public CommandDialog(Widgets.ConfigWindow window, Term? term, Gtk.Widget? widget, string? info=null, KeyFile? config_file=null) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             set_init_size(480, 320);
 

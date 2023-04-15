@@ -29,7 +29,7 @@ namespace Widgets {
         public Menu.Menu menu;
 
         public EntryMenu() {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
         }
 
         public void create_entry_menu(Gtk.Entry entry, int x, int y) {

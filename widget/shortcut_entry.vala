@@ -48,7 +48,7 @@ namespace Widgets {
         public signal void change_key(string new_key);
 
         public ShortcutEntry() {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             button_left_surface = Utils.create_image_surface("shortcut_button_left.svg");
             button_right_surface = Utils.create_image_surface("shortcut_button_right.svg");

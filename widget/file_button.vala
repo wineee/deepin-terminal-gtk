@@ -33,7 +33,7 @@ namespace Widgets {
         public int height = 26;
 
         public FileButton() {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             visible_window = false;
 

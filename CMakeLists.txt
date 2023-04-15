@@ -82,11 +82,11 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in ${CMAKE_CURRENT_SOU
 set(CFLAGS
 	${GTK3_CFLAGS} ${GTK3_CFLAGS_OTHER}
 	${X11_CFLAGS} ${X11_CFLAGS_OTHER}
-	-DWNCK_I_KNOW_THIS_IS_UNSTABLE
-	-DGETTEXT_PACKAGE=${target}
 	-s -O3 -w
 )
+
 add_compile_options(${CFLAGS})
+
 set(INCLUDE_PATHS
 	${GTK3_INCLUDE_DIRS}
 )
@@ -119,7 +119,6 @@ set(VALA_PRECOMPILE_PACKAGES
 	librsvg-2.0
 )
 
-
 vala_precompile(VALA_C ./main.vala ${APP_SOURCES}
 	        PACKAGES ${VALA_PRECOMPILE_PACKAGES})
 
@@ -127,6 +126,14 @@ add_executable(${target}
 	${VALA_C}
 	${CMAKE_SOURCE_DIR}/project_path.c
 	${CMAKE_SOURCE_DIR}/lib/font.c)
+
+set(LOCALE_INSTALL_DIR ${CMAKE_INSTALL_FULL_DATADIR}/locale)
+target_compile_definitions(${target}
+    PRIVATE
+    WNCK_I_KNOW_THIS_IS_UNSTABLE
+    GETTEXT_PACKAGE="${target}"
+    LOCALEDIR="${LOCALE_INSTALL_DIR}"
+)
 
 target_link_libraries(${target}
 	${GTK3_LIBRARIES}
@@ -164,13 +171,12 @@ FOREACH(lang ${dirlist})
 	SET(gmoFiles)
 	FOREACH(current_PO_FILE po/${lang}/LC_MESSAGES/deepin-terminal-gtk.po)
     	  SET(gmoFile ${CMAKE_CURRENT_BINARY_DIR}/${lang}-${target}.gmo)
-    	  SET(INSTALL_DESTINATION share/locale/)
     	  ADD_CUSTOM_COMMAND(OUTPUT ${gmoFile}
     	        COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${gmoFile} ${current_PO_FILE}
     	        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     	        DEPENDS ${current_PO_FILE}
     	     )
-    	  INSTALL(FILES ${gmoFile} DESTINATION ${INSTALL_DESTINATION}/${lang}/LC_MESSAGES/  RENAME ${target}.mo)
+    	  INSTALL(FILES ${gmoFile} DESTINATION ${LOCALE_INSTALL_DIR}/${lang}/LC_MESSAGES/  RENAME ${target}.mo)
 
     	  LIST(APPEND gmoFiles ${gmoFile})
     ENDFOREACH(current_PO_FILE)

@@ -96,7 +96,7 @@ namespace Widgets {
         public signal void exit_with_bad_code(int exit_status);
 
         public Term(bool first_term, string? work_directory, WorkspaceManager manager) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
+            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace_manager = manager;
             is_first_term = first_term;
