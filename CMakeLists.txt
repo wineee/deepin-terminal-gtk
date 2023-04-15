@@ -7,7 +7,10 @@ project(deepin-terminal-gtk
     LANGUAGES C
 )
 
-set(target deepin-terminal)
+set(target deepin-terminal-gtk)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(ExternalProject)
@@ -159,7 +162,7 @@ ENDFOREACH()
 
 FOREACH(lang ${dirlist})
 	SET(gmoFiles)
-	FOREACH(current_PO_FILE po/${lang}/LC_MESSAGES/deepin-terminal.po)
+	FOREACH(current_PO_FILE po/${lang}/LC_MESSAGES/deepin-terminal-gtk.po)
     	  SET(gmoFile ${CMAKE_CURRENT_BINARY_DIR}/${lang}-${target}.gmo)
     	  SET(INSTALL_DESTINATION share/locale/)
     	  ADD_CUSTOM_COMMAND(OUTPUT ${gmoFile}

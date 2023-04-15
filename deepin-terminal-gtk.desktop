@@ -1,13 +1,13 @@
 [Desktop Entry]
 Categories=GNOME;GTK;DDE;Utility;System;TerminalEmulator;
 Comment=Use the command line
-Exec=deepin-terminal
-GenericName=Terminal
-Icon=deepin-terminal
+Exec=deepin-terminal-gtk
+GenericName=Gtk Terminal
+Icon=deepin-terminal-gtk
 Keywords=shell;prompt;command;commandline;
-Name=Deepin Terminal
+Name=Deepin Terminal Gtk
 StartupNotify=true
-TryExec=deepin-terminal
+TryExec=deepin-terminal-gtk
 Type=Application
 X-Deepin-Vendor=deepin
 
@@ -109,9 +109,9 @@ GenericName[tr]=Uçbirim
 GenericName[ug]=تېرمىنال
 GenericName[uk]=Термінал
 GenericName[vi]=Đầu cuối
-GenericName[zh_CN]=终端
-GenericName[zh_HK]=終端機
-GenericName[zh_TW]=終端機
+GenericName[zh_CN]=GTK 终端
+GenericName[zh_HK]=GTK 終端機
+GenericName[zh_TW]=GTK 終端機
 Keywords[ca]=shell;intèrpretd'ordres;ordre;línead'ordres;
 Keywords[it]=shell;prompt;command;commandline;
 Keywords[lt]=apvalkalas;užklausa;komanda;komandų eilutė;eilutė;komandos;
@@ -175,7 +175,7 @@ Name[zh_HK]=Deepin 終端機
 Name[zh_TW]=Deepin Terminal
 
 [NewWindow Shortcut Group]
-Exec=deepin-terminal
+Exec=deepin-terminal-gtk
 Name=New Window
 
 # Translations:

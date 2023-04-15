@@ -768,7 +768,7 @@ namespace Widgets {
 
             if (has_foreground_process) {
                 var command = Utils.get_process_cmdline(foreground_pid);
-                if (command.index_of("expect -f /tmp/deepin-terminal-") == 0 && !login_remote_server) {
+                if (command.index_of("expect -f /tmp/deepin-terminal-gtk-") == 0 && !login_remote_server) {
                     login_remote_server = true;
                 }
             } else if (login_remote_server) {
@@ -1542,7 +1542,7 @@ namespace Widgets {
                 var path = config_file.get_string(server_info, "Path");
                 var command = config_file.get_string(server_info, "Command");
 
-                string remote_command = "echo %s &&".printf(_("Welcome to Deepin Terminal, please make sure that rz and sz commands have been installed in the server before right clicking to upload and download files."));
+                string remote_command = "echo %s &&".printf(_("Welcome to Gtk Deepin Terminal, please make sure that rz and sz commands have been installed in the server before right clicking to upload and download files."));
                 if (path.strip() != "") {
                     remote_command += "cd %s && ".printf(path);
                 }
@@ -1555,7 +1555,7 @@ namespace Widgets {
                 // Create temporary expect script file, and the file will
                 // be delete by itself.
                 FileIOStream iostream;
-                var tmpfile = File.new_tmp("deepin-terminal-XXXXXX", out iostream);
+                var tmpfile = File.new_tmp("deepin-terminal-gtk-XXXXXX", out iostream);
                 OutputStream ostream = iostream.output_stream;
                 DataOutputStream dos = new DataOutputStream(ostream);
                 dos.put_string(ssh_script_content);
