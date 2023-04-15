@@ -56,7 +56,7 @@ pkg_check_modules(GNUTLS REQUIRED IMPORTED_TARGET gnutls)
 pkg_check_modules(JsonGlib REQUIRED IMPORTED_TARGET json-glib-1.0)
 
 
-option(BUILD_TESTING "Build with native testing" OFF)
+option(TEST_BUILD "Build local for test without install" OFF)
 
 # There're 3 releases for 0.59.x, only 0.59.0 keeps old behaviour
 if("${VTE_VERSION}" VERSION_GREATER "0.59.0")
@@ -68,22 +68,16 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/lib/constant.vala
 )
 
-if(BUILD_TESTING)
+if(TEST_BUILD)
     message("set project_path to native test")
-    execute_process(
-        COMMAND sed s|@@PROJECT_PATH@@|\"${CMAKE_SOURCE_DIR}\"|g
-        OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c
-        INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in
-    )
     list(APPEND ARGS_DEFINITIONS "TEST_BUILD")
+	set(PROJECT_PATH ${CMAKE_SOURCE_DIR})
 else()
     message("set project_path to ${CMAKE_INSTALL_PREFIX}")
-    execute_process(
-        COMMAND sed s|@@PROJECT_PATH@@|\"${CMAKE_INSTALL_PREFIX}\"|g
-        OUTPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c
-        INPUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in
-    )
+	set(PROJECT_PATH ${CMAKE_INSTALL_PREFIX})
 endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c @ONLY)
 
 set(CFLAGS
 	${GTK3_CFLAGS} ${GTK3_CFLAGS_OTHER}
