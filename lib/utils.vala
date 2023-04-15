@@ -434,7 +434,7 @@ namespace Utils {
 #if TEST_BUILD
         return GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,  (string) project_path(), "ssh_login.sh");
 #else
-        return GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,  (string) project_path(), "lib", "deepin-terminal", "ssh_login.sh");
+        return GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,  (string) project_path(), "libexec", "deepin-terminal", "ssh_login.sh");
 #endif
     }
 

@@ -241,7 +241,7 @@ namespace Widgets {
 
                         if (blur_rect.width < 0) {
                             print("[!!!] blur_rect calc result error! blur_rect.width = %d which is negative!\n", blur_rect.width);
-                            blur_rect.width = width - window_frame_box.get_margin_left() - window_frame_box.get_margin_right();
+                            blur_rect.width = width - window_frame_box.get_margin_start() - window_frame_box.get_margin_end();
                             blur_rect.height = height - window_frame_box.get_margin_top() - window_frame_box.get_margin_bottom();
                         }
 

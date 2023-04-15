@@ -40,12 +40,12 @@ namespace Widgets {
         public Gtk.Widget focus_widget;
         public KeyFile config_file;
         public Term focus_term;
-        public int back_button_margin_left = 8;
+        public int back_button_margin_start = 8;
         public int back_button_margin_top = 6;
         public int encoding_button_padding = 5;
         public int encoding_list_margin_bottom = 5;
         public int encoding_list_margin_top = 5;
-        public int split_line_margin_left = 1;
+        public int split_line_margin_start = 1;
         public int width = Constant.ENCODING_SLIDER_WIDTH;
 
         public delegate void UpdatePageAfterEdit();

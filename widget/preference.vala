@@ -112,17 +112,17 @@ namespace Widgets {
         public Gtk.Widget? focus_widget;
         public Widgets.PreferenceSlidebar slidebar;
         public bool in_animation = false;
-        public int checkbutton_margin_right = 5;
+        public int checkbutton_margin_end = 5;
         public int checkbutton_margin_top = 4;
-        public int first_segment_margin_left = 20;
+        public int first_segment_margin_start = 20;
         public int grid_height = 24;
-        public int option_widget_margin_left = 40;
-        public int option_widget_margin_right = 10;
+        public int option_widget_margin_start = 40;
+        public int option_widget_margin_end = 10;
         public int preference_name_width = 180;
-        public int preference_split_line_margin_left = 2;
+        public int preference_split_line_margin_start = 2;
         public int preference_widget_width = Constant.PREFERENCE_WIDGET_WIDTH;
         public int reset_button_margin = 35;
-        public int second_segment_margin_left = 30;
+        public int second_segment_margin_start = 30;
         public int segment_margin_bottom = 5;
         public int segment_margin_top = 10;
         public int slidebar_width = Constant.PREFERENCE_SLIDEBAR_WIDTH;
@@ -568,7 +568,7 @@ namespace Widgets {
             box.pack_start(segment, false, false, 0);
 
             var line = new Gtk.EventBox();
-            line.margin_start = preference_split_line_margin_left;
+            line.margin_start = preference_split_line_margin_start;
             line.draw.connect((w, cr) => {
                     Gtk.Allocation rect;
                     this.get_allocation(out rect);
@@ -582,7 +582,7 @@ namespace Widgets {
 
             box.margin_top = segment_margin_top;
             box.margin_bottom = segment_margin_bottom;
-            box.margin_start = first_segment_margin_left;
+            box.margin_start = first_segment_margin_start;
 
             return (Gtk.Widget) box;
         }
@@ -594,7 +594,7 @@ namespace Widgets {
             segment.set_xalign(0);
             segment.margin_top = segment_margin_top;
             segment.margin_bottom = segment_margin_bottom;
-            segment.margin_start = second_segment_margin_left;
+            segment.margin_start = second_segment_margin_start;
 
             return (Gtk.Widget) segment;
         }
@@ -700,10 +700,10 @@ namespace Widgets {
         public void adjust_option_widgets(Gtk.Label name_widget, Gtk.Widget value_widget) {
             name_widget.set_xalign(0);
             name_widget.set_size_request(preference_name_width, grid_height);
-            name_widget.margin_start = option_widget_margin_left;
+            name_widget.margin_start = option_widget_margin_start;
 
             value_widget.set_size_request(preference_widget_width, grid_height);
-            value_widget.margin_end = option_widget_margin_right;
+            value_widget.margin_end = option_widget_margin_end;
             // NOTE:
             // set_hexpand is very important to make widget in grid to expand space horizaontally.
             value_widget.set_hexpand(true);
@@ -802,9 +802,9 @@ namespace Widgets {
         }
 
         public void adjust_option_checkbutton(Gtk.Label label, Widgets.CheckButton checkbutton) {
-            checkbutton.margin_start = option_widget_margin_left;
+            checkbutton.margin_start = option_widget_margin_start;
             checkbutton.margin_top = checkbutton_margin_top;
-            checkbutton.margin_end = checkbutton_margin_right;
+            checkbutton.margin_end = checkbutton_margin_end;
         }
 
         public Widgets.Entry create_entry() {

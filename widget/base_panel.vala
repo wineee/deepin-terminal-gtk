@@ -37,7 +37,7 @@ namespace Widgets {
         public Gtk.Widget? focus_widget;
         public Widgets.Switcher switcher;
         public Workspace workspace;
-        public int back_button_margin_left = 8;
+        public int back_button_margin_start = 8;
         public int back_button_margin_top = 6;
 
         public BasePanel() {

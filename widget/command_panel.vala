@@ -128,8 +128,8 @@ namespace Widgets {
             home_page_box.pack_start(split_line, false, false, 0);
 
             Widgets.AddButton add_command_button = create_add_command_button();
-            add_command_button.margin_left = 16;
-            add_command_button.margin_right = 16;
+            add_command_button.margin_start = 16;
+            add_command_button.margin_end = 16;
             add_command_button.margin_top = 16;
             add_command_button.margin_bottom = 16;
             home_page_box.pack_start(add_command_button, false, false, 0);
@@ -190,7 +190,7 @@ namespace Widgets {
                 search_page_box.pack_start(top_box, false, false, 0);
 
                 ImageButton back_button = new Widgets.ImageButton("back", true);
-                back_button.margin_left = back_button_margin_left;
+                back_button.margin_start = back_button_margin_start;
                 back_button.margin_top = back_button_margin_top;
                 back_button.clicked.connect((w) => {
                         show_home_page(search_page_box);

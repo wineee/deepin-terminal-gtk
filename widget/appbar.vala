@@ -107,9 +107,9 @@ namespace Widgets {
             min_button = new WindowButton("window_min", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
             max_button = new WindowButton("window_max", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
             unmax_button = new WindowButton("window_unmax", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
-            close_button = new WindowButton("window_close", true, menu_button_width + Constant.CLOSE_BUTTON_MARGIN_RIGHT, Constant.TITLEBAR_HEIGHT);
+            close_button = new WindowButton("window_close", true, menu_button_width + Constant.CLOSE_BUTTON_MARGIN_END, Constant.TITLEBAR_HEIGHT);
 
-            quit_fullscreen_button = new WindowButton("quit_fullscreen", true, Constant.WINDOW_BUTTON_WIDHT + Constant.CLOSE_BUTTON_MARGIN_RIGHT, Constant.TITLEBAR_HEIGHT);
+            quit_fullscreen_button = new WindowButton("quit_fullscreen", true, Constant.WINDOW_BUTTON_WIDHT + Constant.CLOSE_BUTTON_MARGIN_END, Constant.TITLEBAR_HEIGHT);
 
             close_button.clicked.connect((w) => {
                     close_window();

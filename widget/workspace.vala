@@ -666,7 +666,7 @@ namespace Widgets {
 
                 show_all();
 
-                remote_panel.margin_left = rect.width;
+                remote_panel.margin_start = rect.width;
                 show_slider_start_x = rect.width;
                 remote_panel_show_timer.reset();
             }
@@ -690,7 +690,7 @@ namespace Widgets {
 
                 show_all();
 
-                command_panel.margin_left = rect.width;
+                command_panel.margin_start = rect.width;
                 show_slider_start_x = rect.width;
                 command_panel_show_timer.reset();
             }
@@ -715,7 +715,7 @@ namespace Widgets {
 
                 show_all();
 
-                encoding_panel.margin_left = rect.width;
+                encoding_panel.margin_start = rect.width;
                 show_slider_start_x = rect.width;
                 encoding_panel_show_timer.reset();
             }
@@ -724,7 +724,7 @@ namespace Widgets {
         }
 
         public void remote_panel_show_animate(double progress) {
-            remote_panel.margin_left = (int) (show_slider_start_x - Constant.SLIDER_WIDTH * progress);
+            remote_panel.margin_start = (int) (show_slider_start_x - Constant.SLIDER_WIDTH * progress);
 
             if (progress >= 1.0) {
                 remote_panel_show_timer.stop();
@@ -732,7 +732,7 @@ namespace Widgets {
         }
 
         public void remote_panel_hide_animate(double progress) {
-            remote_panel.margin_left = (int) (hide_slider_start_x + Constant.SLIDER_WIDTH * progress);
+            remote_panel.margin_start = (int) (hide_slider_start_x + Constant.SLIDER_WIDTH * progress);
 
             if (progress >= 1.0) {
                 remote_panel_hide_timer.stop();
@@ -757,7 +757,7 @@ namespace Widgets {
 
                 show_all();
 
-                theme_panel.margin_left = rect.width;
+                theme_panel.margin_start = rect.width;
                 show_slider_start_x = rect.width;
                 theme_panel_show_timer.reset();
             }
@@ -766,7 +766,7 @@ namespace Widgets {
         }
 
         public void theme_panel_show_animate(double progress) {
-            theme_panel.margin_left = (int) (show_slider_start_x - Constant.THEME_SLIDER_WIDTH * progress);
+            theme_panel.margin_start = (int) (show_slider_start_x - Constant.THEME_SLIDER_WIDTH * progress);
 
             if (progress >= 1.0) {
                 theme_panel_show_timer.stop();
@@ -774,7 +774,7 @@ namespace Widgets {
         }
 
         public void theme_panel_hide_animate(double progress) {
-            theme_panel.margin_left = (int) (hide_slider_start_x + Constant.THEME_SLIDER_WIDTH * progress);
+            theme_panel.margin_start = (int) (hide_slider_start_x + Constant.THEME_SLIDER_WIDTH * progress);
 
             if (progress >= 1.0) {
                 theme_panel_hide_timer.stop();
@@ -784,7 +784,7 @@ namespace Widgets {
         }
 
         public void command_panel_show_animate(double progress) {
-            command_panel.margin_left = (int) (show_slider_start_x - Constant.COMMAND_SLIDER_WIDTH * progress);
+            command_panel.margin_start = (int) (show_slider_start_x - Constant.COMMAND_SLIDER_WIDTH * progress);
 
             if (progress >= 1.0) {
                 command_panel_show_timer.stop();
@@ -792,7 +792,7 @@ namespace Widgets {
         }
 
         public void command_panel_hide_animate(double progress) {
-            command_panel.margin_left = (int) (hide_slider_start_x + Constant.COMMAND_SLIDER_WIDTH * progress);
+            command_panel.margin_start = (int) (hide_slider_start_x + Constant.COMMAND_SLIDER_WIDTH * progress);
 
             if (progress >= 1.0) {
                 command_panel_hide_timer.stop();
@@ -802,7 +802,7 @@ namespace Widgets {
         }
 
         public void encoding_panel_show_animate(double progress) {
-            encoding_panel.margin_left = (int) (show_slider_start_x - Constant.ENCODING_SLIDER_WIDTH * progress);
+            encoding_panel.margin_start = (int) (show_slider_start_x - Constant.ENCODING_SLIDER_WIDTH * progress);
 
             if (progress >= 1.0) {
                 encoding_panel_show_timer.stop();
@@ -810,7 +810,7 @@ namespace Widgets {
         }
 
         public void encoding_panel_hide_animate(double progress) {
-            encoding_panel.margin_left = (int) (hide_slider_start_x + Constant.ENCODING_SLIDER_WIDTH * progress);
+            encoding_panel.margin_start = (int) (hide_slider_start_x + Constant.ENCODING_SLIDER_WIDTH * progress);
 
             if (progress >= 1.0) {
                 encoding_panel_hide_timer.stop();

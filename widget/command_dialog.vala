@@ -50,12 +50,12 @@ namespace Widgets {
         public int action_button_margin_top = 20;
         public int font_size = 11;
         public int grid_height = 24;
-        public int label_margin_left = 14;
+        public int label_margin_start = 14;
         public int max_command_name_length = 50;
         public int preference_margin_end = 10;
         public int preference_margin_start = 10;
         public int preference_margin_top = 10;
-        public int preference_name_margin_left = 10;
+        public int preference_name_margin_start = 10;
         public int preference_name_width = 0;
         public int preference_widget_width = 300;
         public int window_expand_height = 330;
@@ -89,7 +89,7 @@ namespace Widgets {
 
                 max_width = int.max(max_width, name_width);
             }
-            preference_name_width = max_width + preference_name_margin_left;
+            preference_name_width = max_width + preference_name_margin_start;
 
             try {
                 parent_window = window;
@@ -146,7 +146,7 @@ namespace Widgets {
                 box.pack_start(content_box, false, false, 0);
 
                 var grid = new Gtk.Grid();
-                grid.margin_end = label_margin_left;
+                grid.margin_end = label_margin_start;
                 content_box.pack_start(grid, false, false, 0);
 
                 // Name.
@@ -266,7 +266,7 @@ namespace Widgets {
 
         public Label create_label(string text) {
             Label label = new Gtk.Label(null);
-            label.margin_start = label_margin_left;
+            label.margin_start = label_margin_start;
             label.set_text(text);
             label.get_style_context().add_class("preference_label");
             label.set_xalign(0);
@@ -276,10 +276,10 @@ namespace Widgets {
 
         public void create_key_row(Gtk.Label label, Gtk.Widget widget, string name, Gtk.Grid grid, string class_name="preference_entry") {
             label.set_text(name);
-            label.margin_start = label_margin_left;
+            label.margin_start = label_margin_start;
             label.get_style_context().add_class("preference_label");
             widget.get_style_context().add_class(class_name);
-            widget.margin_start = label_margin_left;
+            widget.margin_start = label_margin_start;
 
             adjust_option_widgets(label, widget);
             grid_attach(grid, label, 0, 0, preference_name_width, grid_height);
@@ -288,10 +288,10 @@ namespace Widgets {
 
         public void create_follow_key_row(Gtk.Label label, Gtk.Widget widget, string name, Gtk.Label previous_label, Gtk.Grid grid, string class_name="preference_entry") {
             label.set_text(name);
-            label.margin_start = label_margin_left;
+            label.margin_start = label_margin_start;
             label.get_style_context().add_class("preference_label");
             widget.get_style_context().add_class(class_name);
-            widget.margin_start = label_margin_left;
+            widget.margin_start = label_margin_start;
 
             adjust_option_widgets(label, widget);
             grid_attach_next_to(grid, label, previous_label, Gtk.PositionType.BOTTOM, preference_name_width, grid_height);

@@ -39,9 +39,9 @@ namespace Widgets {
         public Gtk.ScrolledWindow scrolledwindow;
         public Gtk.Widget focus_widget;
         public KeyFile config_file;
-        public int back_button_margin_left = 8;
+        public int back_button_margin_start = 8;
         public int back_button_margin_top = 6;
-        public int split_line_margin_left = 1;
+        public int split_line_margin_start = 1;
         public int theme_button_padding = 5;
         public int theme_list_margin_bottom = 5;
         public int theme_list_margin_top = 5;

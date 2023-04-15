@@ -25,10 +25,10 @@ using Gtk;
 
 namespace Widgets {
     public class SplitLine : Gtk.Box {
-        public int split_line_margin_left = 1;
+        public int split_line_margin_start = 1;
 
         public SplitLine() {
-            margin_left = split_line_margin_left;
+            margin_start = split_line_margin_start;
             set_size_request(-1, 1);
 
             draw.connect((w, cr) => {

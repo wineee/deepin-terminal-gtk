@@ -35,10 +35,10 @@ namespace Widgets {
         public Widgets.Entry search_entry;
         public Widgets.ImageButton search_image;
         public int animation_time = 100;
-        public int clear_button_margin_right = 12;
+        public int clear_button_margin_end = 12;
         public int height = 36;
         public int search_image_animate_start_x;
-        public int search_image_margin_right = 5;
+        public int search_image_margin_end = 5;
         public int search_image_margin_x = 18;
 
         public SearchEntry() {
@@ -57,7 +57,7 @@ namespace Widgets {
             display_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
 
             search_image = new ImageButton("search", true);
-            search_image.margin_end = search_image_margin_right;
+            search_image.margin_end = search_image_margin_end;
             search_image.set_valign(Gtk.Align.CENTER);
             search_label = new Gtk.Label(null);
             search_label.set_valign(Gtk.Align.CENTER);
@@ -65,7 +65,7 @@ namespace Widgets {
             search_entry = new Widgets.Entry();
             search_entry.set_placeholder_text(_("Search"));
             clear_button = new ImageButton("search_clear", true);
-            clear_button.margin_right = clear_button_margin_right;
+            clear_button.margin_end = clear_button_margin_end;
             clear_button.set_valign(Gtk.Align.CENTER);
             clear_button.clicked.connect((w, e) => {
                     search_entry.set_text("");
@@ -90,7 +90,7 @@ namespace Widgets {
 
                     this.translate_coordinates(search_image, 0, 0, out search_image_animate_start_x, null);
                     search_image_animate_start_x = search_image_animate_start_x.abs() - search_image_margin_x;
-                    search_image.margin_left = search_image_margin_x + search_image_animate_start_x;
+                    search_image.margin_start = search_image_margin_x + search_image_animate_start_x;
 
                     timer.reset();
 
@@ -110,7 +110,7 @@ namespace Widgets {
         }
 
         public void on_animate(double progress) {
-            search_image.margin_left = search_image_margin_x + (int) (search_image_animate_start_x * (1.0 - progress));
+            search_image.margin_start = search_image_margin_x + (int) (search_image_animate_start_x * (1.0 - progress));
 
             if (progress >= 1.0) {
                 timer.stop();
@@ -121,7 +121,7 @@ namespace Widgets {
         public void switch_to_display() {
             Utils.remove_all_children(box);
 
-            search_image.margin_left = 0;
+            search_image.margin_start = 0;
             display_box.pack_start(search_image, false, false, 0);
             display_box.pack_start(search_label, false, false, 0);
             display_box.set_halign(Gtk.Align.CENTER);
@@ -138,7 +138,7 @@ namespace Widgets {
              box.pack_start(search_entry, true, true, 0);
              box.pack_start(clear_button, false, false, 0);
 
-             search_image.margin_left = search_image_margin_x;
+             search_image.margin_start = search_image_margin_x;
              search_entry.grab_focus();
 
              show_all();
