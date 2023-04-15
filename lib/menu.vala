@@ -75,7 +75,7 @@ namespace Menu {
                 var item = create_gtk_menu_item(menu_item.menu_item_id, menu_item.menu_item_text);
                 if (menu_item.menu_item_submenu.length() > 0) {
                     Gtk.Menu submenu = create_gtk_menu(menu_item.menu_item_submenu);
-                    item.set_submenu(submenu);   
+                    item.set_submenu(submenu);
                 }
                 result.append(item);
             }

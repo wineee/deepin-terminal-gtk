@@ -404,7 +404,6 @@ namespace Widgets {
             }
 
             menu_content.append(new Menu.MenuItem("find", _("Find")));
-            menu_content.append(new Menu.MenuItem("", ""));
             if (term.get_has_selection()) {
                 Menu.MenuItem online_search  = new Menu.MenuItem("search", _("Search"));
 
@@ -440,6 +439,7 @@ namespace Widgets {
                     }
                 }
 
+                menu_content.append(new Menu.MenuItem("", ""));
                 menu_content.append(online_search);
             }
             menu_content.append(new Menu.MenuItem("", ""));
