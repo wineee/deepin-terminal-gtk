@@ -1193,14 +1193,16 @@ namespace Widgets {
 
             launch_idle_id = GLib.Idle.add(() => {
                     try {
-                        term.spawn_sync(pty_flags,
+                        term.spawn_async(pty_flags,
                                         directory,
                                         argv,
-                                        null,
+                                        null, /* envv */
                                         spawn_flags,
                                         null, /* child setup */
-                                        out child_pid,
-                                        null /* cancellable */);
+                                        -1, /* timeout */
+                                        null, /* cancellable */
+                                        null /* callback */
+                                        );
 
                         GLib.Timeout.add(200, () => {
                                 update_terminal_title();
@@ -1224,14 +1226,15 @@ namespace Widgets {
             if (!has_print_exit_notify) {
                 GLib.Timeout.add(200, () => {
                         try {
-                            term.spawn_sync(Vte.PtyFlags.DEFAULT,
+                            term.spawn_async(Vte.PtyFlags.DEFAULT,
                                             null,
                     {"echo", _("\nCommand has been completed, press ENTER to exit the terminal.")},
                                             null,
                                             GLib.SpawnFlags.SEARCH_PATH,
                                             null, /* child setup */
-                                            null,
-                                            null /* cancellable */);
+                                            -1, /* timeout */
+                                            null, /* cancellable */
+                                            null /* callback */);
                         } catch (Error e) {
                             warning("Terminal print_exit_notify: %s\n", e.message);
                         }
@@ -1260,14 +1263,15 @@ namespace Widgets {
 
             launch_idle_id = GLib.Idle.add(() => {
                     try {
-                        term.spawn_sync(Vte.PtyFlags.DEFAULT,
+                        term.spawn_async(Vte.PtyFlags.DEFAULT,
                                         dir,
                                         argv,
                                         null,
                                         GLib.SpawnFlags.SEARCH_PATH,
                                         null, /* child setup */
-                                        out child_pid,
-                                        null /* cancellable */);
+                                        -1, /* timeout */
+                                        null, /* cancellable */
+                                        null /* callback */);
                     } catch (Error e) {
                         warning("Terminal launch_idle_id: %s\n", e.message);
                     }
