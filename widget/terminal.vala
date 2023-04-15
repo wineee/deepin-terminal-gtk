@@ -170,13 +170,13 @@ namespace Widgets {
                         int modifiers = Gtk.accelerator_get_default_mod_mask();
                         if ((event.state & modifiers) == Gdk.ModifierType.CONTROL_MASK && uri != null) {
                             try {
-                                Gtk.show_uri(null, (!) uri, Gtk.get_current_event_time());
+                                Gtk.show_uri_on_window(null, (!) uri, Gtk.get_current_event_time());
 
                                 return true;
                             } catch (GLib.Error error) {
                                 try {
                                     uri = "http://%s".printf(uri);
-                                    Gtk.show_uri(null, (!) uri, Gtk.get_current_event_time());
+                                    Gtk.show_uri_on_window(null, (!) uri, Gtk.get_current_event_time());
                                 } catch (GLib.Error error) {
                                     warning("Could Not Open link");
                                 }
@@ -488,11 +488,11 @@ namespace Widgets {
                         open_selection_file();
                     } else if (uri_at_right_press != null) {
                         try { 
-                            Gtk.show_uri(null, (!) uri_at_right_press, Gtk.get_current_event_time()); 
+                            Gtk.show_uri_on_window(null, (!) uri_at_right_press, Gtk.get_current_event_time()); 
                         } catch (GLib.Error error) { 
                             try { 
                                 var uri = "http://%s".printf(uri_at_right_press); 
-                                Gtk.show_uri(null, (!) uri, Gtk.get_current_event_time()); 
+                                Gtk.show_uri_on_window(null, (!) uri, Gtk.get_current_event_time()); 
                             } catch (GLib.Error error) { 
                                 warning("Could Not Open link"); 
                             } 
