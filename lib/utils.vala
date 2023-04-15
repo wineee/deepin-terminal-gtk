@@ -4,10 +4,12 @@
  * Copyright (C) 2011 ~ 2018 Deepin, Inc.
  *               2011 ~ 2018 Wang Yong
  *               2019 ~ 2020 Gary Wang
+ *               2023        rewine
  *
  * Author:     Wang Yong <wangyong@deepin.com>
  *             Gary Wang <wzc782970009@gmail.com>
  * Maintainer: Wang Yong <wangyong@deepin.com>
+ *             rewine    <lhongxu@outlook.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +32,7 @@ using Rsvg;
 using Cairo;
 
 extern char* project_path();
+extern char* script_install_path();
 extern string font_match(string family);
 extern string[] list_mono_or_dot_fonts(out int num);
 private static bool is_tiling = false;
@@ -434,7 +437,7 @@ namespace Utils {
 #if TEST_BUILD
         return GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,  (string) project_path(), "ssh_login.sh");
 #else
-        return GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,  (string) project_path(), "libexec", "deepin-terminal-gtk", "ssh_login.sh");
+        return GLib.Path.build_path(GLib.Path.DIR_SEPARATOR_S,  (string) script_install_path(), "ssh_login.sh");
 #endif
     }
 

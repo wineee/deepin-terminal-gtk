@@ -3,9 +3,11 @@
  *
  * Copyright (C) 2011 ~ 2016 Deepin, Inc.
  *               2011 ~ 2016 Wang Yong
+ *               2023        rewine
  *
  * Author:     Wang Yong <wangyong@deepin.com>
  * Maintainer: Wang Yong <wangyong@deepin.com>
+ *             rewine    <lhongxu@outlook.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,4 +28,8 @@
 
 char* project_path() {
     return "@PROJECT_PATH@";
+}
+
+char* script_install_path() {
+    return "@SCRIPT_INSTALL_DIR@";
 }
