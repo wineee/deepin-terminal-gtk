@@ -24,19 +24,6 @@
 using Gtk;
 
 namespace Menu {
-    [DBus (name = "com.deepin.menu.Manager")]
-    interface MenuManagerInterface : Object {
-        public abstract string RegisterMenu() throws Error;
-        public abstract void UnregisterMenu(string object_path) throws Error;
-    }
-
-    [DBus (name = "com.deepin.menu.Menu")]
-    interface MenuInterface : Object {
-        public abstract void ShowMenu(string menu_json_content) throws Error;
-        public signal void ItemInvoked(string item_id, bool checked);
-        public signal void MenuUnregistered();
-    }
-
     public class MenuItem : Object {
         public string menu_item_id;
         public string menu_item_text;
@@ -55,11 +42,6 @@ namespace Menu {
     }
 
     public class Menu : Object {
-        MenuManagerInterface menu_manager_interface;
-        MenuInterface menu_interface;
-        static string? menu_object_path;
-
-        private bool prefer_deepin_menu = true;
         private bool inited = false;
 
         public signal void click_item(string item_id);
@@ -67,59 +49,15 @@ namespace Menu {
 
         public Menu() {}
 
-        public void set_prefer_deepin_menu(bool _prefer_deepin_menu) {
-            prefer_deepin_menu = _prefer_deepin_menu;
-        }
-
         private void init() {
             if (inited) return;
-
-            register_deepin_menu_dbus_if_needed();
 
             inited = true;
         }
 
-        private void register_deepin_menu_dbus_if_needed() {
-            if (prefer_deepin_menu) {
-                try {
-                    menu_manager_interface = Bus.get_proxy_sync(BusType.SESSION, "com.deepin.menu", "/com/deepin/menu");
-    
-                    if (menu_object_path != null)
-                        unregister();
-                    menu_object_path = menu_manager_interface.RegisterMenu();
-    
-                    menu_interface = Bus.get_proxy_sync(BusType.SESSION, "com.deepin.menu", menu_object_path);
-                    menu_interface.ItemInvoked.connect((item_id, checked) => {
-                        click_item(item_id);
-                    });
-                    menu_interface.MenuUnregistered.connect(() => {
-                        menu_object_path = null;
-                        destroy();
-                    });
-                } catch (Error e) {
-                    prefer_deepin_menu = false;
-                    stderr.printf ("%s\n", e.message);
-                }
-            }
-        }
-
-        private void unregister(){
-            try {
-                menu_manager_interface.UnregisterMenu(menu_object_path);
-            } catch (Error e) {
-                stderr.printf ("%s\n", e.message);
-            }
-            menu_object_path = null;
-        }
-
         public void popup_at_position(List<MenuItem> menu_content, int x, int y) {
             init();
-
-            if (prefer_deepin_menu) {
-                show_deepin_menu(menu_content, x, y);
-            } else {
-                show_gtk_menu_at_pointer(menu_content);
-            }
+            show_gtk_menu_at_pointer(menu_content);
         }
 
         private Gtk.Menu create_gtk_menu(List<MenuItem> menu_content) {
@@ -159,51 +97,6 @@ namespace Menu {
             var gtk_menu = create_gtk_menu(menu_content);
             gtk_menu.show_all();
             gtk_menu.popup_at_pointer();
-        }
-
-        private void show_deepin_menu(List<MenuItem> menu_content, int x, int y) {
-            // since GTK only supports integral scaling yet DDE supports fractional scaling,
-            // the scale on both sides may not be the same, so we need to negtiate here.
-            var scale = Utils.get_default_monitor_scale();
-            var dde_scale = Utils.get_dde_scale_ratio();
-
-            if (scale != dde_scale) {
-                x = (int)(x * scale / dde_scale);
-                y = (int)(y * scale / dde_scale);
-            }
-
-            try {
-                Json.Builder builder = new Json.Builder();
-
-                builder.begin_object();
-
-                builder.set_member_name("x");
-                builder.add_int_value(x);
-
-                builder.set_member_name("y");
-                builder.add_int_value(y);
-
-                builder.set_member_name("isDockMenu");
-                builder.add_boolean_value(false);
-
-                builder.set_member_name("menuJsonContent");
-                builder.add_string_value(get_items_node(menu_content));
-
-                builder.set_member_name("isScaled");
-                builder.add_boolean_value(false);
-
-                builder.end_object ();
-
-                Json.Generator generator = new Json.Generator();
-                Json.Node root = builder.get_root();
-                generator.set_root(root);
-
-                string menu_json_content = generator.to_data(null);
-
-                menu_interface.ShowMenu(menu_json_content);
-            } catch (Error e) {
-                stderr.printf ("%s\n", e.message);
-            }
         }
 
         private string get_items_node(List<MenuItem> menu_content) {

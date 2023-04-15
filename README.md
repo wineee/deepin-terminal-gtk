@@ -14,9 +14,7 @@ In debian, use below command to install compile dependencies:
 
 In debian, use below command to install running dependencies:
 
-`sudo apt-get install libatk1.0-0 libc6 libcairo-gobject2 libcairo2 libfontconfig1 libgdk-pixbuf2.0-0 libgee-0.8-2 libglib2.0-0 libgnutls30 libgtk-3-0 libice6 libjson-glib-1.0-0 libpango-1.0-0 libpangocairo-1.0-0 libpcre2-8-0 libreadline7 librsvg2-2 libsecret-1-0 libsm6 libstdc++6 libtinfo5 libwnck-3-0 libx11-6 libxext6 zlib1g lrzsz expect deepin-menu`
-
-And you also need the [`deepin-menu`](https://github.com/linuxdeepin/deepin-menu) package.
+`sudo apt-get install libatk1.0-0 libc6 libcairo-gobject2 libcairo2 libfontconfig1 libgdk-pixbuf2.0-0 libgee-0.8-2 libglib2.0-0 libgnutls30 libgtk-3-0 libice6 libjson-glib-1.0-0 libpango-1.0-0 libpangocairo-1.0-0 libpcre2-8-0 libreadline7 librsvg2-2 libsecret-1-0 libsm6 libstdc++6 libtinfo5 libwnck-3-0 libx11-6 libxext6 zlib1g lrzsz expect `
 
 ## Installation
 
@@ -160,9 +158,6 @@ When you are using deepin-terminal with not composited window manager, there wil
 
 #### allow_hyperlink
 Enable Hyperlinks (a.k.a. HTML-like anchors) in deepin-terminal, default is `false`. ([learn more](https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda))
-
-#### prefer_deepin_menu
-Once enabled, will use deepin-menu if possible and use GTK native menu as a fallback. Set it to false will make it always show GTK native menu, default is `true`.
 
 ## Customize themes
 User can place its own theme file to `~/.config/deepin/deepin-terminal/themes` (create if path not exist), the theme file added to this location will available to use from the theme selection panel.

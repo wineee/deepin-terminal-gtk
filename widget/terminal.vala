@@ -462,9 +462,7 @@ namespace Widgets {
             menu = new Menu.Menu();
             menu.click_item.connect(handle_menu_item_click);
             menu.destroy.connect(handle_menu_destroy);
-            menu.set_prefer_deepin_menu(window.config.config_file.get_boolean("advanced", "prefer_deepin_menu"));
             menu.popup_at_position(menu_content, x, y);
-
         }
 
         public void handle_menu_item_click(string item_id) {
