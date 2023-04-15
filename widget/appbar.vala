@@ -128,9 +128,6 @@ namespace Widgets {
                     menu_content.append(new Menu.MenuItem("remote_manage", _("Remote management")));
                     menu_content.append(new Menu.MenuItem("", ""));
                     menu_content.append(new Menu.MenuItem("preference", _("Settings")));
-                    if (Utils.is_command_exist("dman")) {
-                        menu_content.append(new Menu.MenuItem("help", _("Help")));
-                    }
                     menu_content.append(new Menu.MenuItem("about", _("About")));
                     menu_content.append(new Menu.MenuItem("exit", _("Exit")));
 
@@ -251,9 +248,6 @@ namespace Widgets {
                     break;
                 case "switch_theme":
                     workspace_manager.focus_workspace.show_theme_panel(workspace_manager.focus_workspace);
-                    break;
-                case "help":
-                    Utils.show_manual();
                     break;
                 case "about":
                     var dialog = new AboutDialog(focus_widget);

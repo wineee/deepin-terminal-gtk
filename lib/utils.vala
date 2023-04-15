@@ -39,10 +39,6 @@ private static bool is_tiling = false;
 private static bool tiling_checked = false;
 
 namespace Utils {
-    [DBus (name = "com.deepin.Manual.Open")]
-    interface DeepinManualInterface : Object {
-        public abstract void ShowManual(string appName) throws GLib.Error;
-    }
 
     public Gdk.RGBA hex_to_rgba(string hex_color, double alpha=1.0) {
         Gdk.RGBA rgba_color = Gdk.RGBA();
@@ -528,15 +524,6 @@ namespace Utils {
         widget.get_toplevel().get_window().get_root_origin(out window_x, out window_y);
 
         return pointer_x > window_x + widget_rect.x && pointer_x < window_x + widget_rect.x + widget_rect.width && pointer_y > window_y + widget_rect.y && pointer_y < window_y + widget_rect.y + widget_rect.height;
-    }
-
-    public void show_manual() {
-        try {
-            DeepinManualInterface deepin_manual_interface = Bus.get_proxy_sync(BusType.SESSION, "com.deepin.Manual.Open", "/com/deepin/Manual/Open");
-            deepin_manual_interface.ShowManual("deepin-terminal");
-        } catch (GLib.Error e) {
-            print("show_manual: %s\n", e.message);
-        }
     }
 
     public void write_log(string log) {
