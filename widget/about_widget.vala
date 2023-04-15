@@ -47,35 +47,10 @@ namespace Widgets {
         public AboutWidget() {
             Intl.bindtextdomain(GETTEXT_PACKAGE, "/usr/share/locale");
 
-            KeyFile distribution_info_file = new KeyFile ();
-            bool dif_loaded = false;
-            try {
-                dif_loaded = distribution_info_file.load_from_file("/usr/share/deepin/distribution.info", KeyFileFlags.NONE);
-            } catch (FileError e) {
-                if (!(e is FileError.NOENT)) {
-                    print("distribution_info_file load error (FileError): %s", e.message);
-                }
-            } catch (KeyFileError e) {
-                print("distribution_info_file load error (KeyFileError): %s", e.message);
-            }
-
             string logo_path = Utils.get_image_path("logo.svg");
             
-            about_text = dif_loaded ? 
-                _("Terminal is an advanced terminal emulator with workspace, multiple windows, remote management, quake mode and other features.") :
-                _("Deepin Terminal is an advanced terminal emulator with workspace, multiple windows, remote management, quake mode and other features.\n\nIt sharpens your focus in the world of command line!");
-            product_name_text = dif_loaded ? _("Terminal") : _("Deepin Terminal");
-
-            try {
-                if (dif_loaded) {
-                    logo_path = distribution_info_file.get_string("Distribution", "LogoLight");
-                }
-                if (logo_path == "") {
-                    logo_path = Utils.get_image_path("logo.svg");
-                }
-            } catch (Error e) {
-                print("distribution_info_file process error: %s", e.message);
-            }
+            about_text = _("Deepin Terminal is an advanced terminal emulator with workspace, multiple windows, remote management, quake mode and other features.\n\nIt sharpens your focus in the world of command line!");
+            product_name_text = _("Deepin Terminal");
 
             icon_surface = Utils.create_image_surface("icon.svg");
             logo_surface = Utils.create_image_surface_from_file(logo_path);
@@ -87,26 +62,8 @@ namespace Widgets {
 
             // Add homepage.
             try {
-                // Check deepin system's version is whether professional.
-                string os_version_path = "/etc/deepin-version";
-                bool is_professional = false;
-                var version_file = File.new_for_path(os_version_path);
-                if (version_file.query_exists()) {
-                    var version_config_file = new KeyFile();
-                    version_config_file.load_from_file(os_version_path, KeyFileFlags.NONE);
-
-                    is_professional = version_config_file.get_string("Release", "Type") == "Professional";
-                }
-
-                string homepage_name = is_professional ? "www.deepin.com" : "www.deepin.org";
+                string homepage_name = "www.deepin.org";
                 string homepage_link = "https://" + homepage_name;
-
-                if (dif_loaded) {
-                    string dif_homepage_name = distribution_info_file.get_string("Distribution", "WebsiteName");
-                    string dif_homepage_link = distribution_info_file.get_string("Distribution", "Website");
-                    homepage_name = dif_homepage_name == "" ? homepage_name : dif_homepage_name;
-                    homepage_link = dif_homepage_link == "" ? homepage_link : dif_homepage_link;
-                }
 
                 var homepage_area = new Widgets.LinkButton(homepage_name, homepage_link, "homepage");
                 content_box.pack_start(homepage_area, false, false, 0);
