@@ -5,6 +5,7 @@ build/
 *.o
 *.log
 *.user
+*.cache
 3rdparty/
 project_path.c
 lib/constant.vala
