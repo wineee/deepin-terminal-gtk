@@ -4,15 +4,17 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nix-filter.url = "github:numtide/nix-filter";
   };
 
-  outputs = { self, flake-utils, nixpkgs }@input:
+  outputs = { self, flake-utils, nixpkgs, nix-filter }@input:
     flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" "riscv64-linux" ]
       (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          deepin-terminal-gtk = pkgs.callPackage ./nix { };
-
+          deepin-terminal-gtk = pkgs.callPackage ./nix {
+            inherit nix-filter;
+          };
         in
         rec {
           packages.default = deepin-terminal-gtk;

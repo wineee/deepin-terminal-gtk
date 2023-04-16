@@ -1,4 +1,5 @@
 { stdenv
+, nix-filter
 , lib
 , fetchFromGitHub
 , cmake
@@ -21,7 +22,17 @@ stdenv.mkDerivation rec {
   pname = "deepin-terminal-gtk";
   version = "5.1.0";
 
-  src = ./..;
+  src = nix-filter.lib.filter {
+    root = ./..;
+
+    exclude = [
+      ".git"
+      "LICENSE"
+      "README.md"
+      "project_path.c"
+      (nix-filter.lib.matchExt "nix")
+    ];
+  };
 
   nativeBuildInputs = [
     cmake
