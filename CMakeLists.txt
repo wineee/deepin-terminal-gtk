@@ -22,7 +22,7 @@ endif(NOT CMAKE_C_STANDARD)
 include(CheckPIESupported OPTIONAL RESULT_VARIABLE CHECK_PIE_SUPPORTED)
 if (CHECK_PIE_SUPPORTED)
   check_pie_supported(LANGUAGES C)
-  if (CMAKE_CXX_LINK_PIE_SUPPORTED)
+  if (CMAKE_C_LINK_PIE_SUPPORTED)
     set (CMAKE_POSITION_INDEPENDENT_CODE TRUE)
   endif ()
 endif()
@@ -32,29 +32,27 @@ include(ExternalProject)
 include(ValaPrecompile)
 include(ValaVersion)
 include(GNUInstallDirs)
-find_package(Vala)
+
+find_package(Vala REQUIRED)
 ensure_vala_version("0.22.0" MINIMUM)
 find_package(PkgConfig REQUIRED)
-find_package(GLib "2.48" REQUIRED)
-find_package(FontConfig)
-find_package(X11)
-find_package(Gettext)
+find_package(X11 REQUIRED)
+find_package(Gettext REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
 pkg_check_modules(GEE REQUIRED IMPORTED_TARGET gee-0.8)
 pkg_check_modules(GIO REQUIRED IMPORTED_TARGET gio-unix-2.0)
 pkg_check_modules(RSVG REQUIRED IMPORTED_TARGET librsvg-2.0)
 pkg_check_modules(WNCK REQUIRED IMPORTED_TARGET libwnck-3.0)
 pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
-pkg_check_modules(GLIB REQUIRED glib-2.0)
+pkg_check_modules(GLIB REQUIRED glib-2.0>=2.48)
 pkg_check_modules(VTE REQUIRED IMPORTED_TARGET vte-2.91)
-pkg_check_modules(LIBSECRET IMPORTED_TARGET libsecret-1)
+pkg_check_modules(LIBSECRET REQUIRED IMPORTED_TARGET libsecret-1)
 pkg_check_modules(PCRE REQUIRED IMPORTED_TARGET libpcre2-8)
 pkg_check_modules(GNUTLS REQUIRED IMPORTED_TARGET gnutls)
 pkg_check_modules(JsonGlib REQUIRED IMPORTED_TARGET json-glib-1.0)
-
 
 option(TEST_BUILD "Build local for test without install" OFF)
 
@@ -81,20 +79,6 @@ set(SCRIPT_INSTALL_DIR ${CMAKE_INSTALL_FULL_LIBEXECDIR}/${target})
 set(LOCALE_INSTALL_DIR ${CMAKE_INSTALL_FULL_DATADIR}/locale)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/project_path.c.in ${CMAKE_CURRENT_SOURCE_DIR}/project_path.c @ONLY)
-
-set(CFLAGS
-	${GTK3_CFLAGS} ${GTK3_CFLAGS_OTHER}
-	${X11_CFLAGS} ${X11_CFLAGS_OTHER}
-	-s -O3 -w
-)
-
-add_compile_options(${CFLAGS})
-
-set(INCLUDE_PATHS
-	${GTK3_INCLUDE_DIRS}
-)
-include_directories(${INCLUDE_PATHS})
-
 
 SET(APP_SOURCES, "")
 FILE(GLOB valalist LIST_FILES true */*.vala)
@@ -137,16 +121,18 @@ target_compile_definitions(${target}
     LOCALEDIR="${LOCALE_INSTALL_DIR}"
 )
 
+target_compile_options(${target}
+    PRIVATE
+    -s -O3 -w
+)
+
 target_link_libraries(${target}
-	${GTK3_LIBRARIES}
-	${ZLIB_LIBRARIES}
-	${X11_LIBRARIES}
-	${XTST_LIBRARIES}
-	${M_LIBRARIES}
+	X11::X11
 	PkgConfig::VTE
 	PkgConfig::GEE
 	PkgConfig::GIO
 	PkgConfig::GNUTLS
+	PkgConfig::GTK3
 	PkgConfig::RSVG
 	PkgConfig::LIBSECRET
 	PkgConfig::WNCK
@@ -154,7 +140,6 @@ target_link_libraries(${target}
 	PkgConfig::FONTCONFIG
 	PkgConfig::JsonGlib
 	Threads::Threads
-
 	m
 	z
 )
