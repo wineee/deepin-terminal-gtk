@@ -9,6 +9,9 @@ project(deepin-terminal-gtk
 
 set(target deepin-terminal-gtk)
 
+option(TEST_BUILD "Build local for test without install" OFF)
+option(USE_GTK4 "Use gtk4 ,Not yet supported" OFF)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # C standard can be overridden when this is used as a sub-project.
 if(NOT CMAKE_C_STANDARD)
@@ -41,20 +44,23 @@ find_package(Gettext REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
 pkg_check_modules(GEE REQUIRED IMPORTED_TARGET gee-0.8)
 pkg_check_modules(GIO REQUIRED IMPORTED_TARGET gio-unix-2.0)
 pkg_check_modules(RSVG REQUIRED IMPORTED_TARGET librsvg-2.0)
-pkg_check_modules(WNCK REQUIRED IMPORTED_TARGET libwnck-3.0)
 pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
 pkg_check_modules(GLIB REQUIRED glib-2.0>=2.48)
-pkg_check_modules(VTE REQUIRED IMPORTED_TARGET vte-2.91)
 pkg_check_modules(LIBSECRET REQUIRED IMPORTED_TARGET libsecret-1)
 pkg_check_modules(PCRE REQUIRED IMPORTED_TARGET libpcre2-8)
 pkg_check_modules(GNUTLS REQUIRED IMPORTED_TARGET gnutls)
 pkg_check_modules(JsonGlib REQUIRED IMPORTED_TARGET json-glib-1.0)
-
-option(TEST_BUILD "Build local for test without install" OFF)
+if (USE_GTK4)
+    pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk4>=4.10.0)
+    pkg_check_modules(VTE REQUIRED IMPORTED_TARGET vte-2.91-gtk4>=0.69.0)
+else()
+    pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
+    pkg_check_modules(VTE REQUIRED IMPORTED_TARGET vte-2.91)
+    pkg_check_modules(WNCK REQUIRED IMPORTED_TARGET libwnck-3.0)
+endif()
 
 # There're 3 releases for 0.59.x, only 0.59.0 keeps old behaviour
 if("${VTE_VERSION}" VERSION_GREATER "0.59.0")
@@ -93,18 +99,29 @@ ENDFOREACH()
 
 set(VALA_PRECOMPILE_PACKAGES
 	xcb
-	gtk+-3.0
-	vte-2.91
 	gee-0.8
 	json-glib-1.0
 	gio-2.0
-	libwnck-3.0
 	posix
 	libsecret-1
-	gdk-x11-3.0
 	glib-2.0
 	librsvg-2.0
 )
+
+if (USE_GTK4)
+    list(APPEND VALA_PRECOMPILE_PACKAGES
+	    gtk4
+	    vte-2.91-gtk4
+	    gtk4-x11
+	)
+else()
+    list(APPEND VALA_PRECOMPILE_PACKAGES 
+	    gtk+-3.0 
+	    vte-2.91
+	    gdk-x11-3.0
+	    libwnck-3.0
+	)
+endif()
 
 vala_precompile(VALA_C ./main.vala ${APP_SOURCES}
 	        PACKAGES ${VALA_PRECOMPILE_PACKAGES})
@@ -132,10 +149,9 @@ target_link_libraries(${target}
 	PkgConfig::GEE
 	PkgConfig::GIO
 	PkgConfig::GNUTLS
-	PkgConfig::GTK3
+	PkgConfig::GTK
 	PkgConfig::RSVG
 	PkgConfig::LIBSECRET
-	PkgConfig::WNCK
 	PkgConfig::PCRE
 	PkgConfig::FONTCONFIG
 	PkgConfig::JsonGlib
@@ -143,6 +159,9 @@ target_link_libraries(${target}
 	m
 	z
 )
+if (NOT USE_GTK4)
+	target_link_libraries(${target} PkgConfig::WNCK)
+endif()
 
 FILE(GLOB children LIST_DIRECTORIES true po/*)
 SET(dirlist "")

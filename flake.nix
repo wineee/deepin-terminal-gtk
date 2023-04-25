@@ -17,7 +17,10 @@
           };
         in
         rec {
-          packages.default = deepin-terminal-gtk;
+          packages = {
+            default = deepin-terminal-gtk;
+            gtk4 = deepin-terminal-gtk.override { gtkVersion = "4"; };
+          };
 
           devShell = pkgs.mkShell {
             inherit (packages.default) nativeBuildInputs buildInputs;
