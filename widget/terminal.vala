@@ -1304,7 +1304,7 @@ namespace Widgets {
         public void kill_fg() {
             int fg_pid;
             if (this.try_get_foreground_pid(out fg_pid)) {
-                Posix.kill(fg_pid, Posix.SIGKILL);
+                Posix.kill(fg_pid, Posix.Signal.KILL);
             }
         }
 

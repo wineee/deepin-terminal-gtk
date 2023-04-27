@@ -37,7 +37,7 @@ include(ValaVersion)
 include(GNUInstallDirs)
 
 find_package(Vala REQUIRED)
-ensure_vala_version("0.22.0" MINIMUM)
+ensure_vala_version("0.40.0" MINIMUM)
 find_package(PkgConfig REQUIRED)
 find_package(X11 REQUIRED)
 find_package(Gettext REQUIRED)
@@ -113,6 +113,7 @@ if (USE_GTK4)
 	    gtk4
 	    vte-2.91-gtk4
 	    gtk4-x11
+	    gtk4-wayland
 	)
 else()
     list(APPEND VALA_PRECOMPILE_PACKAGES 
