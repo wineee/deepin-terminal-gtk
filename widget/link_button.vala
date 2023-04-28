@@ -52,9 +52,8 @@ namespace Widgets {
                     return false;
                 });
             clicked.connect((w, e) => {
-                    Gdk.Screen screen = Gdk.Screen.get_default();
                     try {
-                        Gtk.show_uri(screen, link_uri, e.time);
+                        Gtk.show_uri_on_window(null, link_uri, e.time);
                     } catch (GLib.Error e) {
                         print("LinkButton: %s\n", e.message);
                     }
