@@ -27,8 +27,10 @@ using Cairo;
 using Config;
 using Gtk;
 using Utils;
-using Wnck;
 using Widgets;
+#if USE_GTK3
+using Wnck;
+#endif
 
 namespace Widgets {
     public class Window : Widgets.ConfigWindow {
@@ -414,6 +416,11 @@ namespace Widgets {
         }
 
         public bool have_terminal_at_same_workspace () {
+            #if USE_GTK3
+            if (GLib.Environment.get_variable ("XDG_SESSION_TYPE") == "wayland") {
+                return false;
+            }
+
             var screen = Wnck.Screen.get_default ();
             screen.force_update ();
 
@@ -430,6 +437,7 @@ namespace Widgets {
                     }
                 }
             }
+            #endif
 
             return false;
         }

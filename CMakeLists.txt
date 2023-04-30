@@ -134,14 +134,13 @@ add_executable(${target}
 
 target_compile_definitions(${target}
     PRIVATE
-    WNCK_I_KNOW_THIS_IS_UNSTABLE
     GETTEXT_PACKAGE="${target}"
     LOCALEDIR="${LOCALE_INSTALL_DIR}"
 )
 
 target_compile_options(${target}
     PRIVATE
-    -s -O3 -w
+    -s -w
 )
 
 target_link_libraries(${target}
@@ -162,6 +161,10 @@ target_link_libraries(${target}
 )
 if (NOT USE_GTK4)
 	target_link_libraries(${target} PkgConfig::WNCK)
+	target_compile_definitions(${target} PRIVATE 
+		USE_GTK3
+		WNCK_I_KNOW_THIS_IS_UNSTABLE
+	)
 endif()
 
 FILE(GLOB children LIST_DIRECTORIES true po/*)
