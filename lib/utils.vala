@@ -541,11 +541,25 @@ namespace Utils {
         try {
             var scale = get_default_monitor_scale();
             Rsvg.Handle r = new Rsvg.Handle.from_file(file_path);
-            Rsvg.DimensionData d = r.get_dimensions();
-            Cairo.ImageSurface cs = new Cairo.ImageSurface(Cairo.Format.ARGB32, (int)(d.width * scale), (int)(d.height * scale));
+
+            bool has_width, has_height, has_viewbox;
+            Rsvg.Length handle_width, handle_height;
+            Rsvg.Rectangle viewbox;
+            r.get_intrinsic_dimensions (out has_width, out handle_width,
+                                             out has_height, out handle_height,
+                                             out has_viewbox, out viewbox);
+            assert (has_width && has_height);
+            var svg_width = (int)(handle_width.length * scale);
+            var svg_height = (int)(handle_height.length * scale);
+
+            Cairo.ImageSurface cs = new Cairo.ImageSurface(Cairo.Format.ARGB32, svg_width, svg_height);
             cs.set_device_scale(scale, scale);
             Cairo.Context c = new Cairo.Context(cs);
-            r.render_cairo(c);
+            if (has_viewbox) {
+                r.render_document(c, Rsvg.Rectangle () { width = svg_width, height = svg_height, x = viewbox.x, y = viewbox.y });
+            } else {
+                r.render_document(c, Rsvg.Rectangle () { width = svg_width, height = svg_height, x = 0, y = 0 });
+            } 
 
             return cs;
         } catch (GLib.Error e) {

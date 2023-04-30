@@ -46,7 +46,7 @@ find_package(Threads REQUIRED)
 
 pkg_check_modules(GEE REQUIRED IMPORTED_TARGET gee-0.8)
 pkg_check_modules(GIO REQUIRED IMPORTED_TARGET gio-unix-2.0)
-pkg_check_modules(RSVG REQUIRED IMPORTED_TARGET librsvg-2.0)
+pkg_check_modules(RSVG REQUIRED IMPORTED_TARGET librsvg-2.0>=2.52)
 pkg_check_modules(FONTCONFIG REQUIRED IMPORTED_TARGET fontconfig)
 pkg_check_modules(GLIB REQUIRED glib-2.0>=2.48)
 pkg_check_modules(LIBSECRET REQUIRED IMPORTED_TARGET libsecret-1)
