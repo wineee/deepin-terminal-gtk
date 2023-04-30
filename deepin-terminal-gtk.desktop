@@ -197,7 +197,7 @@ Name[uk]=Нове вікно
 Name[zh_CN]=新建窗口
 
 [Quake Shortcut Group]
-Exec=deepin-terminal --quake-mode
+Exec=deepin-terminal-gtk --quake-mode
 Name=Quake Terminal
 
 # Translations:
