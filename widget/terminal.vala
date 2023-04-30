@@ -1124,15 +1124,16 @@ namespace Widgets {
 #if VTE_0_60
                     var regex = new Vte.Regex.for_match (exp, -1, 0x00000400u); /* PCRE2_MULTILINE */
                     int id = term.match_add_regex (regex, 0);
+                    term.match_set_cursor_name (id, "pointer");
 #else
                     var regex = new GLib.Regex (exp,
                                                GLib.RegexCompileFlags.OPTIMIZE |
                                                GLib.RegexCompileFlags.MULTILINE,
                                                0);
                     int id = term.match_add_gregex (regex, 0);
+                    term.match_set_cursor_type (id, Gdk.CursorType.HAND2);
 #endif
 
-                    term.match_set_cursor_type (id, Gdk.CursorType.HAND2);
                 } catch (GLib.RegexError error) {
                     warning (error.message);
                 }
