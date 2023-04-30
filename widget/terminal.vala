@@ -458,7 +458,6 @@ namespace Widgets {
             menu_content.append(new Menu.MenuItem("", ""));
             menu_content.append(new Menu.MenuItem("preference", _("Settings")));
 
-            var window = ((Widgets.Window) get_toplevel());
             menu = new Menu.Menu();
             menu.click_item.connect(handle_menu_item_click);
             menu.destroy.connect(handle_menu_destroy);
@@ -1270,7 +1269,7 @@ namespace Widgets {
                                         -1, /* timeout */
                                         null, /* cancellable */
                                         null /* callback */);
-                    } catch (Error e) {
+                    } catch (GLib.SpawnError e) {
                         warning("Terminal launch_idle_id: %s\n", e.message);
                     }
 
