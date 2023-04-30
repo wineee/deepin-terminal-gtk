@@ -23,7 +23,12 @@
           };
 
           devShell = pkgs.mkShell {
-            inherit (packages.default) nativeBuildInputs buildInputs;
+            nativeBuildInputs = packages.default.nativeBuildInputs ++ (with pkgs; [
+              vala-lint
+              vala-language-server
+              uncrustify
+            ]);
+            inherit (packages.default) buildInputs;
             shellHook = ''
               echo "Hello Hack for deepin-terminal-gtk!"
             '';
