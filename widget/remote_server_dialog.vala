@@ -408,7 +408,7 @@ namespace Widgets {
         }
 
         public void show_advanced_options () {
-            set_default_geometry (window_init_width, window_expand_height);
+            set_default_size (window_init_width, window_expand_height);
 
             Utils.destroy_all_children (server_action_box);
             if (server_info != null) {

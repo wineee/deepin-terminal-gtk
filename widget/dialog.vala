@@ -139,7 +139,7 @@ namespace Widgets {
         public void transient_for_window (Widgets.ConfigWindow window) {
             transient_window = window;
 
-            set_default_geometry (window_init_width, window_init_height);
+            set_default_size (window_init_width, window_init_height);
 
             set_transient_for (window);
             Gdk.Window gdk_window = window.get_window ();
