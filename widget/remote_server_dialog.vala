@@ -394,7 +394,7 @@ namespace Widgets {
                 var tab_order_list = new List<Gtk.Widget> ();
                 tab_order_list.append ((Gtk.Widget) cancel_button);
                 tab_order_list.append ((Gtk.Widget) confirm_button);
-                button_box.set_focus_chain (tab_order_list);
+                // button_box.set_focus_chain (tab_order_list);
                 button_box.set_focus_child (confirm_button);
 
                 button_box.pack_start (cancel_button, true, true, 0);
