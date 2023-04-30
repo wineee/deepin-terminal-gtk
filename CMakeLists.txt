@@ -122,6 +122,7 @@ else()
 	    gdk-x11-3.0
 	    libwnck-3.0
 	)
+	list(APPEND ARGS_DEFINITIONS "USE_GTK3")
 endif()
 
 vala_precompile(VALA_C ./main.vala ${APP_SOURCES}

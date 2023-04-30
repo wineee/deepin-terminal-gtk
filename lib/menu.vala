@@ -61,14 +61,19 @@ namespace Menu {
         }
 
         private Gtk.Menu create_gtk_menu (List<MenuItem> menu_content) {
-            Gdk.Screen screen = Gdk.Screen.get_default ();
             CssProvider provider = new Gtk.CssProvider ();
             try {
                 provider.load_from_data (Utils.get_menu_css ());
             } catch (GLib.Error e) {
                     warning ("Something bad happened with CSS load %s", e.message);
             }
-            Gtk.StyleContext.add_provider_for_screen (screen,provider,Gtk.STYLE_PROVIDER_PRIORITY_USER);
+#if USE_GTK3
+            Gdk.Screen screen = Gdk.Screen.get_default ();
+            Gtk.StyleContext.add_provider_for_screen (screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+#else
+            Gdk.Display display = Gdk.Display.get_default ();
+            Gtk.StyleContext.add_provider_for_display (display, provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+#endif
             Gtk.Menu result = new Gtk.Menu ();
 
             foreach (unowned MenuItem menu_item in menu_content) {
