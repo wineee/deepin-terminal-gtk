@@ -26,25 +26,25 @@ using Widgets;
 
 namespace Widgets {
     public class HighlightFrame : Gtk.EventBox {
-        public Gdk.RGBA foreground_color = Gdk.RGBA();
+        public Gdk.RGBA foreground_color = Gdk.RGBA ();
 
-        public HighlightFrame() {
-            draw.connect(on_draw);
+        public HighlightFrame () {
+            draw.connect (on_draw);
         }
 
-        private bool on_draw(Gtk.Widget widget, Cairo.Context cr) {
+        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
             Gtk.Allocation rect;
-            widget.get_allocation(out rect);
+            widget.get_allocation (out rect);
 
             try {
-                Widgets.ConfigWindow parent_window = (Widgets.ConfigWindow) this.get_toplevel();
-                foreground_color = Utils.hex_to_rgba(parent_window.config.config_file.get_string("theme", "foreground"));
+                Widgets.ConfigWindow parent_window = (Widgets.ConfigWindow) this.get_toplevel ();
+                foreground_color = Utils.hex_to_rgba (parent_window.config.config_file.get_string ("theme", "foreground"));
             } catch (GLib.KeyFileError e) {
-                print("HighlightFrame: %s\n", e.message);
+                print ("HighlightFrame: %s\n", e.message);
             }
 
-            cr.set_source_rgba(foreground_color.red, foreground_color.green, foreground_color.blue, 0.4);
-            Draw.draw_rectangle(cr, rect.x, rect.y, rect.width, rect.height, false);
+            cr.set_source_rgba (foreground_color.red, foreground_color.green, foreground_color.blue, 0.4);
+            Draw.draw_rectangle (cr, rect.x, rect.y, rect.width, rect.height, false);
 
             return true;
         }

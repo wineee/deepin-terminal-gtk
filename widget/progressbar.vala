@@ -37,51 +37,51 @@ namespace Widgets {
         public int line_margin_top = 10;
         public int width = Constant.PREFERENCE_WIDGET_WIDTH;
 
-        public signal void update(double percent);
+        public signal void update (double percent);
 
-        public ProgressBar(double init_percent) {
+        public ProgressBar (double init_percent) {
             percent = init_percent;
-            set_size_request(width, height);
+            set_size_request (width, height);
 
-            foreground_color = Utils.hex_to_rgba("#2ca7f8");
-            background_color = Utils.hex_to_rgba("#A4A4A4");
-            pointer_surface = Utils.create_image_surface("progress_pointer.svg");
+            foreground_color = Utils.hex_to_rgba ("#2ca7f8");
+            background_color = Utils.hex_to_rgba ("#A4A4A4");
+            pointer_surface = Utils.create_image_surface ("progress_pointer.svg");
 
-            button_press_event.connect((w, e) => {
+            button_press_event.connect ((w, e) => {
                     Gtk.Allocation rect;
-                    w.get_allocation(out rect);
+                    w.get_allocation (out rect);
 
-                    set_percent(e.x * 1.0 / rect.width);
+                    set_percent (e.x * 1.0 / rect.width);
 
                     return false;
                 });
 
-            motion_notify_event.connect((w, e) => {
+            motion_notify_event.connect ((w, e) => {
                     Gtk.Allocation rect;
-                    w.get_allocation(out rect);
+                    w.get_allocation (out rect);
 
-                    set_percent(e.x * 1.0 / rect.width);
+                    set_percent (e.x * 1.0 / rect.width);
 
                     return false;
                 });
 
-            draw.connect(on_draw);
+            draw.connect (on_draw);
 
-            show_all();
+            show_all ();
         }
 
-        public void set_percent(double new_percent) {
-            percent = double.max(double.min((1 - Constant.TERMINAL_MIN_OPACITY) * new_percent + Constant.TERMINAL_MIN_OPACITY, 1), Constant.TERMINAL_MIN_OPACITY);
-            draw_percent = double.max(double.min(new_percent, 1), 0);
+        public void set_percent (double new_percent) {
+            percent = double.max (double.min ((1 - Constant.TERMINAL_MIN_OPACITY) * new_percent + Constant.TERMINAL_MIN_OPACITY, 1), Constant.TERMINAL_MIN_OPACITY);
+            draw_percent = double.max (double.min (new_percent, 1), 0);
 
-            update(percent);
+            update (percent);
 
-            queue_draw();
+            queue_draw ();
         }
 
-        private bool on_draw(Gtk.Widget widget, Cairo.Context cr) {
+        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
             Gtk.Allocation rect;
-            widget.get_allocation(out rect);
+            widget.get_allocation (out rect);
 
             int left_offset = 0;
             int right_offset = 0;
@@ -89,27 +89,27 @@ namespace Widgets {
             // Because pointer surface opacity at side.
             // So we adjust background line offset to avoid user see background line at two side when percent is 0 or 1.
             if (draw_percent == 0) {
-                left_offset = pointer_surface.get_width() / 2;
-                right_offset = pointer_surface.get_width() / 2;
+                left_offset = pointer_surface.get_width () / 2;
+                right_offset = pointer_surface.get_width () / 2;
             } else if (draw_percent == 1) {
                 left_offset = 0;
                 right_offset = draw_pointer_offset;
             }
 
-            Utils.set_context_color(cr, background_color);
-            Draw.draw_rectangle(cr, left_offset, line_margin_top, rect.width - right_offset, line_height);
+            Utils.set_context_color (cr, background_color);
+            Draw.draw_rectangle (cr, left_offset, line_margin_top, rect.width - right_offset, line_height);
 
             if (draw_percent > 0) {
-                cr.set_source_rgba(1, 0, 1, 1);
-                Utils.set_context_color(cr, foreground_color);
-                Draw.draw_rectangle(cr, left_offset, line_margin_top, (int) (rect.width * draw_percent) - right_offset, line_height);
+                cr.set_source_rgba (1, 0, 1, 1);
+                Utils.set_context_color (cr, foreground_color);
+                Draw.draw_rectangle (cr, left_offset, line_margin_top, (int) (rect.width * draw_percent) - right_offset, line_height);
             }
 
-            Draw.draw_surface(cr,
+            Draw.draw_surface (cr,
                               pointer_surface,
-                              int.max(-draw_pointer_offset,
-                                      int.min((int) (rect.width * draw_percent) - pointer_surface.get_width() / 2 / 2,
-                                              rect.width - pointer_surface.get_width() + draw_pointer_offset)),
+                              int.max (-draw_pointer_offset,
+                                      int.min ((int) (rect.width * draw_percent) - pointer_surface.get_width () / 2 / 2,
+                                              rect.width - pointer_surface.get_width () + draw_pointer_offset)),
                               0);
 
             return true;

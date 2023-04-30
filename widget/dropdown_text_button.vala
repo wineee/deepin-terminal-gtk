@@ -26,11 +26,11 @@ using Widgets;
 
 namespace Widgets {
     public class DropdownTextButton : Gtk.ComboBoxText {
-        public DropdownTextButton() {
-            scroll_event.connect(on_scroll);
+        public DropdownTextButton () {
+            scroll_event.connect (on_scroll);
         }
 
-        public bool on_scroll(Gtk.Widget widget, Gdk.EventScroll scroll_event) {
+        public bool on_scroll (Gtk.Widget widget, Gdk.EventScroll scroll_event) {
             return true;
         }
     }

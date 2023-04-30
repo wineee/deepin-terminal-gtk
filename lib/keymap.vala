@@ -24,12 +24,12 @@
 using GLib;
 
 namespace Keymap {
-    public string get_keyevent_name(Gdk.EventKey key_event) {
+    public string get_keyevent_name (Gdk.EventKey key_event) {
         if ((key_event.is_modifier) != 0) {
             return "";
         } else {
-            var key_modifiers = get_key_event_modifiers(key_event);
-            var key_name = get_key_name(key_event.keyval);
+            var key_modifiers = get_key_event_modifiers (key_event);
+            var key_name = get_key_name (key_event.keyval);
 
             if (key_modifiers.length == 0) {
                 return key_name;
@@ -45,7 +45,7 @@ namespace Keymap {
         }
     }
 
-    public string[] get_key_event_modifiers(Gdk.EventKey key_event) {
+    public string[] get_key_event_modifiers (Gdk.EventKey key_event) {
         string[] modifiers = {};
 
         if ((key_event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
@@ -71,11 +71,11 @@ namespace Keymap {
         return modifiers;
     }
 
-    public string get_key_name(uint keyval) {
-        unichar key_unicode = Gdk.keyval_to_unicode(Gdk.keyval_to_lower(keyval));
+    public string get_key_name (uint keyval) {
+        unichar key_unicode = Gdk.keyval_to_unicode (Gdk.keyval_to_lower (keyval));
 
         if (key_unicode == 0) {  // function keys at top line of keyboard
-            var keyname = Gdk.keyval_name(keyval);
+            var keyname = Gdk.keyval_name(   keyval);
 
             // Gdk.keyval_name will return null when user's hardware got KEY_UNKNOWN from hardware.
             // So, we need return empty string to protect program won't crash later.
@@ -102,24 +102,24 @@ namespace Keymap {
             } else if (key_unicode == 32) {
                 return "Space";
             } else {
-                return key_unicode.to_string();
+                return key_unicode.to_string ();
             }
         }
     }
 
-    public bool has_ctrl_mask(Gdk.EventKey key_event) {
+    public bool has_ctrl_mask (Gdk.EventKey key_event) {
         string[] mask_list = {"Control_L", "Control_R"};
 
-        return get_key_name(key_event.keyval) in mask_list;
+        return get_key_name (key_event.keyval) in mask_list;
     }
 
-    public bool has_shift_mask(Gdk.EventKey key_event) {
+    public bool has_shift_mask (Gdk.EventKey key_event) {
         string[] mask_list = {"Shift_L", "Shift_R"};
-        return get_key_name(key_event.keyval) in mask_list;
+        return get_key_name (key_event.keyval) in mask_list;
     }
 
-    public bool is_no_key_press(Gdk.EventKey key_event) {
-        return (key_event.is_modifier == 0 && get_key_name(key_event.keyval) == get_keyevent_name(key_event) ||
-                key_event.is_modifier != 0 && get_key_event_modifiers(key_event).length == 1);
+    public bool is_no_key_press (Gdk.EventKey key_event) {
+        return (key_event.is_modifier == 0 && get_key_name (key_event.keyval) == get_keyevent_name (key_event) ||
+                key_event.is_modifier != 0 && get_key_event_modifiers (key_event).length == 1);
     }
 }

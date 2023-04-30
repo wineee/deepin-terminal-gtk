@@ -38,87 +38,87 @@ namespace Widgets {
         public bool is_theme_button;
         public int surface_y;
 
-        public WindowButton(string image_path, bool theme_button=false, int width, int height) {
+        public WindowButton (string image_path, bool theme_button=false, int width, int height) {
             is_theme_button = theme_button;
 
             if (is_theme_button) {
-                normal_dark_surface = Utils.create_image_surface(image_path + "_dark_normal.svg");
-                hover_dark_surface = Utils.create_image_surface(image_path + "_dark_hover.svg");
-                press_dark_surface = Utils.create_image_surface(image_path + "_dark_press.svg");
+                normal_dark_surface = Utils.create_image_surface (image_path + "_dark_normal.svg");
+                hover_dark_surface = Utils.create_image_surface (image_path + "_dark_hover.svg");
+                press_dark_surface = Utils.create_image_surface (image_path + "_dark_press.svg");
 
-                normal_light_surface = Utils.create_image_surface(image_path + "_light_normal.svg");
-                hover_light_surface = Utils.create_image_surface(image_path + "_light_hover.svg");
-                press_light_surface = Utils.create_image_surface(image_path + "_light_press.svg");
+                normal_light_surface = Utils.create_image_surface (image_path + "_light_normal.svg");
+                hover_light_surface = Utils.create_image_surface (image_path + "_light_hover.svg");
+                press_light_surface = Utils.create_image_surface (image_path + "_light_press.svg");
             } else {
-                normal_dark_surface = Utils.create_image_surface(image_path + "_normal.svg");
-                hover_dark_surface = Utils.create_image_surface(image_path + "_hover.svg");
-                press_dark_surface = Utils.create_image_surface(image_path + "_press.svg");
+                normal_dark_surface = Utils.create_image_surface (image_path + "_normal.svg");
+                hover_dark_surface = Utils.create_image_surface (image_path + "_hover.svg");
+                press_dark_surface = Utils.create_image_surface (image_path + "_press.svg");
             }
 
-            set_size_request(width, height);
+            set_size_request (width, height);
 
-            surface_y = (height - normal_dark_surface.get_height() / get_scale_factor()) / 2;
+            surface_y = (height - normal_dark_surface.get_height () / get_scale_factor ()) / 2;
 
-            draw.connect(on_draw);
-            enter_notify_event.connect((w, e) => {
+            draw.connect (on_draw);
+            enter_notify_event.connect ((w, e) => {
                     is_hover = true;
-                    queue_draw();
+                    queue_draw ();
 
                     // set cursor.
-                    get_window().set_cursor(new Gdk.Cursor.for_display(Gdk.Display.get_default(),
+                    get_window(   ).set_cursor(   new Gdk.Cursor.for_display(   Gdk.Display.get_default(   ),
                                                                        Gdk.CursorType.HAND1));
 
                     return false;
                 });
-            leave_notify_event.connect((w, e) => {
+            leave_notify_event.connect ((w, e) => {
                     is_hover = false;
-                    queue_draw();
+                    queue_draw ();
 
-                    get_window().set_cursor(null);
+                    get_window ().set_cursor (null);
 
                     return false;
                 });
-            button_press_event.connect((w, e) => {
-                    queue_draw();
+            button_press_event.connect ((w, e) => {
+                    queue_draw ();
 
                     return false;
                 });
-            button_release_event.connect((w, e) => {
+            button_release_event.connect ((w, e) => {
                     is_hover = false;
-                    queue_draw();
+                    queue_draw ();
 
                     return false;
                 });
         }
 
-        private bool on_draw(Gtk.Widget widget, Cairo.Context cr) {
+        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
             bool is_light_theme = false;
-            var top_level = get_toplevel();
-            if (top_level.get_type().is_a(typeof(Widgets.Dialog))) {
-                is_light_theme = ((Widgets.Dialog) top_level).transient_window.is_light_theme();
+            var top_level = get_toplevel ();
+            if (top_level.get_type ().is_a (typeof (Widgets.Dialog))) {
+                is_light_theme = ((Widgets.Dialog) top_level).transient_window.is_light_theme ();
             } else {
-                is_light_theme = ((Widgets.ConfigWindow) get_toplevel()).is_light_theme();
+                is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
             }
 
             if (is_hover) {
                 if (is_press) {
                     if (is_theme_button && is_light_theme) {
-                        Draw.draw_surface(cr, press_light_surface, 0, surface_y);
+                        Draw.draw_surface (cr, press_light_surface, 0, surface_y);
                     } else {
-                        Draw.draw_surface(cr, press_dark_surface, 0, surface_y);
+                        Draw.draw_surface (cr, press_dark_surface, 0, surface_y);
                     }
                 } else {
                     if (is_theme_button && is_light_theme) {
-                        Draw.draw_surface(cr, hover_light_surface, 0, surface_y);
+                        Draw.draw_surface (cr, hover_light_surface, 0, surface_y);
                     } else {
-                        Draw.draw_surface(cr, hover_dark_surface, 0, surface_y);
+                        Draw.draw_surface (cr, hover_dark_surface, 0, surface_y);
                     }
                 }
             } else {
                 if (is_theme_button && is_light_theme) {
-                    Draw.draw_surface(cr, normal_light_surface, 0, surface_y);
+                    Draw.draw_surface (cr, normal_light_surface, 0, surface_y);
                 } else {
-                    Draw.draw_surface(cr, normal_dark_surface, 0, surface_y);
+                    Draw.draw_surface (cr, normal_dark_surface, 0, surface_y);
                 }
             }
 
@@ -126,9 +126,9 @@ namespace Widgets {
         }
     }
 
-    public WindowButton create_close_button() {
-        var close_button = new WindowButton("titlebar_close", false, Constant.WINDOW_BUTTON_WIDHT + Constant.CLOSE_BUTTON_MARGIN_END, Constant.TITLEBAR_HEIGHT);
-        close_button.set_halign(Gtk.Align.END);
+    public WindowButton create_close_button () {
+        var close_button = new WindowButton ("titlebar_close", false, Constant.WINDOW_BUTTON_WIDHT + Constant.CLOSE_BUTTON_MARGIN_END, Constant.TITLEBAR_HEIGHT);
+        close_button.set_halign (Gtk.Align.END);
 
         return close_button;
     }

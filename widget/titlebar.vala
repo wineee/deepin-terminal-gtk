@@ -29,19 +29,19 @@ namespace Widgets {
         public Widgets.WindowEventArea event_area;
         public WindowButton close_button;
 
-        public Titlebar() {
-            close_button = Widgets.create_close_button();
+        public Titlebar () {
+            close_button = Widgets.create_close_button ();
 
-            Box box = new Box(Gtk.Orientation.HORIZONTAL, 0);
-            box.pack_start(close_button, true, true, 0);
+            Box box = new Box (Gtk.Orientation.HORIZONTAL, 0);
+            box.pack_start (close_button, true, true, 0);
 
-            event_area = new Widgets.WindowEventArea(this);
+            event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
 
-            add(box);
-            add_overlay(event_area);
+            add (box);
+            add_overlay (event_area);
 
-            set_size_request(-1, Constant.TITLEBAR_HEIGHT);
+            set_size_request (-1, Constant.TITLEBAR_HEIGHT);
         }
     }
 }

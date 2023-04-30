@@ -26,25 +26,25 @@ using Widgets;
 
 namespace Widgets {
     public class ServerButton : Widgets.PanelButton {
-        public signal void edit_server(string server_info);
-        public signal void login_server(string server_info);
+        public signal void edit_server (string server_info);
+        public signal void login_server (string server_info);
 
-        public ServerButton(string server_title, string server_content) {
-            string[] server_infos = server_content.split("@");
+        public ServerButton (string server_title, string server_content) {
+            string[] server_infos = server_content.split ("@");
             string display_name = "";
             if (server_infos.length > 2) {
-                display_name = "%s@%s:%s".printf(server_infos[0], server_infos[1], server_infos[2]);
+                display_name = "%s@%s:%s".printf(   server_infos[0], server_infos[1], server_infos[2]);
             } else {
-                display_name = "%s@%s".printf(server_infos[0], server_infos[1]);
+                display_name = "%s@%s".printf(   server_infos[0], server_infos[1]);
             }
 
-            base(GLib.Markup.escape_text(server_title), server_content, display_name, "server");
+            base (GLib.Markup.escape_text (server_title), server_content, display_name, "server");
 
-            click_edit_button.connect((w) => {
-                    edit_server(server_content);
+            click_edit_button.connect ((w) => {
+                    edit_server (server_content);
                 });
-            click_button.connect((w) => {
-                    login_server(server_content);
+            click_button.connect ((w) => {
+                    login_server (server_content);
                 });
         }
     }

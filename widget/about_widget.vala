@@ -44,63 +44,63 @@ namespace Widgets {
         public string about_text;
         public string product_name_text;
 
-        public AboutWidget() {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+        public AboutWidget () {
+            Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
-            string logo_path = Utils.get_image_path("logo.svg");
-            
+            string logo_path = Utils.get_image_path ("logo.svg");
+
             about_text = _("Deepin Terminal is an advanced terminal emulator with workspace, multiple windows, remote management, quake mode and other features.\n\nIt sharpens your focus in the world of command line!");
             product_name_text = _("Deepin Terminal Gtk");
 
-            icon_surface = Utils.create_image_surface("icon.svg");
-            logo_surface = Utils.create_image_surface_from_file(logo_path);
+            icon_surface = Utils.create_image_surface ("icon.svg");
+            logo_surface = Utils.create_image_surface_from_file (logo_path);
 
-            set_size_request(-1, height);
+            set_size_request (-1, height);
 
-            var content_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+            var content_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             content_box.margin_top = homepage_y;
 
             // Add homepage.
             string homepage_name = "www.deepin.org";
             string homepage_link = "https://" + homepage_name;
 
-            var homepage_area = new Widgets.LinkButton(homepage_name, homepage_link, "homepage");
-            content_box.pack_start(homepage_area, false, false, 0);
+            var homepage_area = new Widgets.LinkButton (homepage_name, homepage_link, "homepage");
+            content_box.pack_start (homepage_area, false, false, 0);
 
-            var acknowledgments_area = new Widgets.LinkButton(_("Acknowledgments"), "https://www.deepin.org/acknowledgments/deepin-terminal", "acknowledgments");
+            var acknowledgments_area = new Widgets.LinkButton (_("Acknowledgments"), "https://www.deepin.org/acknowledgments/deepin-terminal", "acknowledgments");
             acknowledgments_area.margin_top = acknowledgments_y;
-            content_box.pack_start(acknowledgments_area, false, false, 0);
+            content_box.pack_start (acknowledgments_area, false, false, 0);
 
-            pack_start(content_box, true, true, 0);
+            pack_start (content_box, true, true, 0);
 
-            draw.connect(on_draw);
+            draw.connect (on_draw);
 
-            show_all();
+            show_all ();
         }
 
-        private bool on_draw(Gtk.Widget widget, Cairo.Context cr) {
+        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
             Gtk.Allocation rect;
-            widget.get_allocation(out rect);
+            widget.get_allocation (out rect);
 
             // Draw icon.
-            Draw.draw_surface(cr, icon_surface, (rect.width - icon_surface.get_width() / get_scale_factor()) / 2, icon_y);
+            Draw.draw_surface(   cr, icon_surface, (rect.width - icon_surface.get_width(   ) / get_scale_factor(   )) / 2, icon_y);
 
             // Draw name.
-            cr.set_source_rgba(0, 0, 0, 1);
-            Draw.draw_text(cr, product_name_text, 0, name_y, rect.width, name_height, name_height, Pango.Alignment.CENTER, "top");
+            cr.set_source_rgba(   0, 0, 0, 1);
+            Draw.draw_text (cr, product_name_text, 0, name_y, rect.width, name_height, name_height, Pango.Alignment.CENTER, "top");
 
             // Draw version.
-            cr.set_source_rgba(0.4, 0.4, 0.4, 1);
-            Draw.draw_text(cr, "%s %s".printf(_("Version:"), Constant.VERSION), 0, version_y, rect.width, version_height, version_size, Pango.Alignment.CENTER, "top");
+            cr.set_source_rgba(   0.4, 0.4, 0.4, 1);
+            Draw.draw_text (cr, "%s %s".printf(   _("Version:"), Constant.VERSION), 0, version_y, rect.width, version_height, version_size, Pango.Alignment.CENTER, "top");
 
             // Draw logo.
-            Draw.draw_surface(cr, logo_surface, (rect.width - logo_surface.get_width() / get_scale_factor()) / 2, logo_y);
+            Draw.draw_surface(   cr, logo_surface, (rect.width - logo_surface.get_width(   ) / get_scale_factor(   )) / 2, logo_y);
 
             // Draw about.
-            cr.set_source_rgba(0.1, 0.1, 0.1, 1);
-            Draw.draw_text(cr, about_text, about_x, about_y, rect.width - about_x * 2, about_height, about_height, Pango.Alignment.CENTER, "top", rect.width - about_x * 2);
+            cr.set_source_rgba(   0.1, 0.1, 0.1, 1);
+            Draw.draw_text (cr, about_text, about_x, about_y, rect.width - about_x * 2, about_height, about_height, Pango.Alignment.CENTER, "top", rect.width - about_x * 2);
 
-            Utils.propagate_draw(this, cr);
+            Utils.propagate_draw (this, cr);
 
             return true;
         }

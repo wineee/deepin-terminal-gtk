@@ -41,107 +41,107 @@ namespace Widgets {
         public int search_image_margin_end = 5;
         public int search_image_margin_x = 18;
 
-        public SearchEntry() {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+        public SearchEntry () {
+            Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
-            this.add_events(Gdk.EventMask.BUTTON_PRESS_MASK
+            this.add_events (Gdk.EventMask.BUTTON_PRESS_MASK
                             | Gdk.EventMask.BUTTON_RELEASE_MASK
                             | Gdk.EventMask.POINTER_MOTION_MASK
                             | Gdk.EventMask.LEAVE_NOTIFY_MASK);
-            set_size_request(-1, height);
+            set_size_request (-1, height);
 
-            timer = new AnimateTimer(AnimateTimer.ease_in_out, animation_time);
-            timer.animate.connect(on_animate);
+            timer = new AnimateTimer (AnimateTimer.ease_in_out, animation_time);
+            timer.animate.connect (on_animate);
 
-            box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-            display_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+            box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            display_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 
-            search_image = new ImageButton("search", true);
+            search_image = new ImageButton ("search", true);
             search_image.margin_end = search_image_margin_end;
-            search_image.set_valign(Gtk.Align.CENTER);
-            search_label = new Gtk.Label(null);
-            search_label.set_valign(Gtk.Align.CENTER);
-            search_label.set_text(_("Search"));
-            search_entry = new Widgets.Entry();
-            search_entry.set_placeholder_text(_("Search"));
-            clear_button = new ImageButton("search_clear", true);
+            search_image.set_valign (Gtk.Align.CENTER);
+            search_label = new Gtk.Label (null);
+            search_label.set_valign (Gtk.Align.CENTER);
+            search_label.set_text (_("Search"));
+            search_entry = new Widgets.Entry ();
+            search_entry.set_placeholder_text (_("Search"));
+            clear_button = new ImageButton ("search_clear", true);
             clear_button.margin_end = clear_button_margin_end;
-            clear_button.set_valign(Gtk.Align.CENTER);
-            clear_button.clicked.connect((w, e) => {
-                    search_entry.set_text("");
+            clear_button.set_valign (Gtk.Align.CENTER);
+            clear_button.clicked.connect ((w, e) => {
+                    search_entry.set_text ("");
                 });
 
-            switch_to_display();
+            switch_to_display ();
 
-            realize.connect((w) => {
-                    bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel()).is_light_theme();
+            realize.connect ((w) => {
+                    bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
                     if (is_light_theme) {
-                        search_entry.get_style_context().add_class("remote_search_light_entry");
-                        search_label.get_style_context().add_class("remote_search_label_light");
+                        search_entry.get_style_context ().add_class ("remote_search_light_entry");
+                        search_label.get_style_context ().add_class ("remote_search_label_light");
                     } else {
-                        search_entry.get_style_context().add_class("remote_search_dark_entry");
-                        search_label.get_style_context().add_class("remote_search_label_dark");
+                        search_entry.get_style_context ().add_class ("remote_search_dark_entry");
+                        search_label.get_style_context ().add_class ("remote_search_label_dark");
                     }
                 });
 
-            button_press_event.connect((w, e) => {
-                    display_box.set_halign(Gtk.Align.START);
-                    display_box.remove(search_label);
+            button_press_event.connect ((w, e) => {
+                    display_box.set_halign (Gtk.Align.START);
+                    display_box.remove (search_label);
 
-                    this.translate_coordinates(search_image, 0, 0, out search_image_animate_start_x, null);
-                    search_image_animate_start_x = search_image_animate_start_x.abs() - search_image_margin_x;
+                    this.translate_coordinates (search_image, 0, 0, out search_image_animate_start_x, null);
+                    search_image_animate_start_x = search_image_animate_start_x.abs () - search_image_margin_x;
                     search_image.margin_start = search_image_margin_x + search_image_animate_start_x;
 
-                    timer.reset();
+                    timer.reset ();
 
                     return false;
                 });
 
-            key_press_event.connect((w, e) => {
-                    string keyname = Keymap.get_keyevent_name(e);
+            key_press_event.connect ((w, e) => {
+                    string keyname = Keymap.get_keyevent_name (e);
                     if (keyname == "Esc") {
-                        switch_to_display();
+                        switch_to_display ();
                     }
 
                     return false;
                 });
 
-            add(box);
+            add (box);
         }
 
-        public void on_animate(double progress) {
+        public void on_animate (double progress) {
             search_image.margin_start = search_image_margin_x + (int) (search_image_animate_start_x * (1.0 - progress));
 
             if (progress >= 1.0) {
-                timer.stop();
-                switch_to_input();
+                timer.stop ();
+                switch_to_input ();
             }
         }
 
-        public void switch_to_display() {
-            Utils.remove_all_children(box);
+        public void switch_to_display () {
+            Utils.remove_all_children (box);
 
             search_image.margin_start = 0;
-            display_box.pack_start(search_image, false, false, 0);
-            display_box.pack_start(search_label, false, false, 0);
-            display_box.set_halign(Gtk.Align.CENTER);
-            box.pack_start(display_box, true, true, 0);
+            display_box.pack_start (search_image, false, false, 0);
+            display_box.pack_start (search_label, false, false, 0);
+            display_box.set_halign (Gtk.Align.CENTER);
+            box.pack_start (display_box, true, true, 0);
 
-            show_all();
+            show_all ();
         }
 
-        public void switch_to_input() {
-             Utils.remove_all_children(box);
-             Utils.remove_all_children(display_box);
+        public void switch_to_input () {
+             Utils.remove_all_children (box);
+             Utils.remove_all_children (display_box);
 
-             box.pack_start(search_image, false, false, 0);
-             box.pack_start(search_entry, true, true, 0);
-             box.pack_start(clear_button, false, false, 0);
+             box.pack_start (search_image, false, false, 0);
+             box.pack_start (search_entry, true, true, 0);
+             box.pack_start (clear_button, false, false, 0);
 
              search_image.margin_start = search_image_margin_x;
-             search_entry.grab_focus();
+             search_entry.grab_focus ();
 
-             show_all();
+             show_all ();
         }
     }
 }

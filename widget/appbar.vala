@@ -26,8 +26,8 @@ using Widgets;
 
 [DBus (name = "com.deepin.terminal")]
 interface TerminalBus : Object {
-    public abstract void exit() throws Error;
-    public signal void quit();
+    public abstract void exit () throws Error;
+    public signal void quit ();
 }
 
 namespace Widgets {
@@ -52,17 +52,17 @@ namespace Widgets {
         public int titlebar_right_cache_width = 10;
         public int menu_button_width = Constant.WINDOW_BUTTON_WIDHT;
 
-        public signal void close_window();
-        public signal void exit_terminal();
-        public signal void quit_fullscreen();
+        public signal void close_window ();
+        public signal void exit_terminal ();
+        public signal void quit_fullscreen ();
 
-        public Appbar(TerminalApp app, Widgets.Window win, Tabbar tab_bar, WorkspaceManager manager, bool has_start) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+        public Appbar (TerminalApp app, Widgets.Window win, Tabbar tab_bar, WorkspaceManager manager, bool has_start) {
+            Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             window = win;
             workspace_manager = manager;
 
-            set_size_request(-1, height);
+            set_size_request (-1, height);
 
             if (has_start) {
                 // If has one terminal start,
@@ -70,218 +70,218 @@ namespace Widgets {
                 // all other terminals will quit when catch 'quit' signal that emit from *first* terminal.
                 TerminalBus bus = null;
                 try {
-                    bus = Bus.get_proxy_sync(
+                    bus = Bus.get_proxy_sync (
                         BusType.SESSION,
                         "com.deepin.terminal",
                         "/com/deepin/terminal");
-                    bus.quit.connect(() => {
-                            window.quit();
+                    bus.quit.connect (() => {
+                            window.quit ();
                         });
-                    exit_terminal.connect(() => {
+                    exit_terminal.connect (() => {
                             try {
-                                bus.exit();
+                                bus.exit ();
                             } catch (Error e) {
-                                stderr.printf("AppBar bus.ext: %s\n", e.message);
+                                stderr.printf ("AppBar bus.ext: %s\n", e.message);
                             }
                         });
                 } catch (Error e) {
-                    stderr.printf("AppBar bus own: %s\n", e.message);
+                    stderr.printf ("AppBar bus own: %s\n", e.message);
                 }
             } else {
                 // If current temrinal is *first* one,
                 // broadcast 'quit' signal to other terminals and quit itself.
-                exit_terminal.connect(() => {
-                        app.exit();
+                exit_terminal.connect(   () => {
+                        app.exit ();
                     });
             }
 
             tabbar = tab_bar;
 
-            window_button_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-            window_close_button_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+            window_button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            window_close_button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 
             // Hide all butons. Only right-click menu will be working
-            if (Utils.is_tiling_wm()) menu_button_width = 0;
+            if (Utils.is_tiling_wm(   )) menu_button_width = 0;
 
-            menu_button = new WindowButton("window_menu", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
-            min_button = new WindowButton("window_min", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
-            max_button = new WindowButton("window_max", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
-            unmax_button = new WindowButton("window_unmax", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
-            close_button = new WindowButton("window_close", true, menu_button_width + Constant.CLOSE_BUTTON_MARGIN_END, Constant.TITLEBAR_HEIGHT);
+            menu_button = new WindowButton ("window_menu", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
+            min_button = new WindowButton ("window_min", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
+            max_button = new WindowButton ("window_max", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
+            unmax_button = new WindowButton ("window_unmax", true, menu_button_width, Constant.TITLEBAR_HEIGHT);
+            close_button = new WindowButton ("window_close", true, menu_button_width + Constant.CLOSE_BUTTON_MARGIN_END, Constant.TITLEBAR_HEIGHT);
 
-            quit_fullscreen_button = new WindowButton("quit_fullscreen", true, Constant.WINDOW_BUTTON_WIDHT + Constant.CLOSE_BUTTON_MARGIN_END, Constant.TITLEBAR_HEIGHT);
+            quit_fullscreen_button = new WindowButton ("quit_fullscreen", true, Constant.WINDOW_BUTTON_WIDHT + Constant.CLOSE_BUTTON_MARGIN_END, Constant.TITLEBAR_HEIGHT);
 
-            close_button.clicked.connect((w) => {
-                    close_window();
+            close_button.clicked.connect ((w) => {
+                    close_window ();
                 });
-            quit_fullscreen_button.clicked.connect((w) => {
-                    quit_fullscreen();
+            quit_fullscreen_button.clicked.connect ((w) => {
+                    quit_fullscreen ();
                 });
 
-            menu_button.clicked.connect((b) => {
-                    focus_widget = ((Gtk.Window) menu_button.get_toplevel()).get_focus();
+            menu_button.clicked.connect ((b) => {
+                    focus_widget = ((Gtk.Window) menu_button.get_toplevel ()).get_focus ();
 
-                    var menu_content = new List<Menu.MenuItem>();
-                    menu_content.append(new Menu.MenuItem("new_window", _("New window")));
-                    menu_content.append(new Menu.MenuItem("switch_theme", _("Switch theme")));
-                    menu_content.append(new Menu.MenuItem("custom_commands", _("Custom commands")));
-                    menu_content.append(new Menu.MenuItem("remote_manage", _("Remote management")));
-                    menu_content.append(new Menu.MenuItem("", ""));
-                    menu_content.append(new Menu.MenuItem("preference", _("Settings")));
-                    menu_content.append(new Menu.MenuItem("about", _("About")));
-                    menu_content.append(new Menu.MenuItem("exit", _("Exit")));
+                    var menu_content = new List<Menu.MenuItem> ();
+                    menu_content.append (new Menu.MenuItem ("new_window", _("New window")));
+                    menu_content.append (new Menu.MenuItem ("switch_theme", _("Switch theme")));
+                    menu_content.append (new Menu.MenuItem ("custom_commands", _("Custom commands")));
+                    menu_content.append (new Menu.MenuItem ("remote_manage", _("Remote management")));
+                    menu_content.append (new Menu.MenuItem ("", ""));
+                    menu_content.append (new Menu.MenuItem ("preference", _("Settings")));
+                    menu_content.append (new Menu.MenuItem ("about", _("About")));
+                    menu_content.append (new Menu.MenuItem ("exit", _("Exit")));
 
                     int menu_x, menu_y;
-                    menu_button.translate_coordinates(menu_button.get_toplevel(), 0, 0, out menu_x, out menu_y);
+                    menu_button.translate_coordinates (menu_button.get_toplevel (), 0, 0, out menu_x, out menu_y);
                     Gtk.Allocation menu_rect;
-                    menu_button.get_allocation(out menu_rect);
+                    menu_button.get_allocation (out menu_rect);
                     int window_x, window_y;
-                    menu_button.get_toplevel().get_window().get_origin(out window_x, out window_y);
+                    menu_button.get_toplevel ().get_window ().get_origin (out window_x, out window_y);
 
-                    menu = new Menu.Menu();
-                    menu.click_item.connect(handle_menu_item_click);
-                    menu.destroy.connect(handle_menu_destroy);
-                    menu.popup_at_position(menu_content, window_x + menu_x, window_y + menu_y + menu_rect.height);
+                    menu = new Menu.Menu ();
+                    menu.click_item.connect (handle_menu_item_click);
+                    menu.destroy.connect (handle_menu_destroy);
+                    menu.popup_at_position (menu_content, window_x + menu_x, window_y + menu_y + menu_rect.height);
                 });
 
-            max_toggle_box = new Box(Gtk.Orientation.HORIZONTAL, 0);
+            max_toggle_box = new Box (Gtk.Orientation.HORIZONTAL, 0);
 
-            min_button.clicked.connect((w, e) => {
-                    ((Gtk.Window) w.get_toplevel()).iconify();
+            min_button.clicked.connect ((w, e) => {
+                    ((Gtk.Window) w.get_toplevel ()).iconify ();
                 });
-            max_button.clicked.connect((w, e) => {
-                    ((Gtk.Window) w.get_toplevel()).maximize();
+            max_button.clicked.connect ((w, e) => {
+                    ((Gtk.Window) w.get_toplevel ()).maximize ();
                 });
-            unmax_button.clicked.connect((w, e) => {
-                    ((Gtk.Window) w.get_toplevel()).unmaximize();
+            unmax_button.clicked.connect ((w, e) => {
+                    ((Gtk.Window) w.get_toplevel ()).unmaximize ();
                 });
 
-            Box box = new Box(Gtk.Orientation.HORIZONTAL, 0);
+            Box box = new Box (Gtk.Orientation.HORIZONTAL, 0);
 
-            var logo_box = new Box(Gtk.Orientation.VERTICAL, 0);
-            logo_box.set_size_request(logo_width, Constant.TITLEBAR_HEIGHT);
-            Gtk.Image logo_image = new Gtk.Image.from_file(Utils.get_image_path("title_icon.svg"));
-            logo_box.pack_start(logo_image, true, true, 0);
-            box.pack_start(logo_box, false, false, 0);
+            var logo_box = new Box (Gtk.Orientation.VERTICAL, 0);
+            logo_box.set_size_request (logo_width, Constant.TITLEBAR_HEIGHT);
+            Gtk.Image logo_image = new Gtk.Image.from_file (Utils.get_image_path ("title_icon.svg"));
+            logo_box.pack_start (logo_image, true, true, 0);
+            box.pack_start (logo_box, false, false, 0);
 
-            max_toggle_box.add(max_button);
+            max_toggle_box.add (max_button);
 
-            box.pack_start(tabbar, true, true, 0);
-            var cache_area = new Gtk.EventBox();
-            cache_area.set_size_request(titlebar_right_cache_width, -1);
-            box.pack_start(cache_area, false, false, 0);
-            box.pack_start(window_button_box, false, false, 0);
-            box.pack_start(window_close_button_box, false, false, 0);
+            box.pack_start (tabbar, true, true, 0);
+            var cache_area = new Gtk.EventBox ();
+            cache_area.set_size_request (titlebar_right_cache_width, -1);
+            box.pack_start (cache_area, false, false, 0);
+            box.pack_start (window_button_box, false, false, 0);
+            box.pack_start (window_close_button_box, false, false, 0);
 
-            show_window_button();
+            show_window_button ();
 
-            event_area = new Widgets.WindowEventArea(this);
+            event_area = new Widgets.WindowEventArea (this);
             // Don't override window button area.
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH * 4;
             event_area.filter_double_click_callback = ((x, y) => {
                     int tabbar_x, tabbar_y;
-                    this.translate_coordinates(tabbar, x, y, out tabbar_x, out tabbar_y);
+                    this.translate_coordinates (tabbar, x, y, out tabbar_x, out tabbar_y);
 
-                    return tabbar.is_at_tab_close_button((int) tabbar_x) != -1;
+                    return tabbar.is_at_tab_close_button ((int) tabbar_x) != -1;
                 });
 
-            add(box);
-            add_overlay(event_area);
+            add (box);
+            add_overlay (event_area);
 
-            Gdk.RGBA background_color = Gdk.RGBA();
+            Gdk.RGBA background_color = Gdk.RGBA ();
 
-            box.draw.connect((w, cr) => {
+            box.draw.connect ((w, cr) => {
                     Gtk.Allocation rect;
-                    w.get_allocation(out rect);
+                    w.get_allocation (out rect);
 
                     try {
-                        background_color = Utils.hex_to_rgba(window.config.config_file.get_string("theme", "background"));
-                        if (window.window_is_fullscreen()) {
-                            cr.set_source_rgba(background_color.red, background_color.green, background_color.blue, 0.8);
+                        background_color = Utils.hex_to_rgba (window.config.config_file.get_string ("theme", "background"));
+                        if (window.window_is_fullscreen ()) {
+                            cr.set_source_rgba (background_color.red, background_color.green, background_color.blue, 0.8);
                         } else {
-                            cr.set_source_rgba(background_color.red, background_color.green, background_color.blue, window.config.config_file.get_double("general", "opacity"));
+                            cr.set_source_rgba (background_color.red, background_color.green, background_color.blue, window.config.config_file.get_double ("general", "opacity"));
                         }
-                        Draw.draw_rectangle(cr, 0, 0, rect.width, Constant.TITLEBAR_HEIGHT);
+                        Draw.draw_rectangle (cr, 0, 0, rect.width, Constant.TITLEBAR_HEIGHT);
                     } catch (Error e) {
-                        print("Main window: %s\n", e.message);
+                        print ("Main window: %s\n", e.message);
                     }
 
-                    Utils.propagate_draw((Container) w, cr);
+                    Utils.propagate_draw ((Container) w, cr);
 
                     return true;
                 });
         }
 
-        public void show_window_button() {
-            window_button_box.pack_start(menu_button, false, false, 0);
-            window_button_box.pack_start(min_button, false, false, 0);
-            window_button_box.pack_start(max_toggle_box, false, false, 0);
+        public void show_window_button () {
+            window_button_box.pack_start (menu_button, false, false, 0);
+            window_button_box.pack_start (min_button, false, false, 0);
+            window_button_box.pack_start (max_toggle_box, false, false, 0);
 
-            Utils.remove_all_children(window_close_button_box);
-            window_close_button_box.pack_start(close_button, false, false, 0);
+            Utils.remove_all_children (window_close_button_box);
+            window_close_button_box.pack_start (close_button, false, false, 0);
 
-            show_all();
+            show_all ();
         }
 
-        public void hide_window_button() {
-            Utils.remove_all_children(window_button_box);
-            Utils.remove_all_children(window_close_button_box);
+        public void hide_window_button () {
+            Utils.remove_all_children (window_button_box);
+            Utils.remove_all_children (window_close_button_box);
 
-            window_close_button_box.pack_start(quit_fullscreen_button, false, false, 0);
+            window_close_button_box.pack_start (quit_fullscreen_button, false, false, 0);
         }
 
-        public void handle_menu_item_click(string item_id) {
-            switch(item_id) {
+        public void handle_menu_item_click (string item_id) {
+            switch (item_id) {
                 case "new_window":
                     try {
-                        GLib.AppInfo appinfo = GLib.AppInfo.create_from_commandline("deepin-terminal-gtk", null, GLib.AppInfoCreateFlags.NONE);
-                        appinfo.launch(null, null);
+                        GLib.AppInfo appinfo = GLib.AppInfo.create_from_commandline ("deepin-terminal-gtk", null, GLib.AppInfoCreateFlags.NONE);
+                        appinfo.launch (null, null);
                     } catch (GLib.Error e) {
-                        print("Appbar menu item 'new window': %s\n", e.message);
+                        print ("Appbar menu item 'new window': %s\n", e.message);
                     }
                     break;
                 case "custom_commands":
-                    workspace_manager.focus_workspace.show_command_panel(workspace_manager.focus_workspace);
+                    workspace_manager.focus_workspace.show_command_panel (workspace_manager.focus_workspace);
                     break;
                 case "remote_manage":
-                    workspace_manager.focus_workspace.show_remote_panel(workspace_manager.focus_workspace);
+                    workspace_manager.focus_workspace.show_remote_panel (workspace_manager.focus_workspace);
                     break;
                 case "switch_theme":
-                    workspace_manager.focus_workspace.show_theme_panel(workspace_manager.focus_workspace);
+                    workspace_manager.focus_workspace.show_theme_panel (workspace_manager.focus_workspace);
                     break;
                 case "about":
-                    var dialog = new AboutDialog(focus_widget);
-                    dialog.transient_for_window((Widgets.ConfigWindow) this.get_toplevel());
+                    var dialog = new AboutDialog (focus_widget);
+                    dialog.transient_for_window ((Widgets.ConfigWindow) this.get_toplevel ());
                     break;
                 case "exit":
                     // This just call exit_terminal signal, how to exit terminal looks signal exit_terminal's hooks that define at current class.
-                    exit_terminal();
+                    exit_terminal(   );
                     break;
                 case "preference":
-                    var preference = new Widgets.Preference((Widgets.ConfigWindow) this.get_toplevel(), ((Gtk.Window) this.get_toplevel()).get_focus());
-                    preference.transient_for_window((Widgets.ConfigWindow) this.get_toplevel());
+                    var preference = new Widgets.Preference ((Widgets.ConfigWindow) this.get_toplevel (), ((Gtk.Window) this.get_toplevel ()).get_focus ());
+                    preference.transient_for_window ((Widgets.ConfigWindow) this.get_toplevel ());
                     break;
             }
         }
 
-        public void handle_menu_destroy() {
+        public void handle_menu_destroy () {
             menu = null;
 
             if (focus_widget != null) {
-                focus_widget.grab_focus();
+                focus_widget.grab_focus ();
             }
         }
 
-        public void update_max_button() {
-            Utils.remove_all_children(max_toggle_box);
+        public void update_max_button () {
+            Utils.remove_all_children (max_toggle_box);
 
-            if (((Widgets.Window) get_toplevel()).window_is_max()) {
-                max_toggle_box.add(unmax_button);
+            if (((Widgets.Window) get_toplevel ()).window_is_max ()) {
+                max_toggle_box.add (unmax_button);
             } else {
-                max_toggle_box.add(max_button);
+                max_toggle_box.add (max_button);
             }
 
-            max_toggle_box.show_all();
+            max_toggle_box.show_all ();
         }
     }
 }

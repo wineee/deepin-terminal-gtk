@@ -47,118 +47,118 @@ namespace Widgets {
         public int theme_list_margin_top = 5;
         public int width = Constant.THEME_SLIDER_WIDTH;
 
-        public delegate void UpdatePageAfterEdit();
+        public delegate void UpdatePageAfterEdit ();
 
-        public ThemePanel(Workspace space, WorkspaceManager manager) {
-            Intl.bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+        public ThemePanel (Workspace space, WorkspaceManager manager) {
+            Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace = space;
             workspace_manager = manager;
 
-            config_file = new KeyFile();
+            config_file = new KeyFile ();
 
-            line_dark_color = Utils.hex_to_rgba("#ffffff", 0.1);
-            line_light_color = Utils.hex_to_rgba("#000000", 0.1);
+            line_dark_color = Utils.hex_to_rgba ("#ffffff", 0.1);
+            line_light_color = Utils.hex_to_rgba ("#000000", 0.1);
 
-            focus_widget = ((Gtk.Window) workspace.get_toplevel()).get_focus();
-            parent_window = (Widgets.ConfigWindow) workspace.get_toplevel();
+            focus_widget = ((Gtk.Window) workspace.get_toplevel ()).get_focus ();
+            parent_window = (Widgets.ConfigWindow) workspace.get_toplevel ();
 
-            switcher = new Widgets.Switcher(width);
+            switcher = new Widgets.Switcher (width);
 
-            home_page_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+            home_page_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 
-            set_size_request(width, -1);
-            home_page_box.set_size_request(width, -1);
+            set_size_request (width, -1);
+            home_page_box.set_size_request (width, -1);
 
-            pack_start(switcher, true, true, 0);
+            pack_start (switcher, true, true, 0);
 
-            show_home_page();
+            show_home_page ();
 
-            draw.connect(on_draw);
+            draw.connect (on_draw);
         }
 
-        private bool on_draw(Gtk.Widget widget, Cairo.Context cr) {
-            bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel()).is_light_theme();
+        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
+            bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
 
             Gtk.Allocation rect;
-            widget.get_allocation(out rect);
+            widget.get_allocation (out rect);
 
             try {
-                background_color = Utils.hex_to_rgba(parent_window.config.config_file.get_string("theme", "background"));
+                background_color = Utils.hex_to_rgba (parent_window.config.config_file.get_string ("theme", "background"));
             } catch (Error e) {
-                print("ThemePanel init: %s\n", e.message);
+                print ("ThemePanel init: %s\n", e.message);
             }
-            cr.set_source_rgba(background_color.red, background_color.green, background_color.blue, 0.8);
-            Draw.draw_rectangle(cr, 1, 0, rect.width - 1, rect.height);
+            cr.set_source_rgba (background_color.red, background_color.green, background_color.blue, 0.8);
+            Draw.draw_rectangle (cr, 1, 0, rect.width - 1, rect.height);
 
             if (is_light_theme) {
-                Utils.set_context_color(cr, line_light_color);
+                Utils.set_context_color (cr, line_light_color);
             } else {
-                Utils.set_context_color(cr, line_dark_color);
+                Utils.set_context_color (cr, line_dark_color);
             }
-            Draw.draw_rectangle(cr, 0, 0, 1, rect.height);
+            Draw.draw_rectangle (cr, 0, 0, 1, rect.height);
 
             return false;
         }
 
-        public void show_home_page(Gtk.Widget? start_widget=null) {
+        public void show_home_page (Gtk.Widget? start_widget=null) {
             try {
-                scrolledwindow = new ScrolledWindow(null, null);
-                scrolledwindow.get_style_context().add_class("scrolledwindow");
-                scrolledwindow.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
-                scrolledwindow.set_shadow_type(Gtk.ShadowType.NONE);
-                scrolledwindow.get_vscrollbar().get_style_context().add_class("light_scrollbar");
-                home_page_box.pack_start(scrolledwindow, true, true, 0);
+                scrolledwindow = new ScrolledWindow (null, null);
+                scrolledwindow.get_style_context ().add_class ("scrolledwindow");
+                scrolledwindow.set_policy (Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
+                scrolledwindow.set_shadow_type (Gtk.ShadowType.NONE);
+                scrolledwindow.get_vscrollbar ().get_style_context ().add_class ("light_scrollbar");
+                home_page_box.pack_start (scrolledwindow, true, true, 0);
 
-                realize.connect((w) => {
-                        init_scrollbar();
+                realize.connect ((w) => {
+                        init_scrollbar ();
                     });
 
-                var theme_name = parent_window.config.config_file.get_string("general", "theme");
-                var theme_list = new ThemeList(theme_name);
+                var theme_name = parent_window.config.config_file.get_string ("general", "theme");
+                var theme_list = new ThemeList (theme_name);
                 theme_list.margin_top = theme_list_margin_top;
                 theme_list.margin_bottom = theme_list_margin_bottom;
-                theme_list.active_theme.connect((active_theme_name) => {
-                        parent_window.config.set_theme(active_theme_name);
+                theme_list.active_theme.connect ((active_theme_name) => {
+                        parent_window.config.set_theme (active_theme_name);
 
-                        init_scrollbar();
+                        init_scrollbar ();
 
-                        queue_draw();
+                        queue_draw ();
                     });
 
-                scrolledwindow.add(theme_list);
+                scrolledwindow.add (theme_list);
 
-                switcher.add_to_left_box(home_page_box);
+                switcher.add_to_left_box (home_page_box);
 
-                show.connect((w) => {
-                        GLib.Timeout.add(100, () => {
+                show.connect ((w) => {
+                        GLib.Timeout.add (100, () => {
                                 int widget_x, widget_y;
-                                theme_list.active_theme_button.translate_coordinates(theme_list, 0, 0, out widget_x, out widget_y);
+                                theme_list.active_theme_button.translate_coordinates (theme_list, 0, 0, out widget_x, out widget_y);
 
                                 Gtk.Allocation rect;
-                                get_allocation(out rect);
+                                get_allocation (out rect);
 
-                                var adjust = scrolledwindow.get_vadjustment();
-                                adjust.set_value(widget_y - (rect.height - Constant.THEME_BUTTON_HEIGHT) / 2);
+                                var adjust = scrolledwindow.get_vadjustment ();
+                                adjust.set_value (widget_y - (rect.height - Constant.THEME_BUTTON_HEIGHT) / 2);
 
                                 return false;
                             });
                     });
 
-                show_all();
+                show_all ();
             } catch (Error e) {
-                print("ThemePanel show_home_page: %s\n", e.message);
+                print ("ThemePanel show_home_page: %s\n", e.message);
             }
         }
 
-        public void init_scrollbar() {
-            scrolledwindow.get_vscrollbar().get_style_context().remove_class("light_scrollbar");
-            scrolledwindow.get_vscrollbar().get_style_context().remove_class("dark_scrollbar");
-            bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel()).is_light_theme();
+        public void init_scrollbar () {
+            scrolledwindow.get_vscrollbar ().get_style_context ().remove_class ("light_scrollbar");
+            scrolledwindow.get_vscrollbar ().get_style_context ().remove_class ("dark_scrollbar");
+            bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
             if (is_light_theme) {
-                scrolledwindow.get_vscrollbar().get_style_context().add_class("light_scrollbar");
+                scrolledwindow.get_vscrollbar ().get_style_context ().add_class ("light_scrollbar");
             } else {
-                scrolledwindow.get_vscrollbar().get_style_context().add_class("dark_scrollbar");
+                scrolledwindow.get_vscrollbar ().get_style_context ().add_class ("dark_scrollbar");
             }
         }
     }

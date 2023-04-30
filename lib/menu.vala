@@ -29,151 +29,151 @@ namespace Menu {
         public string menu_item_text;
         public List<MenuItem> menu_item_submenu;
 
-        public MenuItem(string item_id, string item_text) {
+        public MenuItem (string item_id, string item_text) {
             menu_item_id = item_id;
             menu_item_text = item_text;
 
-            menu_item_submenu = new List<MenuItem>();
+            menu_item_submenu = new List<MenuItem> ();
         }
 
-        public void add_submenu_item(MenuItem item) {
-            menu_item_submenu.append(item);
+        public void add_submenu_item (MenuItem item) {
+            menu_item_submenu.append (item);
         }
     }
 
     public class Menu : Object {
         private bool inited = false;
 
-        public signal void click_item(string item_id);
-        public signal void destroy();
+        public signal void click_item (string item_id);
+        public signal void destroy ();
 
-        public Menu() {}
+        public Menu () {}
 
-        private void init() {
+        private void init () {
             if (inited) return;
 
             inited = true;
         }
 
-        public void popup_at_position(List<MenuItem> menu_content, int x, int y) {
-            init();
-            show_gtk_menu_at_pointer(menu_content);
+        public void popup_at_position (List<MenuItem> menu_content, int x, int y) {
+            init ();
+            show_gtk_menu_at_pointer (menu_content);
         }
 
-        private Gtk.Menu create_gtk_menu(List<MenuItem> menu_content) {
-            Gdk.Screen screen = Gdk.Screen.get_default();
-            CssProvider provider = new Gtk.CssProvider();
+        private Gtk.Menu create_gtk_menu (List<MenuItem> menu_content) {
+            Gdk.Screen screen = Gdk.Screen.get_default ();
+            CssProvider provider = new Gtk.CssProvider ();
             try {
-                provider.load_from_data(Utils.get_menu_css());
+                provider.load_from_data (Utils.get_menu_css ());
             } catch (GLib.Error e) {
-                    warning("Something bad happened with CSS load %s", e.message);
+                    warning ("Something bad happened with CSS load %s", e.message);
             }
-            Gtk.StyleContext.add_provider_for_screen(screen,provider,Gtk.STYLE_PROVIDER_PRIORITY_USER);
-            Gtk.Menu result = new Gtk.Menu();
-            
+            Gtk.StyleContext.add_provider_for_screen (screen,provider,Gtk.STYLE_PROVIDER_PRIORITY_USER);
+            Gtk.Menu result = new Gtk.Menu ();
+
             foreach (unowned MenuItem menu_item in menu_content) {
-                var item = create_gtk_menu_item(menu_item.menu_item_id, menu_item.menu_item_text);
-                if (menu_item.menu_item_submenu.length() > 0) {
-                    Gtk.Menu submenu = create_gtk_menu(menu_item.menu_item_submenu);
-                    item.set_submenu(submenu);
+                var item = create_gtk_menu_item (menu_item.menu_item_id, menu_item.menu_item_text);
+                if (menu_item.menu_item_submenu.length () > 0) {
+                    Gtk.Menu submenu = create_gtk_menu (menu_item.menu_item_submenu);
+                    item.set_submenu (submenu);
                 }
-                result.append(item);
+                result.append (item);
             }
 
             return result;
         }
 
-        private Gtk.MenuItem create_gtk_menu_item(string item_id, string item_text) {
-            Gtk.MenuItem item = (item_text == "") ? new Gtk.SeparatorMenuItem() : new Gtk.MenuItem.with_label(item_text);
+        private Gtk.MenuItem create_gtk_menu_item (string item_id, string item_text) {
+            Gtk.MenuItem item = (item_text == "") ? new Gtk.SeparatorMenuItem(   ) : new Gtk.MenuItem.with_label(   item_text);
 
-            item.activate.connect(() => { 
-                click_item(item_id); 
+            item.activate.connect (() => {
+                click_item (item_id);
             });
 
             return item;
         }
 
-        private void show_gtk_menu_at_pointer(List<MenuItem> menu_content) {
-            var gtk_menu = create_gtk_menu(menu_content);
-            gtk_menu.show_all();
-            gtk_menu.popup_at_pointer();
+        private void show_gtk_menu_at_pointer (List<MenuItem> menu_content) {
+            var gtk_menu = create_gtk_menu (menu_content);
+            gtk_menu.show_all ();
+            gtk_menu.popup_at_pointer ();
         }
 
-        private string get_items_node(List<MenuItem> menu_content) {
-            Json.Builder builder = new Json.Builder();
+        private string get_items_node (List<MenuItem> menu_content) {
+            Json.Builder builder = new Json.Builder ();
 
-            builder.begin_object();
+            builder.begin_object ();
 
-            builder.set_member_name("items");
+            builder.set_member_name ("items");
             builder.begin_array ();
             foreach (MenuItem item in menu_content) {
-                builder.add_value(get_item_node(item));
+                builder.add_value (get_item_node (item));
             }
             builder.end_array ();
 
             builder.end_object ();
 
-            Json.Generator generator = new Json.Generator();
-            generator.set_root(builder.get_root());
+            Json.Generator generator = new Json.Generator ();
+            generator.set_root (builder.get_root ());
 
-            return generator.to_data(null);
+            return generator.to_data (null);
         }
 
-        private Json.Node get_item_node(MenuItem item) {
-            Json.Builder builder = new Json.Builder();
+        private Json.Node get_item_node (MenuItem item) {
+            Json.Builder builder = new Json.Builder ();
 
-            builder.begin_object();
+            builder.begin_object ();
 
-            builder.set_member_name("itemId");
-            builder.add_string_value(item.menu_item_id);
+            builder.set_member_name ("itemId");
+            builder.add_string_value (item.menu_item_id);
 
-            builder.set_member_name("itemText");
-            builder.add_string_value(item.menu_item_text);
+            builder.set_member_name ("itemText");
+            builder.add_string_value (item.menu_item_text);
 
-            builder.set_member_name("itemIcon");
-            builder.add_string_value("");
+            builder.set_member_name ("itemIcon");
+            builder.add_string_value ("");
 
-            builder.set_member_name("itemIconHover");
-            builder.add_string_value("");
+            builder.set_member_name ("itemIconHover");
+            builder.add_string_value ("");
 
-            builder.set_member_name("itemIconInactive");
-            builder.add_string_value("");
+            builder.set_member_name ("itemIconInactive");
+            builder.add_string_value ("");
 
-            builder.set_member_name("itemExtra");
-            builder.add_string_value("");
+            builder.set_member_name ("itemExtra");
+            builder.add_string_value ("");
 
-            builder.set_member_name("isActive");
-            builder.add_boolean_value(true);
+            builder.set_member_name ("isActive");
+            builder.add_boolean_value (true);
 
-            builder.set_member_name("checked");
-            builder.add_boolean_value(false);
+            builder.set_member_name ("checked");
+            builder.add_boolean_value (false);
 
-            builder.set_member_name("itemSubMenu");
+            builder.set_member_name ("itemSubMenu");
             unowned List<MenuItem> submenu_items = item.menu_item_submenu;
 
-            if (submenu_items.length() == 0) {
-                builder.add_null_value();
+            if (submenu_items.length () == 0) {
+                builder.add_null_value ();
             } else {
-                Json.Builder _builder = new Json.Builder();
+                Json.Builder _builder = new Json.Builder ();
 
                 _builder.begin_object ();
 
-                _builder.set_member_name("items");
+                _builder.set_member_name ("items");
 
                 _builder.begin_array ();
                 foreach (MenuItem _item in submenu_items) {
-                    _builder.add_value(get_item_node(_item));
+                    _builder.add_value (get_item_node (_item));
                 }
                 _builder.end_array ();
 
                 _builder.end_object ();
 
-                builder.add_value(_builder.get_root());
+                builder.add_value (_builder.get_root ());
             }
 
             builder.end_object ();
 
-            return builder.get_root();
+            return builder.get_root ();
         }
     }
 }

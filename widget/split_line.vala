@@ -27,21 +27,21 @@ namespace Widgets {
     public class SplitLine : Gtk.Box {
         public int split_line_margin_start = 1;
 
-        public SplitLine() {
+        public SplitLine () {
             margin_start = split_line_margin_start;
-            set_size_request(-1, 1);
+            set_size_request (-1, 1);
 
-            draw.connect((w, cr) => {
+            draw.connect ((w, cr) => {
                     Gtk.Allocation rect;
-                    w.get_allocation(out rect);
+                    w.get_allocation (out rect);
 
-                    bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel()).is_light_theme();
+                    bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
                     if (is_light_theme) {
-                        cr.set_source_rgba(0, 0, 0, 0.1);
+                        cr.set_source_rgba (0, 0, 0, 0.1);
                     } else {
-                        cr.set_source_rgba(1, 1, 1, 0.1);
+                        cr.set_source_rgba (1, 1, 1, 0.1);
                     }
-                    Draw.draw_rectangle(cr, 0, 0, rect.width, 1);
+                    Draw.draw_rectangle (cr, 0, 0, rect.width, 1);
 
                     return true;
                 });

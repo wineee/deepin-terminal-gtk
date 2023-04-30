@@ -55,10 +55,10 @@ namespace Widgets {
         public int width = Constant.SLIDER_WIDTH;
         public string title;
 
-        public signal void show_group_servers(string group_name);
+        public signal void show_group_servers (string group_name);
 
-        public ServerGroupButton(string server_title, int number) {
-            this.add_events(Gdk.EventMask.BUTTON_PRESS_MASK
+        public ServerGroupButton (string server_title, int number) {
+            this.add_events (Gdk.EventMask.BUTTON_PRESS_MASK
                             | Gdk.EventMask.BUTTON_RELEASE_MASK
                             | Gdk.EventMask.POINTER_MOTION_MASK
                             | Gdk.EventMask.LEAVE_NOTIFY_MASK);
@@ -66,108 +66,108 @@ namespace Widgets {
             title = server_title;
             server_number = number;
 
-            server_group_dark_surface = Utils.create_image_surface("server_group_dark.svg");
-            server_group_light_surface = Utils.create_image_surface("server_group_light.svg");
-            arrow_dark_surface = Utils.create_image_surface("list_arrow_dark.svg");
-            arrow_light_surface = Utils.create_image_surface("list_arrow_light.svg");
+            server_group_dark_surface = Utils.create_image_surface ("server_group_dark.svg");
+            server_group_light_surface = Utils.create_image_surface ("server_group_light.svg");
+            arrow_dark_surface = Utils.create_image_surface ("list_arrow_dark.svg");
+            arrow_light_surface = Utils.create_image_surface ("list_arrow_light.svg");
 
-            title_dark_color = Utils.hex_to_rgba("#FFFFFF");
-            content_dark_color = Utils.hex_to_rgba("#FFFFFF", 0.5);
-            press_dark_color = Utils.hex_to_rgba("#FFFFFF", 0.1);
-            hover_dark_color = Utils.hex_to_rgba("#FFFFFF", 0.1);
-            title_light_color = Utils.hex_to_rgba("#303030");
-            content_light_color = Utils.hex_to_rgba("#000000", 0.5);
-            press_light_color = Utils.hex_to_rgba("#000000", 0.1);
-            hover_light_color = Utils.hex_to_rgba("#000000", 0.1);
-            line_dark_color = Utils.hex_to_rgba("#ffffff", 0.05);
-            line_light_color = Utils.hex_to_rgba("#000000", 0.05);
+            title_dark_color = Utils.hex_to_rgba ("#FFFFFF");
+            content_dark_color = Utils.hex_to_rgba ("#FFFFFF", 0.5);
+            press_dark_color = Utils.hex_to_rgba ("#FFFFFF", 0.1);
+            hover_dark_color = Utils.hex_to_rgba ("#FFFFFF", 0.1);
+            title_light_color = Utils.hex_to_rgba ("#303030");
+            content_light_color = Utils.hex_to_rgba ("#000000", 0.5);
+            press_light_color = Utils.hex_to_rgba ("#000000", 0.1);
+            hover_light_color = Utils.hex_to_rgba ("#000000", 0.1);
+            line_dark_color = Utils.hex_to_rgba ("#ffffff", 0.05);
+            line_light_color = Utils.hex_to_rgba ("#000000", 0.05);
 
-            set_size_request(width, height);
+            set_size_request (width, height);
 
-            draw.connect(on_draw);
-            enter_notify_event.connect((w, e) => {
+            draw.connect (on_draw);
+            enter_notify_event.connect ((w, e) => {
                     is_hover = true;
-                    queue_draw();
+                    queue_draw ();
 
                     return false;
                 });
-            leave_notify_event.connect((w, e) => {
+            leave_notify_event.connect ((w, e) => {
                     is_hover = false;
-                    queue_draw();
+                    queue_draw ();
 
                     return false;
                 });
-            button_press_event.connect((w, e) => {
-                    queue_draw();
+            button_press_event.connect ((w, e) => {
+                    queue_draw ();
 
                     return false;
                 });
-            button_release_event.connect((w, e) => {
+            button_release_event.connect ((w, e) => {
                     is_hover = false;
-                    queue_draw();
+                    queue_draw ();
 
                     return false;
                 });
-            clicked.connect((w, e) => {
-                    show_group_servers(server_title);
+            clicked.connect ((w, e) => {
+                    show_group_servers (server_title);
                 });
         }
 
-        private bool on_draw(Gtk.Widget widget, Cairo.Context cr) {
-            bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel()).is_light_theme();
+        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
+            bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
 
             if (is_light_theme) {
-                Draw.draw_surface(cr, server_group_light_surface, image_x, 0, 0, height);
-                Draw.draw_surface(cr, arrow_light_surface, arrow_x, 0, 0, height);
+                Draw.draw_surface (cr, server_group_light_surface, image_x, 0, 0, height);
+                Draw.draw_surface (cr, arrow_light_surface, arrow_x, 0, 0, height);
             } else {
-                Draw.draw_surface(cr, server_group_dark_surface, image_x, 0, 0, height);
-                Draw.draw_surface(cr, arrow_dark_surface, arrow_x, 0, 0, height);
+                Draw.draw_surface (cr, server_group_dark_surface, image_x, 0, 0, height);
+                Draw.draw_surface (cr, arrow_dark_surface, arrow_x, 0, 0, height);
             }
 
 
             if (is_light_theme) {
-                Utils.set_context_color(cr, title_light_color);
+                Utils.set_context_color (cr, title_light_color);
             } else {
-                Utils.set_context_color(cr, title_dark_color);
+                Utils.set_context_color (cr, title_dark_color);
             }
-            Draw.draw_text(cr, title, text_x, title_y, text_width, height, title_size, Pango.Alignment.LEFT, "top");
+            Draw.draw_text (cr, title, text_x, title_y, text_width, height, title_size, Pango.Alignment.LEFT, "top");
 
             if (is_light_theme) {
-                Utils.set_context_color(cr, content_light_color);
+                Utils.set_context_color (cr, content_light_color);
             } else {
-                Utils.set_context_color(cr, content_dark_color);
+                Utils.set_context_color (cr, content_dark_color);
             }
             string content;
             if (server_number > 1) {
-                content = "%i servers".printf(server_number);
+                content = "%i servers".printf(   server_number);
             } else {
                 content = "1 server";
             }
-            Draw.draw_text(cr, content, text_x, content_y, text_width, height, content_size, Pango.Alignment.LEFT, "top");
+            Draw.draw_text (cr, content, text_x, content_y, text_width, height, content_size, Pango.Alignment.LEFT, "top");
 
             if (display_bottom_line) {
                  if (is_light_theme) {
-                    Utils.set_context_color(cr, line_light_color);
+                    Utils.set_context_color (cr, line_light_color);
                 } else {
-                    Utils.set_context_color(cr, line_dark_color);
+                    Utils.set_context_color (cr, line_dark_color);
                 }
-                Draw.draw_rectangle(cr, 8, height - 1, width - 16, 1);
+                Draw.draw_rectangle (cr, 8, height - 1, width - 16, 1);
             }
 
             if (is_press) {
                 if (is_light_theme) {
-                    Utils.set_context_color(cr, press_light_color);
+                    Utils.set_context_color (cr, press_light_color);
                 } else {
-                    Utils.set_context_color(cr, content_dark_color);
+                    Utils.set_context_color (cr, content_dark_color);
                 }
-                Draw.draw_rectangle(cr, 0, 0, width, height);
+                Draw.draw_rectangle (cr, 0, 0, width, height);
             } else if (is_hover) {
                 if (is_light_theme) {
-                    Utils.set_context_color(cr, hover_light_color);
+                    Utils.set_context_color (cr, hover_light_color);
                 } else {
-                    Utils.set_context_color(cr, hover_dark_color);
+                    Utils.set_context_color (cr, hover_dark_color);
                 }
-                Draw.draw_rectangle(cr, 0, 0, width, height);
+                Draw.draw_rectangle (cr, 0, 0, width, height);
             }
 
             return true;

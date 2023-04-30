@@ -26,17 +26,17 @@ using Widgets;
 
 namespace Widgets {
     public class CommandButton : Widgets.PanelButton {
-        public signal void edit_command(string command_name);
-        public signal void execute_command(string command_value);
+        public signal void edit_command (string command_name);
+        public signal void execute_command (string command_value);
 
-        public CommandButton(string name, string value, string shortcut) {
-            base(GLib.Markup.escape_text(name), shortcut, null, "command");
+        public CommandButton (string name, string value, string shortcut) {
+            base (GLib.Markup.escape_text (name), shortcut, null, "command");
 
-            click_edit_button.connect((w) => {
-                    edit_command(name);
+            click_edit_button.connect ((w) => {
+                    edit_command (name);
                 });
-            click_button.connect((w) => {
-                    execute_command(value);
+            click_button.connect ((w) => {
+                    execute_command (value);
                 });
         }
     }

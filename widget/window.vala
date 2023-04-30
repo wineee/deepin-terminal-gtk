@@ -52,31 +52,31 @@ namespace Widgets {
         public int window_widget_margin_start = 2;
         public int window_widget_margin_top = 1;
         public int window_width;
-        
+
         private Widgets.ResizeGrip resize_grip;
 
-        public Window(string? window_mode) {
-            tabbar_at_the_bottom = config.config_file.get_boolean("advanced", "tabbar_at_the_bottom");
-            transparent_window();
-            init_window();
+        public Window (string? window_mode) {
+            tabbar_at_the_bottom = config.config_file.get_boolean ("advanced", "tabbar_at_the_bottom");
+            transparent_window ();
+            init_window ();
 
-            int monitor = config.get_terminal_monitor();
+            int monitor = config.get_terminal_monitor ();
             Gdk.Rectangle rect;
-            screen.get_monitor_geometry(monitor, out rect);
+            screen.get_monitor_geometry (monitor, out rect);
 
             if (tabbar_at_the_bottom)
                 window_fullscreen_monitor_height = rect.height - window_fullscreen_monitor_height;
 
-            Gdk.Geometry geo = Gdk.Geometry();
+            Gdk.Geometry geo = Gdk.Geometry ();
             geo.min_width = rect.width / 3;
             geo.min_height = rect.height / 3;
-            this.set_geometry_hints(null, geo, Gdk.WindowHints.MIN_SIZE);
+            this.set_geometry_hints (null, geo, Gdk.WindowHints.MIN_SIZE);
 
-            top_line_dark_color = Utils.hex_to_rgba("#000000", 0.2);
-            top_line_light_color = Utils.hex_to_rgba("#ffffff", 0.2);
+            top_line_dark_color = Utils.hex_to_rgba ("#000000", 0.2);
+            top_line_light_color = Utils.hex_to_rgba ("#ffffff", 0.2);
 
             // Shadow around window will be hidden
-            if (Utils.is_tiling_wm())  {
+            if (Utils.is_tiling_wm(   ))  {
                 window_frame_margin_top = 0;
                 window_frame_margin_bottom = 0;
                 window_frame_margin_start = 0;
@@ -93,120 +93,120 @@ namespace Widgets {
             window_widget_box.margin_start = 2;
             window_widget_box.margin_end = 2;
 
-            realize.connect((w) => {
+            realize.connect ((w) => {
                     try {
                         string window_state = "";
                         string[] window_modes = {"normal", "maximize", "fullscreen"};
                         if (window_mode != null && window_mode in window_modes) {
                             window_state = window_mode;
                         } else {
-                            window_state = config.config_file.get_value("advanced", "use_on_starting");
+                            window_state = config.config_file.get_value ("advanced", "use_on_starting");
                         }
 
                         if (window_state == "maximize") {
-                            maximize();
-                            get_window().set_shadow_width(0, 0, 0, 0);
+                            maximize ();
+                            get_window ().set_shadow_width (0, 0, 0, 0);
                         } else if (window_state == "fullscreen") {
-                            toggle_fullscreen();
-                            get_window().set_shadow_width(0, 0, 0, 0);
+                            toggle_fullscreen ();
+                            get_window ().set_shadow_width (0, 0, 0, 0);
                         } else {
-                            if (screen_monitor.is_composited()) {
-                                get_window().set_shadow_width(window_frame_margin_start, window_frame_margin_end, window_frame_margin_top, window_frame_margin_bottom);
+                            if (screen_monitor.is_composited ()) {
+                                get_window ().set_shadow_width (window_frame_margin_start, window_frame_margin_end, window_frame_margin_top, window_frame_margin_bottom);
                             } else {
-                                get_window().set_shadow_width(0, 0, 0, 0);
+                                get_window ().set_shadow_width (0, 0, 0, 0);
                             }
                         }
 
-                        var width = config.config_file.get_integer("advanced", "window_width");
-                        var height = config.config_file.get_integer("advanced", "window_height");
+                        var width = config.config_file.get_integer ("advanced", "window_width");
+                        var height = config.config_file.get_integer ("advanced", "window_height");
                         if (width == 0 || height == 0) {
                             if (rect.width == 0 || rect.height == 0) {
-                                set_default_size(800, 600);
+                                set_default_size (800, 600);
                             } else {
-                                set_default_size((int) (rect.width * window_default_scale), (int) (rect.height * window_default_scale));
+                                set_default_size ((int) (rect.width * window_default_scale), (int) (rect.height * window_default_scale));
                             }
                         } else {
-                            set_default_size(width, height);
+                            set_default_size (width, height);
                         }
                     } catch (GLib.KeyFileError e) {
-                        stdout.printf(e.message);
+                        stdout.printf (e.message);
                     }
                 });
 
             try{
-                set_icon_from_file(Utils.get_image_path("deepin-terminal-gtk.svg"));
-            } catch(Error er) {
-                stdout.printf(er.message);
+                set_icon_from_file (Utils.get_image_path ("deepin-terminal-gtk.svg"));
+            } catch (Error er) {
+                stdout.printf (er.message);
             }
         }
 
-        public void transparent_window() {
-            set_app_paintable(true); // set_app_paintable is necessary step to make window transparent.
-            Gdk.Screen screen = Gdk.Screen.get_default();
-            set_visual(screen.get_rgba_visual());
+        public void transparent_window () {
+            set_app_paintable (true); // set_app_paintable is necessary step to make window transparent.
+            Gdk.Screen screen = Gdk.Screen.get_default(   );
+            set_visual (screen.get_rgba_visual ());
         }
 
-        public void init_window() {
-            if (Utils.is_tiling_wm()) 
-                set_decorated(true);
-            else 
-                set_decorated(false);
+        public void init_window () {
+            if (Utils.is_tiling_wm ())
+                set_decorated (true);
+            else
+                set_decorated (false);
 
-            window_frame_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
-            window_widget_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+            window_frame_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            window_widget_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 
-            add(window_frame_box);
-            window_frame_box.pack_start(window_widget_box, true, true, 0);
+            add (window_frame_box);
+            window_frame_box.pack_start (window_widget_box, true, true, 0);
 
-            focus_in_event.connect((w) => {
-                    update_style();
-
-                    return false;
-                });
-
-            focus_out_event.connect((w) => {
-                    update_style();
+            focus_in_event.connect ((w) => {
+                    update_style ();
 
                     return false;
                 });
 
-            configure_event.connect((w) => {
+            focus_out_event.connect ((w) => {
+                    update_style ();
+
+                    return false;
+                });
+
+            configure_event.connect ((w) => {
                     // Update input shape.
                     Cairo.RectangleInt rect;
-                    get_window().get_frame_extents(out rect);
+                    get_window ().get_frame_extents (out rect);
                     rect.x = 0;
                     rect.y = 0;
-                    if (!window_is_fullscreen() && !window_is_max() && screen_monitor.is_composited()) {
+                    if (!window_is_fullscreen () && !window_is_max () && screen_monitor.is_composited ()) {
                         rect.x = window_frame_box.margin_start - Constant.RESPONSE_RADIUS;
                         rect.y = window_frame_box.margin_top - Constant.RESPONSE_RADIUS;
                         rect.width += - window_frame_box.margin_start - window_frame_box.margin_end + Constant.RESPONSE_RADIUS * 2;
                         rect.height += - window_frame_box.margin_top - window_frame_box.margin_bottom + Constant.RESPONSE_RADIUS * 2;
                     }
 
-                    var shape = new Cairo.Region.rectangle(rect);
-                    get_window().input_shape_combine_region(shape, 0, 0);
+                    var shape = new Cairo.Region.rectangle (rect);
+                    get_window ().input_shape_combine_region (shape, 0, 0);
 
                     // Update blur area.
-                    update_blur_status();
+                    update_blur_status(   );
 
                     return false;
                 });
 
-            window_state_event.connect((w, e) => {
-                    update_frame();
+            window_state_event.connect ((w, e) => {
+                    update_frame ();
 
                     return false;
                 });
 
-            window_frame_box.button_press_event.connect((w, e) => {
-                    if (!screen_monitor.is_composited()) {
-                        if (window_is_normal()) {
+            window_frame_box.button_press_event.connect ((w, e) => {
+                    if (!screen_monitor.is_composited ()) {
+                        if (window_is_normal ()) {
                             int pointer_x, pointer_y;
-                            e.device.get_position(null, out pointer_x, out pointer_y);
+                            e.device.get_position (null, out pointer_x, out pointer_y);
 
-                            var cursor_type = get_frame_cursor_type(e.x_root, e.y_root);
+                            var cursor_type = get_frame_cursor_type (e.x_root, e.y_root);
                             if (cursor_type != null) {
-                                Utils.resize_window(this, e, cursor_type);
+                                Utils.resize_window (this, e, cursor_type);
                                 return true;
                             }
                         }
@@ -215,14 +215,14 @@ namespace Widgets {
                     return false;
                 });
 
-            button_press_event.connect((w, e) => {
-                    if (window_is_normal()) {
+            button_press_event.connect ((w, e) => {
+                    if (window_is_normal ()) {
                         int pointer_x, pointer_y;
-                        e.device.get_position(null, out pointer_x, out pointer_y);
+                        e.device.get_position (null, out pointer_x, out pointer_y);
 
-                        var cursor_type = get_cursor_type(e.x_root, e.y_root);
+                        var cursor_type = get_cursor_type (e.x_root, e.y_root);
                         if (cursor_type != null) {
-                            Utils.resize_window(this, e, cursor_type);
+                            Utils.resize_window (this, e, cursor_type);
                             return true;
                         }
                     }
@@ -230,122 +230,122 @@ namespace Widgets {
                     return false;
                 });
 
-            draw.connect_after((w, cr) => {
-                    draw_window_below(cr);
+            draw.connect_after ((w, cr) => {
+                    draw_window_below (cr);
 
-                    draw_window_widgets(cr);
+                    draw_window_widgets (cr);
 
-                    draw_window_frame(cr);
+                    draw_window_frame (cr);
 
-                    draw_window_above(cr);
+                    draw_window_above (cr);
 
                     return true;
                 });
 
-            config.update.connect((w) => {
-                    update_style();
+            config.update.connect ((w) => {
+                    update_style ();
 
-                    update_blur_status(true);
+                    update_blur_status (true);
                 });
         }
 
-        public void update_style() {
-            clean_style();
+        public void update_style () {
+            clean_style ();
 
-            bool is_light_theme = is_light_theme();
+            bool is_light_theme = is_light_theme ();
 
             if (is_active) {
-                if (window_is_normal()) {
+                if (window_is_normal ()) {
                     if (is_light_theme) {
-                        if (screen_monitor.is_composited()) {
-                            window_frame_box.get_style_context().add_class("window_light_shadow_active");
+                        if (screen_monitor.is_composited ()) {
+                            window_frame_box.get_style_context ().add_class ("window_light_shadow_active");
                         } else {
-                            window_frame_box.get_style_context().add_class("window_light_noshadow_active");
+                            window_frame_box.get_style_context ().add_class ("window_light_noshadow_active");
                         }
                     } else {
-                        if (screen_monitor.is_composited()) {
-                            window_frame_box.get_style_context().add_class("window_dark_shadow_active");
+                        if (screen_monitor.is_composited ()) {
+                            window_frame_box.get_style_context ().add_class ("window_dark_shadow_active");
                         } else {
-                            window_frame_box.get_style_context().add_class("window_dark_noshadow_active");
+                            window_frame_box.get_style_context ().add_class ("window_dark_noshadow_active");
                         }
                     }
                 } else {
-                    if (screen_monitor.is_composited()) {
-                        window_frame_box.get_style_context().add_class("window_noradius_shadow_active");
+                    if (screen_monitor.is_composited ()) {
+                        window_frame_box.get_style_context ().add_class ("window_noradius_shadow_active");
                     } else {
-                        window_frame_box.get_style_context().add_class("window_noradius_noshadow_active");
+                        window_frame_box.get_style_context ().add_class ("window_noradius_noshadow_active");
                     }
                 }
             } else {
-                if (window_is_normal()) {
+                if (window_is_normal ()) {
                     if (is_light_theme) {
-                        if (screen_monitor.is_composited()) {
-                            window_frame_box.get_style_context().add_class("window_light_shadow_inactive");
+                        if (screen_monitor.is_composited ()) {
+                            window_frame_box.get_style_context ().add_class ("window_light_shadow_inactive");
                         } else {
-                            window_frame_box.get_style_context().add_class("window_light_noshadow_inactive");
+                            window_frame_box.get_style_context ().add_class ("window_light_noshadow_inactive");
                         }
                     } else {
-                        if (screen_monitor.is_composited()) {
-                            window_frame_box.get_style_context().add_class("window_dark_shadow_inactive");
+                        if (screen_monitor.is_composited ()) {
+                            window_frame_box.get_style_context ().add_class ("window_dark_shadow_inactive");
                         } else {
-                            window_frame_box.get_style_context().add_class("window_dark_noshadow_inactive");
+                            window_frame_box.get_style_context ().add_class ("window_dark_noshadow_inactive");
                         }
                     }
                 } else {
-                    if (screen_monitor.is_composited()) {
-                        window_frame_box.get_style_context().add_class("window_noradius_shadow_inactive");
+                    if (screen_monitor.is_composited ()) {
+                        window_frame_box.get_style_context ().add_class ("window_noradius_shadow_inactive");
                     } else {
-                        window_frame_box.get_style_context().add_class("window_noradius_noshadow_inactive");
+                        window_frame_box.get_style_context ().add_class ("window_noradius_noshadow_inactive");
                     }
                 }
             }
         }
 
-        public void clean_style() {
-            window_frame_box.get_style_context().remove_class("window_light_shadow_inactive");
-            window_frame_box.get_style_context().remove_class("window_dark_shadow_inactive");
-            window_frame_box.get_style_context().remove_class("window_light_shadow_active");
-            window_frame_box.get_style_context().remove_class("window_dark_shadow_active");
-            window_frame_box.get_style_context().remove_class("window_noradius_shadow_inactive");
-            window_frame_box.get_style_context().remove_class("window_noradius_shadow_active");
-            window_frame_box.get_style_context().remove_class("window_light_noshadow_inactive");
-            window_frame_box.get_style_context().remove_class("window_dark_noshadow_inactive");
-            window_frame_box.get_style_context().remove_class("window_light_noshadow_active");
-            window_frame_box.get_style_context().remove_class("window_dark_noshadow_active");
-            window_frame_box.get_style_context().remove_class("window_noradius_noshadow_inactive");
-            window_frame_box.get_style_context().remove_class("window_noradius_noshadow_active");
+        public void clean_style () {
+            window_frame_box.get_style_context ().remove_class ("window_light_shadow_inactive");
+            window_frame_box.get_style_context ().remove_class ("window_dark_shadow_inactive");
+            window_frame_box.get_style_context ().remove_class ("window_light_shadow_active");
+            window_frame_box.get_style_context ().remove_class ("window_dark_shadow_active");
+            window_frame_box.get_style_context ().remove_class ("window_noradius_shadow_inactive");
+            window_frame_box.get_style_context ().remove_class ("window_noradius_shadow_active");
+            window_frame_box.get_style_context ().remove_class ("window_light_noshadow_inactive");
+            window_frame_box.get_style_context ().remove_class ("window_dark_noshadow_inactive");
+            window_frame_box.get_style_context ().remove_class ("window_light_noshadow_active");
+            window_frame_box.get_style_context ().remove_class ("window_dark_noshadow_active");
+            window_frame_box.get_style_context ().remove_class ("window_noradius_noshadow_inactive");
+            window_frame_box.get_style_context ().remove_class ("window_noradius_noshadow_active");
         }
 
-        public void update_blur_status(bool force_update=false) {
-            Gdk.Display current_display = get_window().get_display();
+        public void update_blur_status (bool force_update=false) {
+            Gdk.Display current_display = get_window ().get_display ();
             if ((current_display as Gdk.X11.Display) == null) {
                 return;
             }
-            
+
             try {
                 int width, height;
-                get_size(out width, out height);
+                get_size (out width, out height);
 
                 if (width != resize_cache_width || height != resize_cache_height || force_update) {
                     resize_cache_width = width;
                     resize_cache_height = height;
 
-                    unowned X.Display xdisplay = (get_window().get_display() as Gdk.X11.Display).get_xdisplay();
-                    var xid = (int)((Gdk.X11.Window) get_window()).get_xid();
-                    var atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED = xdisplay.intern_atom("_NET_WM_DEEPIN_BLUR_REGION_ROUNDED", false);
-                    var atom_KDE_NET_WM_BLUR_BEHIND_REGION = xdisplay.intern_atom("_KDE_NET_WM_BLUR_BEHIND_REGION", false);
+                    unowned X.Display xdisplay = (get_window ().get_display () as Gdk.X11.Display).get_xdisplay ();
+                    var xid = (int)((Gdk.X11.Window) get_window ()).get_xid ();
+                    var atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED = xdisplay.intern_atom ("_NET_WM_DEEPIN_BLUR_REGION_ROUNDED", false);
+                    var atom_KDE_NET_WM_BLUR_BEHIND_REGION = xdisplay.intern_atom ("_KDE_NET_WM_BLUR_BEHIND_REGION", false);
 
-                    var blur_background = config.config_file.get_boolean("advanced", "blur_background");
+                    var blur_background = config.config_file.get_boolean ("advanced", "blur_background");
                     if (blur_background) {
                         Cairo.RectangleInt blur_rect, blur_rect_kwin;
-                        get_window().get_frame_extents(out blur_rect);
-                        get_window().get_frame_extents(out blur_rect_kwin);
+                        get_window ().get_frame_extents (out blur_rect);
+                        get_window ().get_frame_extents (out blur_rect_kwin);
                         blur_rect.x = 0;
                         blur_rect.y = 0;
                         blur_rect_kwin.x = 0;
                         blur_rect_kwin.y = 0;
 
-                        if (!window_is_fullscreen() && !window_is_max() && screen_monitor.is_composited()) {
+                        if (!window_is_fullscreen () && !window_is_max () && screen_monitor.is_composited ()) {
                             blur_rect.x = window_frame_box.margin_start;
                             blur_rect.y = window_frame_box.margin_top;
                             blur_rect.width += - window_frame_box.margin_start - window_frame_box.margin_end;
@@ -356,28 +356,28 @@ namespace Widgets {
 
                         // blumia: not sure why it could just randomly happens, anyway we did this as a workaround.
                         if (blur_rect.width < 0) {
-                            print("[!!!] blur_rect calc result error! blur_rect.width = %d which is negative!\n", blur_rect.width);
-                            blur_rect.width = width - window_frame_box.get_margin_start() - window_frame_box.get_margin_end();
-                            blur_rect.height = height - window_frame_box.get_margin_top() - window_frame_box.get_margin_bottom();
+                            print ("[!!!] blur_rect calc result error! blur_rect.width = %d which is negative!\n", blur_rect.width);
+                            blur_rect.width = width - window_frame_box.get_margin_start () - window_frame_box.get_margin_end ();
+                            blur_rect.height = height - window_frame_box.get_margin_top () - window_frame_box.get_margin_bottom ();
                         }
                         if (blur_rect_kwin.width < 0) {
-                            print("[!!!] blur_rect_kwin calc result error! blur_rect_kwin.width = %d which is negative!\n", blur_rect_kwin.width);
-                            blur_rect_kwin.width = width - window_frame_box.get_margin_start() - window_frame_box.get_margin_end();
-                            blur_rect_kwin.height = height - window_frame_box.get_margin_top() - window_frame_box.get_margin_bottom();
+                            print ("[!!!] blur_rect_kwin calc result error! blur_rect_kwin.width = %d which is negative!\n", blur_rect_kwin.width);
+                            blur_rect_kwin.width = width - window_frame_box.get_margin_start () - window_frame_box.get_margin_end ();
+                            blur_rect_kwin.height = height - window_frame_box.get_margin_top () - window_frame_box.get_margin_bottom ();
                         }
 
-                        blur_rect.x = (int) (blur_rect.x * Utils.get_default_monitor_scale());
-                        blur_rect.y = (int) (blur_rect.y * Utils.get_default_monitor_scale());
-                        blur_rect.width = (int) (blur_rect.width * Utils.get_default_monitor_scale());
-                        blur_rect.height = (int) (blur_rect.height * Utils.get_default_monitor_scale());
-                        blur_rect_kwin.x = (int) (blur_rect_kwin.x * Utils.get_default_monitor_scale());
-                        blur_rect_kwin.y = (int) (blur_rect_kwin.y * Utils.get_default_monitor_scale());
-                        blur_rect_kwin.width = (int) (blur_rect_kwin.width * Utils.get_default_monitor_scale());
-                        blur_rect_kwin.height = (int) (blur_rect_kwin.height * Utils.get_default_monitor_scale());
+                        blur_rect.x = (int) (blur_rect.x * Utils.get_default_monitor_scale ());
+                        blur_rect.y = (int) (blur_rect.y * Utils.get_default_monitor_scale ());
+                        blur_rect.width = (int) (blur_rect.width * Utils.get_default_monitor_scale ());
+                        blur_rect.height = (int) (blur_rect.height * Utils.get_default_monitor_scale ());
+                        blur_rect_kwin.x = (int) (blur_rect_kwin.x * Utils.get_default_monitor_scale ());
+                        blur_rect_kwin.y = (int) (blur_rect_kwin.y * Utils.get_default_monitor_scale ());
+                        blur_rect_kwin.width = (int) (blur_rect_kwin.width * Utils.get_default_monitor_scale ());
+                        blur_rect_kwin.height = (int) (blur_rect_kwin.height * Utils.get_default_monitor_scale ());
 
                         ulong[] data = {(ulong) blur_rect.x, (ulong) blur_rect.y, (ulong) blur_rect.width, (ulong) blur_rect.height, 8, 8};
                         ulong[] data_kwin = {(ulong) blur_rect_kwin.x, (ulong) blur_rect_kwin.y, (ulong) blur_rect_kwin.width, (ulong) blur_rect_kwin.height, 8, 8};
-                        xdisplay.change_property(
+                        xdisplay.change_property (
                             xid,
                             atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED,
                             X.XA_CARDINAL,
@@ -386,7 +386,7 @@ namespace Widgets {
                             (uchar[])data,
                             ((ulong[]) data).length);
 
-                        xdisplay.change_property(
+                        xdisplay.change_property (
                             xid,
                             atom_KDE_NET_WM_BLUR_BEHIND_REGION,
                             X.XA_CARDINAL,
@@ -396,34 +396,34 @@ namespace Widgets {
                             ((ulong[]) data_kwin).length - 2
                         );
                     } else {
-                        xdisplay.delete_property(xid, atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED);
-                        xdisplay.delete_property(xid, atom_KDE_NET_WM_BLUR_BEHIND_REGION);
+                        xdisplay.delete_property (xid, atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED);
+                        xdisplay.delete_property (xid, atom_KDE_NET_WM_BLUR_BEHIND_REGION);
                     }
                 }
             } catch (GLib.KeyFileError e) {
-                print("%s\n", e.message);
+                print ("%s\n", e.message);
             }
         }
 
-        public void draw_window_widgets(Cairo.Context cr) {
-            Utils.propagate_draw(this, cr);
+        public void draw_window_widgets (Cairo.Context cr) {
+            Utils.propagate_draw (this, cr);
         }
 
-        public void add_widget(Gtk.Widget widget) {
-            window_widget_box.pack_start(widget, true, true, 0);
+        public void add_widget (Gtk.Widget widget) {
+            window_widget_box.pack_start (widget, true, true, 0);
         }
 
-        public bool have_terminal_at_same_workspace() {
-            var screen = Wnck.Screen.get_default();
-            screen.force_update();
+        public bool have_terminal_at_same_workspace () {
+            var screen = Wnck.Screen.get_default ();
+            screen.force_update ();
 
-            var active_workspace = screen.get_active_workspace();
-            foreach (Wnck.Window window in screen.get_windows()) {
-                var workspace = window.get_workspace();
-                if (workspace != null && workspace.get_number() == active_workspace.get_number()) {
-                    int pid = window.get_pid();
+            var active_workspace = screen.get_active_workspace ();
+            foreach (Wnck.Window window in screen.get_windows ()) {
+                var workspace = window.get_workspace ();
+                if (workspace != null && workspace.get_number () == active_workspace.get_number ()) {
+                    int pid = window.get_pid ();
                     if (pid != 0) {
-                        string command = Utils.get_proc_file_content("/proc/%i/comm".printf(pid)).strip();
+                        string command = Utils.get_proc_file_content ("/proc/%i/comm".printf(   pid)).strip(   );
                         if (command == "deepin-terminal-gtk") {
                             return true;
                         }
@@ -434,23 +434,23 @@ namespace Widgets {
             return false;
         }
 
-        public override void toggle_fullscreen() {
-            if (window_is_fullscreen()) {
-                unfullscreen();
+        public override void toggle_fullscreen () {
+            if (window_is_fullscreen ()) {
+                unfullscreen ();
             } else {
-                fullscreen();
+                fullscreen ();
             }
         }
 
-        public override void update_frame() {
-            update_style();
+        public override void update_frame () {
+            update_style ();
 
-            if (Utils.is_tiling_wm() || window_is_fullscreen() || window_is_max()) {
+            if (Utils.is_tiling_wm () || window_is_fullscreen () || window_is_max ()) {
                 window_widget_box.margin_top = 0;
                 window_widget_box.margin_bottom = 0;
                 window_widget_box.margin_start = 0;
                 window_widget_box.margin_end = 0;
-            } else if (window_is_tiled()) {
+            } else if (window_is_tiled ()) {
                 window_widget_box.margin_top = 1;
                 window_widget_box.margin_bottom = 1;
                 window_widget_box.margin_start = 1;
@@ -462,44 +462,44 @@ namespace Widgets {
                 window_widget_box.margin_end = 2;
             }
 
-            if (!screen_monitor.is_composited() || window_is_fullscreen() || window_is_max()) {
+            if (!screen_monitor.is_composited () || window_is_fullscreen () || window_is_max ()) {
                 window_frame_box.margin_top = 0;
                 window_frame_box.margin_bottom = 0;
                 window_frame_box.margin_start = 0;
                 window_frame_box.margin_end = 0;
 
-                get_window().set_shadow_width(0, 0, 0, 0);
+                get_window ().set_shadow_width (0, 0, 0, 0);
             } else {
                 window_frame_box.margin_top = window_frame_margin_top;
                 window_frame_box.margin_bottom = window_frame_margin_bottom;
                 window_frame_box.margin_start = window_frame_margin_start;
                 window_frame_box.margin_end = window_frame_margin_end;
 
-                get_window().set_shadow_width(window_frame_margin_start, window_frame_margin_end, window_frame_margin_top, window_frame_margin_bottom);
+                get_window ().set_shadow_width (window_frame_margin_start, window_frame_margin_end, window_frame_margin_top, window_frame_margin_bottom);
             }
 
-            if (Utils.is_tiling_wm() || screen_monitor.is_composited() || window_is_fullscreen() || window_is_max() || config.config_file.get_boolean("advanced", "always_hide_resize_grip")) {
-                resize_grip.hide();
+            if (Utils.is_tiling_wm () || screen_monitor.is_composited () || window_is_fullscreen () || window_is_max () || config.config_file.get_boolean ("advanced", "always_hide_resize_grip")) {
+                resize_grip.hide ();
             } else {
-                resize_grip.show();
+                resize_grip.show ();
             }
         }
 
-        public void toggle_max() {
-            if (window_is_max()) {
-                unmaximize();
+        public void toggle_max () {
+            if (window_is_max ()) {
+                unmaximize ();
             } else {
-                maximize();
+                maximize ();
             }
         }
 
-        public virtual void draw_window_below(Cairo.Context cr) {
+        public virtual void draw_window_below (Cairo.Context cr) {
 
         }
 
-        public void draw_window_frame(Cairo.Context cr) {
+        public void draw_window_frame (Cairo.Context cr) {
             Gtk.Allocation window_frame_rect;
-            window_frame_box.get_allocation(out window_frame_rect);
+            window_frame_box.get_allocation (out window_frame_rect);
 
             int x = window_frame_box.margin_start;
             int y = window_frame_box.margin_top;
@@ -508,44 +508,44 @@ namespace Widgets {
             Gdk.RGBA frame_color;
 
             try {
-                if (window_is_normal()) {
-                    frame_color = Utils.hex_to_rgba(config.config_file.get_string("theme", "background"));
+                if (window_is_normal ()) {
+                    frame_color = Utils.hex_to_rgba (config.config_file.get_string ("theme", "background"));
 
-                    if (screen_monitor.is_composited()) {
+                    if (screen_monitor.is_composited ()) {
                         // Draw line *innner* of window frame.
-                        cr.save();
-                        cr.set_source_rgba(frame_color.red, frame_color.green, frame_color.blue, config.config_file.get_double("general", "opacity"));
+                        cr.save(   );
+                        cr.set_source_rgba (frame_color.red, frame_color.green, frame_color.blue, config.config_file.get_double ("general", "opacity"));
                         // Bottom.
-                        Draw.draw_rectangle(cr, x + 2, y + height - 2, width - 4, 1);
+                        Draw.draw_rectangle(   cr, x + 2, y + height - 2, width - 4, 1);
                         // Left.
                         if (tabbar_at_the_bottom) {
-                            Draw.draw_rectangle(cr, x + 1, y + 2, 1, height - Constant.TITLEBAR_HEIGHT - 4);
+                            Draw.draw_rectangle (cr, x + 1, y + 2, 1, height - Constant.TITLEBAR_HEIGHT - 4);
                         } else {
-                            Draw.draw_rectangle(cr, x + 1, y + Constant.TITLEBAR_HEIGHT + 2, 1, height - Constant.TITLEBAR_HEIGHT - 4);
+                            Draw.draw_rectangle (cr, x + 1, y + Constant.TITLEBAR_HEIGHT + 2, 1, height - Constant.TITLEBAR_HEIGHT - 4);
                         }
                         // Right..
                         if (tabbar_at_the_bottom) {
-                            Draw.draw_rectangle(cr, x + width - 2, y + 2, 1, height  - Constant.TITLEBAR_HEIGHT- 4);
+                            Draw.draw_rectangle (cr, x + width - 2, y + 2, 1, height  - Constant.TITLEBAR_HEIGHT- 4);
                         } else {
-                            Draw.draw_rectangle(cr, x + width - 2, y + Constant.TITLEBAR_HEIGHT + 2, 1, height - Constant.TITLEBAR_HEIGHT - 4);
+                            Draw.draw_rectangle (cr, x + width - 2, y + Constant.TITLEBAR_HEIGHT + 2, 1, height - Constant.TITLEBAR_HEIGHT - 4);
                         }
-                        cr.restore();
+                        cr.restore ();
                     } else {
                         // Draw line *innner* of window frame.
-                        cr.save();
-                        cr.set_source_rgba(frame_color.red, frame_color.green, frame_color.blue, config.config_file.get_double("general", "opacity"));
-                        Draw.draw_rectangle(cr, x, y, width, height, false);
-                        cr.restore();
+                        cr.save(   );
+                        cr.set_source_rgba (frame_color.red, frame_color.green, frame_color.blue, config.config_file.get_double ("general", "opacity"));
+                        Draw.draw_rectangle (cr, x, y, width, height, false);
+                        cr.restore ();
                     }
                 }
             } catch (Error e) {
-                print("Window draw_window_frame: %s\n", e.message);
+                print ("Window draw_window_frame: %s\n", e.message);
             }
         }
 
-        public void draw_window_above(Cairo.Context cr) {
+        public void draw_window_above (Cairo.Context cr) {
             Gtk.Allocation window_frame_rect;
-            window_frame_box.get_allocation(out window_frame_rect);
+            window_frame_box.get_allocation (out window_frame_rect);
 
             int x = window_frame_box.margin_start;
             int y = window_frame_box.margin_top;
@@ -555,37 +555,37 @@ namespace Widgets {
             if (tabbar_at_the_bottom) {
                 titlebar_y += height - Constant.TITLEBAR_HEIGHT;
             }
-            if (get_scale_factor() > 1) {
+            if (get_scale_factor () > 1) {
                 titlebar_y -= 1;
             }
-            Gdk.RGBA frame_color = Gdk.RGBA();
+            Gdk.RGBA frame_color = Gdk.RGBA ();
 
-            bool is_light_theme = is_light_theme();
+            bool is_light_theme = is_light_theme ();
 
             try {
-                frame_color = Utils.hex_to_rgba(config.config_file.get_string("theme", "background"));
+                frame_color = Utils.hex_to_rgba (config.config_file.get_string ("theme", "background"));
             } catch (GLib.KeyFileError e) {
-                print("Window draw_window_above: %s\n", e.message);
+                print ("Window draw_window_above: %s\n", e.message);
             }
 
             try {
-                if (window_is_fullscreen()) {
+                if (window_is_fullscreen ()) {
                     if (draw_tabbar_line) {
                         if (tabbar_at_the_bottom) {
-                            draw_titlebar_underline(cr, x, titlebar_y, width, -1);
-                            draw_active_tab_underline(cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y - 1);
+                            draw_titlebar_underline (cr, x, titlebar_y, width, -1);
+                            draw_active_tab_underline (cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y - 1);
                         } else {
-                            draw_titlebar_underline(cr, x, titlebar_y + Constant.TITLEBAR_HEIGHT, width, 1);
-                            draw_active_tab_underline(cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y +  Constant.TITLEBAR_HEIGHT - 1);
+                            draw_titlebar_underline (cr, x, titlebar_y + Constant.TITLEBAR_HEIGHT, width, 1);
+                            draw_active_tab_underline (cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y +  Constant.TITLEBAR_HEIGHT - 1);
                         }
                     }
-                } else if (window_is_max() || window_is_tiled()) {
+                } else if (window_is_max () || window_is_tiled ()) {
                     if (tabbar_at_the_bottom) {
-                        draw_titlebar_underline(cr, x + 1, titlebar_y, width - 2, -1);
-                        draw_active_tab_underline(cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y - 1);
-                    } else { 
-                        draw_titlebar_underline(cr, x + 1, titlebar_y + Constant.TITLEBAR_HEIGHT, width - 2, 1);
-                        draw_active_tab_underline(cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y + Constant.TITLEBAR_HEIGHT - 1);
+                        draw_titlebar_underline (cr, x + 1, titlebar_y, width - 2, -1);
+                        draw_active_tab_underline (cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y - 1);
+                    } else {
+                        draw_titlebar_underline (cr, x + 1, titlebar_y + Constant.TITLEBAR_HEIGHT, width - 2, 1);
+                        draw_active_tab_underline (cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y + Constant.TITLEBAR_HEIGHT - 1);
                     }
                 } else {
                     int titlebar_near_frame_y = titlebar_y + 1;
@@ -595,25 +595,25 @@ namespace Widgets {
                         side_margin = -2;
                     }
                     // Draw line above at titlebar.
-                    cr.set_source_rgba(frame_color.red, frame_color.green, frame_color.blue, config.config_file.get_double("general", "opacity"));
-                    Draw.draw_rectangle(cr, x + 2, y + 1, width - 4, 1);
+                    cr.set_source_rgba(   frame_color.red, frame_color.green, frame_color.blue, config.config_file.get_double(   "general", "opacity"));
+                    Draw.draw_rectangle (cr, x + 2, y + 1, width - 4, 1);
 
                     //  if (is_light_theme) {
                     //      Utils.set_context_color(cr, top_line_light_color);
                     //  } else {
                     //      Utils.set_context_color(cr, top_line_dark_color);
                     //  }
-                    Draw.draw_rectangle(cr, x + 2, y + 1, width - 4, 1);
+                    Draw.draw_rectangle(   cr, x + 2, y + 1, width - 4, 1);
 
-                    cr.set_source_rgba(1, 1, 1, 0.0625 * config.config_file.get_double("general", "opacity")); // Draw top line at window.
-                    Draw.draw_rectangle(cr, x + 2, y, width - 4, 1);
+                    cr.set_source_rgba (1, 1, 1, 0.0625 * config.config_file.get_double ("general", "opacity")); // Draw top line at window.
+                    Draw.draw_rectangle(   cr, x + 2, y, width - 4, 1);
 
                     // Draw line around titlebar side.
-                    cr.set_source_rgba(frame_color.red, frame_color.green, frame_color.blue, config.config_file.get_double("general", "opacity"));
+                    cr.set_source_rgba(   frame_color.red, frame_color.green, frame_color.blue, config.config_file.get_double(   "general", "opacity"));
                     // Left.
-                    Draw.draw_rectangle(cr, x + 1, titlebar_y + side_margin, 1, Constant.TITLEBAR_HEIGHT);
+                    Draw.draw_rectangle(   cr, x + 1, titlebar_y + side_margin, 1, Constant.TITLEBAR_HEIGHT);
                     // Right.
-                    Draw.draw_rectangle(cr, x + width - 2, titlebar_y + side_margin, 1, Constant.TITLEBAR_HEIGHT);
+                    Draw.draw_rectangle(   cr, x + width - 2, titlebar_y + side_margin, 1, Constant.TITLEBAR_HEIGHT);
 
                     //  if (is_light_theme) {
                     //      Utils.set_context_color(cr, top_line_light_color);
@@ -622,42 +622,42 @@ namespace Widgets {
                     //  }
 
                     // Left.
-                    Draw.draw_rectangle(cr, x + 1, titlebar_y + side_margin, 1, Constant.TITLEBAR_HEIGHT);
+                    Draw.draw_rectangle(   cr, x + 1, titlebar_y + side_margin, 1, Constant.TITLEBAR_HEIGHT);
                     // Right.
-                    Draw.draw_rectangle(cr, x + width - 2, titlebar_y + side_margin, 1, Constant.TITLEBAR_HEIGHT);
+                    Draw.draw_rectangle(   cr, x + width - 2, titlebar_y + side_margin, 1, Constant.TITLEBAR_HEIGHT);
 
                     if (tabbar_at_the_bottom)  {
-                        draw_titlebar_underline(cr, x + 1, titlebar_y, width - 2, -1);
-                        draw_active_tab_underline(cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y - 1);
+                        draw_titlebar_underline (cr, x + 1, titlebar_y, width - 2, -1);
+                        draw_active_tab_underline (cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y - 1);
                     } else {
-                        draw_titlebar_underline(cr, x + 1, titlebar_y + Constant.TITLEBAR_HEIGHT, width - 2, 1);
-                        draw_active_tab_underline(cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y + Constant.TITLEBAR_HEIGHT -1);
+                        draw_titlebar_underline (cr, x + 1, titlebar_y + Constant.TITLEBAR_HEIGHT, width - 2, 1);
+                        draw_active_tab_underline (cr, x + active_tab_underline_x - window_frame_box.margin_start, titlebar_y + Constant.TITLEBAR_HEIGHT -1);
                     }
                 }
             } catch (Error e) {
-                print("Window draw_window_above: %s\n", e.message);
+                print ("Window draw_window_above: %s\n", e.message);
             }
         }
 
-        public void init_fullscreen_handler(Appbar appbar) {
-            fullscreen_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
-            spacing_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+        public void init_fullscreen_handler (Appbar appbar) {
+            fullscreen_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            spacing_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 
-            spacing_box.set_size_request(-1, Constant.TITLEBAR_HEIGHT);
-            fullscreen_box.pack_start(spacing_box, false, false, 0);
+            spacing_box.set_size_request (-1, Constant.TITLEBAR_HEIGHT);
+            fullscreen_box.pack_start (spacing_box, false, false, 0);
 
-            configure_event.connect((w) => {
-                    if (window_is_fullscreen()) {
-                        Utils.remove_all_children(fullscreen_box);
-                        appbar.hide();
-                        appbar.hide_window_button();
+            configure_event.connect ((w) => {
+                    if (window_is_fullscreen ()) {
+                        Utils.remove_all_children (fullscreen_box);
+                        appbar.hide ();
+                        appbar.hide_window_button ();
                         draw_tabbar_line = false;
                     } else {
-                        Gtk.Widget? parent = spacing_box.get_parent();
+                        Gtk.Widget? parent = spacing_box.get_parent ();
                         if (parent == null) {
-                            fullscreen_box.pack_start(spacing_box, false, false, 0);
-                            appbar.show_all();
-                            appbar.show_window_button();
+                            fullscreen_box.pack_start (spacing_box, false, false, 0);
+                            appbar.show_all ();
+                            appbar.show_window_button ();
                             draw_tabbar_line = true;
                         }
                     }
@@ -665,26 +665,26 @@ namespace Widgets {
                     return false;
                 });
 
-            motion_notify_event.connect((w, e) => {
-                    if (window_is_fullscreen()) {
+            motion_notify_event.connect ((w, e) => {
+                    if (window_is_fullscreen ()) {
                        var receiveEvents = tabbar_at_the_bottom? e.y_root > window_fullscreen_monitor_height : e.y_root < window_fullscreen_monitor_height;
                         if (receiveEvents) {
-                            GLib.Timeout.add(window_fullscreen_monitor_timeout, () => {
+                            GLib.Timeout.add (window_fullscreen_monitor_timeout, () => {
                                     int pointer_x, pointer_y;
-                                    Utils.get_pointer_position(out pointer_x, out pointer_y);
+                                    Utils.get_pointer_position (out pointer_x, out pointer_y);
 
                                     var showAll = tabbar_at_the_bottom? pointer_y > window_fullscreen_monitor_height + Constant.TITLEBAR_HEIGHT : pointer_y < window_fullscreen_response_height;
                                     var hideAll = tabbar_at_the_bottom? pointer_y < window_fullscreen_monitor_height + Constant.TITLEBAR_HEIGHT : pointer_y > Constant.TITLEBAR_HEIGHT;
                                     if (showAll) {
-                                        appbar.show_all();
+                                        appbar.show_all ();
                                         draw_tabbar_line = true;
 
-                                        redraw_window();
+                                        redraw_window ();
                                     } else if (hideAll) {
-                                        appbar.hide();
+                                        appbar.hide ();
                                         draw_tabbar_line = false;
 
-                                        redraw_window();
+                                        redraw_window ();
                                     }
 
                                     return false;
@@ -696,77 +696,77 @@ namespace Widgets {
                 });
         }
 
-        public void show_window(TerminalApp app, WorkspaceManager workspace_manager, Tabbar tabbar, bool has_start=false) {
-            Appbar appbar = new Appbar(app, this, tabbar, workspace_manager, has_start);
+        public void show_window (TerminalApp app, WorkspaceManager workspace_manager, Tabbar tabbar, bool has_start=false) {
+            Appbar appbar = new Appbar (app, this, tabbar, workspace_manager, has_start);
 
-            if (tabbar_at_the_bottom) 
-                appbar.set_valign(Gtk.Align.END);
+            if (tabbar_at_the_bottom)
+                appbar.set_valign (Gtk.Align.END);
             else
-                appbar.set_valign(Gtk.Align.START);
-            appbar.close_window.connect((w) => {
-                    quit();
+                appbar.set_valign (Gtk.Align.START);
+            appbar.close_window.connect ((w) => {
+                    quit ();
                 });
-            appbar.quit_fullscreen.connect((w) => {
-                    toggle_fullscreen();
+            appbar.quit_fullscreen.connect ((w) => {
+                    toggle_fullscreen ();
                 });
 
-            init(workspace_manager, tabbar);
-            init_fullscreen_handler(appbar);
+            init (workspace_manager, tabbar);
+            init_fullscreen_handler (appbar);
 
-            window_state_event.connect((w) => {
-                    appbar.update_max_button();
+            window_state_event.connect ((w) => {
+                    appbar.update_max_button ();
 
                     return false;
                 });
 
-            if (!have_terminal_at_same_workspace()) {
-                set_position(Gtk.WindowPosition.CENTER);
+            if (!have_terminal_at_same_workspace ()) {
+                set_position (Gtk.WindowPosition.CENTER);
             }
 
-            var overlay = new Gtk.Overlay();
-            resize_grip = new Widgets.ResizeGrip(this);
-            top_box.pack_start(fullscreen_box, false, false, 0);
+            var overlay = new Gtk.Overlay ();
+            resize_grip = new Widgets.ResizeGrip (this);
+            top_box.pack_start (fullscreen_box, false, false, 0);
             if (tabbar_at_the_bottom) {
-                box.pack_start(workspace_manager, true, true, 0);
-                box.pack_start(top_box, false, false, 0);
+                box.pack_start (workspace_manager, true, true, 0);
+                box.pack_start (top_box, false, false, 0);
             }
             else {
-                box.pack_start(top_box, false, false, 0);
-                box.pack_start(workspace_manager, true, true, 0);
-                box.pack_start(resize_grip, false, false, 0);
+                box.pack_start (top_box, false, false, 0);
+                box.pack_start (workspace_manager, true, true, 0);
+                box.pack_start (resize_grip, false, false, 0);
             }
 
-            overlay.add(box);
-            overlay.add_overlay(appbar);
+            overlay.add (box);
+            overlay.add_overlay (appbar);
 
-            add_widget(overlay);
-            show_all();
+            add_widget (overlay);
+            show_all ();
         }
 
-        public override void window_save_before_quit() {
+        public override void window_save_before_quit () {
             Cairo.RectangleInt rect;
-            get_window().get_frame_extents(out rect);
+            get_window ().get_frame_extents (out rect);
 
-            if (window_is_normal()) {
-                config.load_config();
-                config.config_file.set_integer("advanced", "window_width", rect.width);
-                config.config_file.set_integer("advanced", "window_height", rect.height);
-                config.save();
+            if (window_is_normal ()) {
+                config.load_config ();
+                config.config_file.set_integer ("advanced", "window_width", rect.width);
+                config.config_file.set_integer ("advanced", "window_height", rect.height);
+                config.save ();
             }
         }
 
-        public override Gdk.CursorType? get_cursor_type(double x, double y) {
+        public override Gdk.CursorType? get_cursor_type (double x, double y) {
             int window_x, window_y;
-            get_window().get_origin(out window_x, out window_y);
+            get_window ().get_origin (out window_x, out window_y);
 
             int width, height;
-            get_size(out width, out height);
+            get_size (out width, out height);
 
             var left_side_start = window_x + window_frame_margin_start - Constant.RESPONSE_RADIUS;
             var left_side_end = window_x + window_frame_margin_start;
             var right_side_start = window_x + width - window_frame_margin_end;
             var right_side_end = window_x + width - window_frame_margin_end + Constant.RESPONSE_RADIUS;
-            var top_side_start = window_y + window_frame_margin_top - Constant.RESPONSE_RADIUS;;
+            var top_side_start = window_y + window_frame_margin_top - Constant.RESPONSE_RADIUS;
             var top_side_end = window_y + window_frame_margin_top;
             var bottom_side_start = window_y + height - window_frame_margin_bottom;
             var bottom_side_end = window_y + height - window_frame_margin_bottom + Constant.RESPONSE_RADIUS;
@@ -804,12 +804,12 @@ namespace Widgets {
             return null;
         }
 
-        public override Gdk.CursorType? get_frame_cursor_type(double x, double y) {
+        public override Gdk.CursorType? get_frame_cursor_type (double x, double y) {
             int window_x, window_y;
-            get_window().get_origin(out window_x, out window_y);
+            get_window ().get_origin (out window_x, out window_y);
 
             int width, height;
-            get_size(out width, out height);
+            get_size (out width, out height);
 
             var left_side_start = window_x;
             var left_side_end = window_x + Constant.RESPONSE_RADIUS;

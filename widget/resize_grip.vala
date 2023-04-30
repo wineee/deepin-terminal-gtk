@@ -36,40 +36,40 @@ namespace Widgets {
         public Cairo.ImageSurface resize_grip_surface;
         public int surface_y;
 
-        public signal void clicked(Gdk.EventButton event);
+        public signal void clicked (Gdk.EventButton event);
 
-        public Grip() {
+        public Grip () {
 
-            resize_grip_surface = Utils.create_image_surface("resize_grip.svg");
-            set_size_request(GRIP_WIDTH, GRIP_HEIGHT);
-            surface_y = (GRIP_HEIGHT - resize_grip_surface.get_height() / get_scale_factor()) / 2;
+            resize_grip_surface = Utils.create_image_surface ("resize_grip.svg");
+            set_size_request (GRIP_WIDTH, GRIP_HEIGHT);
+            surface_y = (GRIP_HEIGHT - resize_grip_surface.get_height () / get_scale_factor ()) / 2;
 
-            draw.connect(on_draw);
+            draw.connect (on_draw);
 
-            enter_notify_event.connect((w, e) => {
+            enter_notify_event.connect ((w, e) => {
                 // set cursor.
-                get_window().set_cursor(new Gdk.Cursor.for_display(Gdk.Display.get_default(),
+                get_window(   ).set_cursor(   new Gdk.Cursor.for_display(   Gdk.Display.get_default(   ),
                                                                    Gdk.CursorType.BOTTOM_RIGHT_CORNER));
 
                 return false;
             });
 
-            leave_notify_event.connect((w, e) => {
+            leave_notify_event.connect ((w, e) => {
                 // set cursor back.
-                get_window().set_cursor(null);
+                get_window(   ).set_cursor(   null);
 
                 return false;
             });
 
-            button_press_event.connect((w, e) => {
-                get_window().begin_resize_drag(Gdk.WindowEdge.SOUTH_EAST, (int)e.button, (int)e.x_root, (int)e.y_root, e.get_time());
+            button_press_event.connect ((w, e) => {
+                get_window ().begin_resize_drag (Gdk.WindowEdge.SOUTH_EAST, (int)e.button, (int)e.x_root, (int)e.y_root, e.get_time ());
 
                 return false;
             });
         }
 
-        private bool on_draw(Gtk.Widget widget, Cairo.Context cr) {
-            Draw.draw_surface(cr, resize_grip_surface, 0, surface_y);
+        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
+            Draw.draw_surface (cr, resize_grip_surface, 0, surface_y);
 
             return true;
         }
@@ -80,39 +80,39 @@ namespace Widgets {
         public Widgets.Window window;
         public Grip grip;
 
-        public ResizeGrip(Widgets.Window win) {
+        public ResizeGrip (Widgets.Window win) {
 
             window = win;
 
-            grip = new Widgets.Grip();
-            grip.set_halign(Gtk.Align.END);
+            grip = new Widgets.Grip ();
+            grip.set_halign (Gtk.Align.END);
 
-            Box box = new Box(Gtk.Orientation.HORIZONTAL, 0);
-            box.pack_start(grip, true, true, 0);
+            Box box = new Box (Gtk.Orientation.HORIZONTAL, 0);
+            box.pack_start (grip, true, true, 0);
 
-            event_area = new Widgets.WindowEventArea(this);
+            event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
 
-            add(box);
-            add_overlay(event_area);
+            add (box);
+            add_overlay (event_area);
 
-            set_size_request(-1, GRIP_HEIGHT);
+            set_size_request (-1, GRIP_HEIGHT);
 
-            Gdk.RGBA background_color = Gdk.RGBA();
+            Gdk.RGBA background_color = Gdk.RGBA ();
 
-            box.draw.connect((w, cr) => {
+            box.draw.connect ((w, cr) => {
                 Gtk.Allocation rect;
-                w.get_allocation(out rect);
+                w.get_allocation (out rect);
 
                 try {
-                    background_color = Utils.hex_to_rgba(window.config.config_file.get_string("theme", "background"));
-                    cr.set_source_rgba(background_color.red, background_color.green, background_color.blue, window.config.config_file.get_double("general", "opacity"));
-                    Draw.draw_rectangle(cr, 0, 0, rect.width, rect.height);
+                    background_color = Utils.hex_to_rgba (window.config.config_file.get_string ("theme", "background"));
+                    cr.set_source_rgba (background_color.red, background_color.green, background_color.blue, window.config.config_file.get_double ("general", "opacity"));
+                    Draw.draw_rectangle (cr, 0, 0, rect.width, rect.height);
                 } catch (Error e) {
-                    print("ResizeGrip draw: %s\n", e.message);
+                    print ("ResizeGrip draw: %s\n", e.message);
                 }
 
-                Utils.propagate_draw((Container) w, cr);
+                Utils.propagate_draw ((Container) w, cr);
 
                 return true;
             });
