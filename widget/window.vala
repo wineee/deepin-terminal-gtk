@@ -62,9 +62,8 @@ namespace Widgets {
             transparent_window ();
             init_window ();
 
-            int monitor = config.get_terminal_monitor ();
-            Gdk.Rectangle rect;
-            screen.get_monitor_geometry (monitor, out rect);
+            Gdk.Monitor monitor = config.get_terminal_monitor ();
+            Gdk.Rectangle rect =  monitor.get_geometry ();;
 
             if (tabbar_at_the_bottom)
                 window_fullscreen_monitor_height = rect.height - window_fullscreen_monitor_height;

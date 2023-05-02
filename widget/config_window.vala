@@ -566,10 +566,8 @@ namespace Widgets {
                     if (show_helper_window_key != "" && keyname == show_helper_window_key) {
                         int x, y;
                         if (quake_mode) {
-                            Gdk.Screen screen = Gdk.Screen.get_default ();
-                            int monitor = config.get_terminal_monitor ();
-                            Gdk.Rectangle rect;
-                            screen.get_monitor_geometry (monitor, out rect);
+                            Gdk.Monitor monitor = config.get_terminal_monitor ();
+                            Gdk.Rectangle rect =  monitor.get_geometry ();;
 
                             x = rect.width / 2;
                             y = rect.height / 2;
