@@ -307,14 +307,19 @@ namespace Utils {
     }
 
     public void load_css_theme (string css_path) {
-        var screen = Gdk.Screen.get_default ();
         var css_provider = new Gtk.CssProvider ();
         try {
             css_provider.load_from_path (css_path);
         } catch (GLib.Error e) {
             print ("Got error when load css: %s\n", e.message);
         }
-        Gtk.StyleContext.add_provider_for_screen (screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+#if USE_GTK3
+            Gdk.Screen screen = Gdk.Screen.get_default ();
+            Gtk.StyleContext.add_provider_for_screen (screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+#else
+            Gdk.Display display = Gdk.Display.get_default ();
+            Gtk.StyleContext.add_provider_for_display (display, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
+#endif
     }
 
     public string slice_string (string str, int unichar_num) {

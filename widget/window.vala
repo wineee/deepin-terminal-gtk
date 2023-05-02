@@ -143,8 +143,24 @@ namespace Widgets {
 
         public void transparent_window () {
             set_app_paintable (true); // set_app_paintable is necessary step to make window transparent.
-            Gdk.Screen screen = Gdk.Screen.get_default(   );
+#if USE_GTK3
+            Gdk.Screen screen = Gdk.Screen.get_default ();
             set_visual (screen.get_rgba_visual ());
+#else
+            // https://github.com/linuxmint/slick-greeter/blob/9bbbc41aa1ae927dfe798e59c0960d74de843fa6/src/main-window.vala#L77
+            try
+            {
+                var style = new Gtk.CssProvider ();
+                style.load_from_data ("* {background-color: transparent;}", -1);
+                var context = menubox.get_style_context ();
+                context.add_provider (style,
+                                    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+            }
+            catch (Error e)
+            {
+                debug ("Internal error loading menubox style: %s", e.message);
+            }
+#endif
         }
 
         public void init_window () {
