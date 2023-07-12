@@ -3,7 +3,7 @@
 
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nix-filter.url = "github:numtide/nix-filter";
   };
 
@@ -23,12 +23,16 @@
           };
 
           devShell = pkgs.mkShell {
-            nativeBuildInputs = packages.default.nativeBuildInputs ++ (with pkgs; [
+            packages = with pkgs; [
               vala-lint
               vala-language-server
               uncrustify
-            ]);
-            inherit (packages.default) buildInputs;
+            ];
+
+            inputsFrom = [
+              packages.default
+            ];
+
             shellHook = ''
               echo "Hello Hack for deepin-terminal-gtk!"
             '';
