@@ -574,22 +574,13 @@ namespace Utils {
         return create_image_surface_from_file (Utils.get_image_path (surface_path));
     }
 
-    public unowned Gdk.Monitor get_active_monitor (Gdk.Display display) {
-        var window = Gdk.get_default_root_window();
-        // FIXME: 'gdk_screen_get_active_window ()' is deprecated
-        // https://stackoverflow.com/questions/41027923/gdk-screen-get-active-window-is-deprecated-since-gtk-version-3-22
+    public int get_active_monitor (Gdk.Screen screen) {
+        var window = screen.get_active_window ();
         if (window != null) {
-            return display.get_monitor_at_window (window);
+            return screen.get_monitor_at_window (window);
         } else {
-            return display.get_primary_monitor ();
+            return screen.get_primary_monitor ();
         }
-    }
-
-    public unowned Gdk.Monitor get_pointer_monitor (Gdk.Display display) {
-        int x, y;
-        get_pointer_position (out x, out y);
-
-        return display.get_monitor_at_point (x, y);
     }
 
     public double get_default_monitor_scale () {
@@ -615,6 +606,13 @@ namespace Utils {
 
         var parsedScale = double.parse (scaleStr);
         return parsedScale == 0 ? 1.0 : parsedScale;
+    }
+
+    public int get_pointer_monitor (Gdk.Screen screen) {
+        int x, y;
+        get_pointer_position (out x, out y);
+
+        return screen.get_monitor_at_point (x, y);
     }
 
     public string get_process_cmdline (int pid) {

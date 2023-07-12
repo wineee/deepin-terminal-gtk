@@ -40,8 +40,10 @@ namespace Widgets {
             Gdk.Screen screen = Gdk.Screen.get_default(   );
             set_visual (screen.get_rgba_visual ());
 
-            Gdk.Monitor monitor = config.get_terminal_monitor ();
-            Gdk.Rectangle rect =  monitor.get_geometry ();;
+            int monitor = config.get_terminal_monitor ();
+
+            Gdk.Rectangle rect;
+            screen.get_monitor_geometry (monitor, out rect);
 
             set_decorated (false);
             set_keep_above (true);
@@ -280,11 +282,12 @@ namespace Widgets {
         }
 
         public void toggle_quake_window () {
-            var display = Gdk.Display.get_default ();    
-            var window_monitor = display.get_monitor_at_window (get_window ());
+            Gdk.Screen screen = Gdk.Screen.get_default ();
+            int monitor = config.get_terminal_monitor ();
+            int window_monitor = screen.get_monitor_at_window (get_window ());
 
-            Gdk.Monitor monitor = config.get_terminal_monitor ();
-            Gdk.Rectangle rect =  monitor.get_geometry ();;
+            Gdk.Rectangle rect;
+            screen.get_monitor_geometry (monitor, out rect);
 
             if (monitor == window_monitor) {
                 var window_state = get_window ().get_state ();
@@ -455,8 +458,9 @@ namespace Widgets {
         }
 
         public override void window_save_before_quit () {
-            Gdk.Monitor monitor = config.get_terminal_monitor ();
-            Gdk.Rectangle rect =  monitor.get_geometry ();;
+            int monitor = config.get_terminal_monitor ();
+            Gdk.Rectangle rect;
+            screen.get_monitor_geometry (monitor, out rect);
 
             int width, height;
             get_size (out width, out height);

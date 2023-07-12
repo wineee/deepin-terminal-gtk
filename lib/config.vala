@@ -468,7 +468,7 @@ namespace Config {
             }
         }
 
-        public unowned Gdk.Monitor get_terminal_monitor () {
+        public int get_terminal_monitor () {
             bool follow_active_window = true;
 
             try {
@@ -477,11 +477,11 @@ namespace Config {
                 print ("Config get_terminal_monitor: %s\n", e.message);
             }
 
-            var display = Gdk.Display.get_default ();
+            Gdk.Screen screen = Gdk.Screen.get_default ();
             if (follow_active_window) {
-                return Utils.get_active_monitor (display);
+                return Utils.get_active_monitor (screen);
             } else {
-                return Utils.get_pointer_monitor (display);
+                return Utils.get_pointer_monitor (screen);
             }
         }
     }
