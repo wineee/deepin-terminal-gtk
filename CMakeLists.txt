@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 
 project(deepin-terminal-gtk
-    VERSION 5.1.0
+    VERSION 5.1.1
     DESCRIPTION "DDE terminal emulator application"
-    HOMEPAGE_URL "https://github.com/wineee/deepin-terminal-gtk"
+    HOMEPAGE_URL "https://github.com/dwapp/deepin-terminal-gtk"
     LANGUAGES C
 )
 
@@ -137,6 +137,7 @@ target_compile_definitions(${target}
     PRIVATE
     GETTEXT_PACKAGE="${target}"
     LOCALEDIR="${LOCALE_INSTALL_DIR}"
+    _XOPEN_SOURCE=700 # https://gitlab.gnome.org/GNOME/gnome-user-share/-/merge_requests/27
 )
 
 target_compile_options(${target}
