@@ -786,7 +786,7 @@ namespace Widgets {
                 title = remote_server_title;
             }
             else {
-                string? vte_window_title = term.get_window_title ();
+                string? vte_window_title = term.window_title;
                 // Use vte window title if vte_window_title is not null.
                 if (vte_window_title != null) {
                     title = vte_window_title;
