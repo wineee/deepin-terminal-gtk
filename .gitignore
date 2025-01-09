@@ -10,6 +10,8 @@ build/
 project_path.c
 lib/constant.vala
 .vscode/
+# lsp
+compile_commands.json
 # nix
 .direnv/
 result

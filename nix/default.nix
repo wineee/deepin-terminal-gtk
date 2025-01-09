@@ -61,12 +61,12 @@ stdenv.mkDerivation rec {
     "-DUSE_GTK4=${if gtkVersion=="4" then "ON" else "OFF" }"
   ];
 
-  meta = with lib; {
+  meta = {
     description = "DDE terminal emulator application";
-    homepage = "https://github.com/wineee/deepin-terminal-gtk";
-    license = licenses.gpl3Plus;
-    platforms = platforms.linux;
-    maintainers = with maintainers; [ rewine ];
+    homepage = "https://github.com/dwapp/deepin-terminal-gtk";
+    license = lib.licenses.gpl3Plus;
+    platforms = lib.platforms.linux;
+    maintainers = with lib.maintainers; [ rewine ];
   };
 }
 

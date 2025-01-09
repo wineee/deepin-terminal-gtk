@@ -24,9 +24,7 @@
 
           devShell = pkgs.mkShell {
             packages = with pkgs; [
-              vala-lint
-              vala-language-server
-              uncrustify
+              # vala-lint
             ];
 
             inputsFrom = [
