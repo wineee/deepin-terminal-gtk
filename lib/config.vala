@@ -132,7 +132,6 @@ namespace Config {
                 config_file.set_string ("advanced", "remote_commands", "zssh");
                 config_file.set_boolean ("advanced", "hide_quakewindow_after_lost_focus", false);
                 config_file.set_boolean ("advanced", "show_quakewindow_tab", true);
-                config_file.set_boolean ("advanced", "follow_active_window", true);
                 config_file.set_boolean ("advanced", "hide_quakewindow_when_active", true);
                 config_file.set_boolean ("advanced", "print_notify_after_script_finish", true);
                 config_file.set_boolean ("advanced", "run_as_login_shell", false);
@@ -353,7 +352,6 @@ namespace Config {
             check_string ("advanced", "remote_commands", "ssh;zssh;tmux;screen");
             check_boolean ("advanced", "hide_quakewindow_after_lost_focus", false);
             check_boolean ("advanced", "show_quakewindow_tab", true);
-            check_boolean ("advanced", "follow_active_window", true);
             check_boolean ("advanced", "hide_quakewindow_when_active", true);
             check_boolean ("advanced", "print_notify_after_script_finish", true);
             check_boolean ("advanced", "run_as_login_shell", false);
@@ -469,20 +467,8 @@ namespace Config {
         }
 
         public int get_terminal_monitor () {
-            bool follow_active_window = true;
-
-            try {
-                follow_active_window = config_file.get_boolean ("advanced", "follow_active_window");
-            } catch (Error e) {
-                print ("Config get_terminal_monitor: %s\n", e.message);
-            }
-
             Gdk.Screen screen = Gdk.Screen.get_default ();
-            if (follow_active_window) {
-                return Utils.get_active_monitor (screen);
-            } else {
-                return Utils.get_pointer_monitor (screen);
-            }
+            return Utils.get_pointer_monitor (screen);
         }
     }
 }

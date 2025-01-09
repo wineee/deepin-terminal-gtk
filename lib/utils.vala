@@ -574,15 +574,6 @@ namespace Utils {
         return create_image_surface_from_file (Utils.get_image_path (surface_path));
     }
 
-    public int get_active_monitor (Gdk.Screen screen) {
-        var window = screen.get_active_window ();
-        if (window != null) {
-            return screen.get_monitor_at_window (window);
-        } else {
-            return screen.get_primary_monitor ();
-        }
-    }
-
     public double get_default_monitor_scale () {
         var display = Display.get_default ();
         if (display != null) {
