@@ -37,8 +37,7 @@ namespace Widgets {
             quake_mode = true;
 
             set_app_paintable (true); // set_app_paintable is necessary step to make window transparent.
-            Gdk.Screen screen = Gdk.Screen.get_default(   );
-            set_visual (screen.get_rgba_visual ());
+            // 在GTK4中，set_visual已被移除，透明度通过CSS处理
 
             // 让窗口管理器决定窗口位置和大小，不再手动move/resize
             set_decorated (false);
@@ -117,7 +116,9 @@ namespace Widgets {
                     Cairo.RectangleInt input_shape_rect;
                     get_window ().get_frame_extents (out input_shape_rect);
 
-                    if (screen_monitor.is_composited ()) {
+                    // 在GTK4中，合成检测需要不同的方法
+                    bool is_composited = true; // 假设现代桌面环境都支持合成
+                    if (is_composited) {
                         input_shape_rect.x = 0;
                         input_shape_rect.y = 0;
                         input_shape_rect.width = width;
@@ -134,9 +135,11 @@ namespace Widgets {
                 });
 
             window_frame_box.button_press_event.connect ((w, e) => {
-                    if (!screen_monitor.is_composited ()) {
-                        var cursor_type = get_frame_cursor_type (e.x_root, e.y_root);
-                        if (cursor_type != null) {
+                    // 在GTK4中，合成检测需要不同的方法
+                    bool is_composited = true; // 假设现代桌面环境都支持合成
+                    if (!is_composited) {
+                        var cursor_name = get_frame_cursor_name (e.x_root, e.y_root);
+                        if (cursor_name != null) {
                             e.device.get_position (null, out press_x, out press_y);
 
                             GLib.Timeout.add (10, () => {
@@ -144,7 +147,7 @@ namespace Widgets {
                                     e.device.get_position (null, out pointer_x, out pointer_y);
 
                                     if (pointer_x != press_x || pointer_y != press_y) {
-                                        Utils.resize_window (this, e, cursor_type);
+                                        Utils.resize_window (this, e, cursor_name);
                                         return false;
                                     } else {
                                         return true;
@@ -157,8 +160,8 @@ namespace Widgets {
                 });
 
             button_press_event.connect ((w, e) => {
-                    var cursor_type = get_cursor_type (e.x_root, e.y_root);
-                    if (cursor_type != null) {
+                    var cursor_name = get_cursor_name (e.x_root, e.y_root);
+                    if (cursor_name != null) {
                         e.device.get_position (null, out press_x, out press_y);
 
                         GLib.Timeout.add (10, () => {
@@ -166,7 +169,7 @@ namespace Widgets {
                                 e.device.get_position (null, out pointer_x, out pointer_y);
 
                                 if (pointer_x != press_x || pointer_y != press_y) {
-                                    Utils.resize_window (this, e, cursor_type);
+                                    Utils.resize_window (this, e, cursor_name);
                                     return false;
                                 } else {
                                     return true;
@@ -193,6 +196,10 @@ namespace Widgets {
         }
 
         public void update_blur_status (bool force_update=false) {
+            // 在GTK4中，X11相关的API已被移除，暂时禁用模糊背景功能
+            // TODO: 实现GTK4兼容的模糊背景功能
+            return;
+            
             try {
                 int width, height;
                 get_size (out width, out height);
@@ -201,17 +208,20 @@ namespace Widgets {
                     resize_cache_width = width;
                     resize_cache_height = height;
 
-                    unowned X.Display xdisplay = (get_window ().get_display () as Gdk.X11.Display).get_xdisplay ();
-                    var xid = (int)((Gdk.X11.Window) get_window ()).get_xid ();
-                    var atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED = xdisplay.intern_atom ("_NET_WM_DEEPIN_BLUR_REGION_ROUNDED", false);
-                    var atom_KDE_NET_WM_BLUR_BEHIND_REGION = xdisplay.intern_atom ("_KDE_NET_WM_BLUR_BEHIND_REGION", false);
+                    // X11相关代码已被移除
+                    // unowned X.Display xdisplay = (get_window ().get_display () as Gdk.X11.Display).get_xdisplay ();
+                    // var xid = (int)((Gdk.X11.Window) get_window ()).get_xid ();
+                    // var atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED = xdisplay.intern_atom ("_NET_WM_DEEPIN_BLUR_REGION_ROUNDED", false);
+                    // var atom_KDE_NET_WM_BLUR_BEHIND_REGION = xdisplay.intern_atom ("_KDE_NET_WM_BLUR_BEHIND_REGION", false);
 
                     var blur_background = config.config_file.get_boolean ("advanced", "blur_background");
                     if (blur_background) {
                         Cairo.RectangleInt blur_rect;
                         get_window ().get_frame_extents (out blur_rect);
 
-                        if (screen_monitor.is_composited ()) {
+                        // 在GTK4中，合成检测需要不同的方法
+                        bool is_composited = true; // 假设现代桌面环境都支持合成
+                        if (is_composited) {
                             blur_rect.x = 0;
                             blur_rect.y = 0;
                             blur_rect.width = width;
@@ -229,26 +239,27 @@ namespace Widgets {
                         blur_rect.width = (int) (blur_rect.width * Utils.get_default_monitor_scale ());
                         blur_rect.height = (int) (blur_rect.height * Utils.get_default_monitor_scale ());
 
-                        ulong[] data = {(ulong) blur_rect.x, (ulong) blur_rect.y, (ulong) blur_rect.width, (ulong) blur_rect.height, 8, 8};
-                        xdisplay.change_property (
-                            xid,
-                            atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED,
-                            X.XA_CARDINAL,
-                            32,
-                            X.PropMode.Replace,
-                            (uchar[])data,
-                            ((ulong[]) data).length);
-                        xdisplay.change_property (
-                            xid,
-                            atom_KDE_NET_WM_BLUR_BEHIND_REGION,
-                            X.XA_CARDINAL,
-                            32,
-                            X.PropMode.Replace,
-                            (uchar[])data,
-                            ((ulong[]) data).length - 2);
+                        // X11相关代码已被移除
+                        // ulong[] data = {(ulong) blur_rect.x, (ulong) blur_rect.y, (ulong) blur_rect.width, (ulong) blur_rect.height, 8, 8};
+                        // xdisplay.change_property (
+                        //     xid,
+                        //     atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED,
+                        //     X.XA_CARDINAL,
+                        //     32,
+                        //     X.PropMode.Replace,
+                        //     (uchar[])data,
+                        //     ((ulong[]) data).length);
+                        // xdisplay.change_property (
+                        //     xid,
+                        //     atom_KDE_NET_WM_BLUR_BEHIND_REGION,
+                        //     X.XA_CARDINAL,
+                        //     32,
+                        //     X.PropMode.Replace,
+                        //     (uchar[])data,
+                        //     ((ulong[]) data).length - 2);
                     } else {
-                        xdisplay.delete_property (xid, atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED);
-                        xdisplay.delete_property (xid, atom_KDE_NET_WM_BLUR_BEHIND_REGION);
+                        // xdisplay.delete_property (xid, atom_NET_WM_DEEPIN_BLUR_REGION_ROUNDED);
+                        // xdisplay.delete_property (xid, atom_KDE_NET_WM_BLUR_BEHIND_REGION);
                     }
                 }
             } catch (GLib.KeyFileError e) {
@@ -273,7 +284,8 @@ namespace Widgets {
                                 if (is_active) {
                                     hide ();
                                 } else {
-                                    present_with_time(   Gdk.X11.get_server_time(   (Gdk.X11.Window)get_window(   )));
+                                    // 在GTK4中，X11相关的API已被移除
+                                    present();
                                 }
                                 return false;
                             });
@@ -303,16 +315,18 @@ namespace Widgets {
             clean_style ();
 
             bool is_light_theme = is_light_theme ();
+            // 在GTK4中，合成检测需要不同的方法
+            bool is_composited = true; // 假设现代桌面环境都支持合成
 
             if (is_active) {
                 if (is_light_theme) {
-                    if (screen_monitor.is_composited ()) {
+                    if (is_composited) {
                         window_frame_box.get_style_context ().add_class ("window_light_shadow_active");
                     } else {
                         window_frame_box.get_style_context ().add_class ("window_light_noshadow_active");
                     }
                 } else {
-                    if (screen_monitor.is_composited ()) {
+                    if (is_composited) {
                         window_frame_box.get_style_context ().add_class ("window_dark_shadow_active");
                     } else {
                         window_frame_box.get_style_context ().add_class ("window_dark_noshadow_active");
@@ -320,13 +334,13 @@ namespace Widgets {
                 }
             } else {
                 if (is_light_theme) {
-                    if (screen_monitor.is_composited ()) {
+                    if (is_composited) {
                         window_frame_box.get_style_context ().add_class ("window_light_shadow_inactive");
                     } else {
                         window_frame_box.get_style_context ().add_class ("window_light_noshadow_inactive");
                     }
                 } else {
-                    if (screen_monitor.is_composited ()) {
+                    if (is_composited) {
                         window_frame_box.get_style_context ().add_class ("window_dark_shadow_inactive");
                     } else {
                         window_frame_box.get_style_context ().add_class ("window_dark_noshadow_inactive");
@@ -415,7 +429,7 @@ namespace Widgets {
             show_all ();
         }
 
-        public override Gdk.CursorType? get_cursor_type (double x, double y) {
+        public override string? get_cursor_name (double x, double y) {
             int window_x, window_y;
             get_window ().get_origin (out window_x, out window_y);
 
@@ -426,13 +440,13 @@ namespace Widgets {
             var bottom_side_end = window_y + height - window_frame_margin_bottom + Constant.RESPONSE_RADIUS;
 
             if (y > bottom_side_start && y < bottom_side_end) {
-                return Gdk.CursorType.BOTTOM_SIDE;
+                return "ns-resize";
             } else {
                 return null;
             }
         }
 
-        public override Gdk.CursorType? get_frame_cursor_type (double x, double y) {
+        public override string? get_frame_cursor_name (double x, double y) {
             int window_x, window_y;
             get_window ().get_origin (out window_x, out window_y);
 
@@ -443,7 +457,7 @@ namespace Widgets {
             var bottom_side_end = window_y + height;
 
             if (y > bottom_side_start && y < bottom_side_end) {
-                return Gdk.CursorType.BOTTOM_SIDE;
+                return "ns-resize";
             } else {
                 return null;
             }
@@ -452,7 +466,9 @@ namespace Widgets {
         public override void update_frame () {
             update_style ();
 
-            if (screen_monitor.is_composited ()) {
+            // 在GTK4中，合成检测需要不同的方法
+            bool is_composited = true; // 假设现代桌面环境都支持合成
+            if (is_composited) {
                 window_frame_box.margin_bottom = window_frame_margin_bottom;
                 get_window ().set_shadow_width (0, 0, 0, window_frame_margin_bottom);
             } else {

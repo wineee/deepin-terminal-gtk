@@ -204,7 +204,7 @@ namespace Widgets {
         public void close_term_except (Term except_term) {
             // We need remove term from it's parent before remove all children from workspace.
             Widget parent_widget = except_term.get_parent(   );
-            ((Container) parent_widget).remove (except_term);
+            parent_widget.remove (except_term);
 
             // Destroy all other terminals, wow! ;)
             foreach (Widget w in get_children(   )) {
@@ -218,7 +218,7 @@ namespace Widgets {
         }
 
         public void close_term (Term term) {
-            Container parent_widget = term.get_parent ();
+            Widget parent_widget = term.get_parent ();
             parent_widget.remove (term);
             term.destroy ();
             term_list.remove (term);
@@ -226,12 +226,12 @@ namespace Widgets {
             clean_unused_parent (parent_widget);
         }
 
-        public void clean_unused_parent (Gtk.Container container) {
+        public void clean_unused_parent (Gtk.Widget container) {
             if (container.get_children ().length () == 0) {
                 if (container.get_type ().is_a (typeof (Workspace))) {
                     exit (index);
                 } else {
-                    Container parent_widget = container.get_parent ();
+                    Widget parent_widget = container.get_parent ();
                     parent_widget.remove (container);
                     container.destroy ();
 
@@ -249,14 +249,14 @@ namespace Widgets {
             }
         }
 
-        public Term get_focus_term (Container container) {
+        public Term get_focus_term (Gtk.Widget container) {
             Widget focus_child = container.get_focus_child ();
             if (terminal_before_popup != null) {
                 return terminal_before_popup;
             } else if (focus_child.get_type ().is_a (typeof (Term))) {
                 return (Term) focus_child;
             } else {
-                return get_focus_term ((Container) focus_child);
+                return get_focus_term (focus_child);
             }
         }
 
@@ -312,19 +312,21 @@ namespace Widgets {
             //         and press: Ctrl+Shfit+j > Ctrl+Shfit+q > Ctrl+Shfit+j > Alt+h > Ctrl+Shfit+j > (should crashed now)
             terminal_before_popup = focus_term;
 
-            Gtk.Allocation alloc;
-            focus_term.get_allocation (out alloc);
+            // 在GTK4中，使用get_width()和get_height()替代get_allocation
+            int alloc_width = focus_term.get_width ();
+            int alloc_height = focus_term.get_height ();
 
             Widget parent_widget = focus_term.get_parent ();
-            ((Container) parent_widget).remove (focus_term);
+            parent_widget.remove (focus_term);
             Paned paned = new Paned (orientation);
             paned.draw.connect ((w, cr) => {
                     var paned_widget = (Paned) w;
 
                     Utils.propagate_draw (paned_widget, cr);
 
-                    Gtk.Allocation rect;
-                    w.get_allocation (out rect);
+                    // 在GTK4中，使用get_width()和get_height()
+                    int rect_width = w.get_width ();
+                    int rect_height = w.get_height ();
 
                     int pos = paned_widget.get_position ();
                     if (pos != 0 && paned_widget.get_child1 () != null && paned_widget.get_child2 () != null) {
@@ -341,16 +343,16 @@ namespace Widgets {
                         }
 
                         if (orientation == Gtk.Orientation.HORIZONTAL) {
-                            Draw.draw_rectangle (cr, pos, 0, 1, rect.height);
+                            Draw.draw_rectangle (cr, pos, 0, 1, rect_height);
                         } else {
-                            Draw.draw_rectangle (cr, 0, pos, rect.width, 1);
+                            Draw.draw_rectangle (cr, 0, pos, rect_width, 1);
                         }
 
                         cr.set_source_rgba (1, 1, 1, 0.1);
                         if (orientation == Gtk.Orientation.HORIZONTAL) {
-                            Draw.draw_rectangle (cr, pos, 0, 1, rect.height);
+                            Draw.draw_rectangle (cr, pos, 0, 1, rect_height);
                         } else {
-                            Draw.draw_rectangle (cr, 0, pos, rect.width, 1);
+                            Draw.draw_rectangle (cr, 0, pos, rect_width, 1);
                         }
                     }
 
@@ -362,9 +364,9 @@ namespace Widgets {
             paned.pack2 (term, true, false);
 
             if (orientation == Gtk.Orientation.HORIZONTAL) {
-                paned.set_position (alloc.width / 2);
+                paned.set_position (alloc_width / 2);
             } else {
-                paned.set_position (alloc.height / 2);
+                paned.set_position (alloc_height / 2);
             }
 
             if (parent_widget.get_type ().is_a (typeof (Workspace))) {
@@ -420,16 +422,18 @@ namespace Widgets {
                 bool show_highlight_frame = parent_window.config.config_file.get_boolean ("advanced", "show_highlight_frame");
                 if (show_highlight_frame) {
                     // Get workspace allocation.
-                    Gtk.Allocation rect;
-                    this.get_allocation (out rect);
+                    // 在GTK4中，使用get_width()和get_height()
+                    int rect_width = this.get_width ();
+                    int rect_height = this.get_height ();
 
                     // Get terminal allocation and coordinate.
                     Term focus_term = get_focus_term(   this);
 
                     int term_x, term_y;
                     focus_term.translate_coordinates (this, 0, 0, out term_x, out term_y);
-                    Gtk.Allocation term_rect;
-                    focus_term.get_allocation (out term_rect);
+                    // 在GTK4中，使用get_width()和get_height()
+                    int term_width = focus_term.get_width ();
+                    int term_height = focus_term.get_height ();
 
                     // Remove temp highlight frame and timeout source id.
                     if (highlight_frame != null) {
@@ -443,11 +447,11 @@ namespace Widgets {
 
                     // Create new highlight frame.
                     highlight_frame = new HighlightFrame(   );
-                    highlight_frame.set_size_request (term_rect.width, term_rect.height);
+                    highlight_frame.set_size_request (term_width, term_height);
                     highlight_frame.margin_start = term_x;
-                    highlight_frame.margin_end = rect.width - term_x - term_rect.width;
+                    highlight_frame.margin_end = rect_width - term_x - term_width;
                     highlight_frame.margin_top = term_y;
-                    highlight_frame.margin_bottom = rect.height - term_y - term_rect.height;
+                    highlight_frame.margin_bottom = rect_height - term_y - term_height;
                     add_overlay (highlight_frame);
                     show_all ();
 
@@ -657,17 +661,18 @@ namespace Widgets {
             remove_command_panel ();
 
             if (remote_panel == null) {
-                Gtk.Allocation rect;
-                get_allocation (out rect);
+                // 在GTK4中，使用get_width()和get_height()
+                int rect_width = get_width ();
+                int rect_height = get_height ();
 
                 remote_panel = new RemotePanel (workspace, workspace_manager);
-                remote_panel.set_size_request (Constant.SLIDER_WIDTH, rect.height);
+                remote_panel.set_size_request (Constant.SLIDER_WIDTH, rect_height);
                 add_overlay (remote_panel);
 
                 show_all ();
 
-                remote_panel.margin_start = rect.width;
-                show_slider_start_x = rect.width;
+                remote_panel.margin_start = rect_width;
+                show_slider_start_x = rect_width;
                 remote_panel_show_timer.reset ();
             }
 
@@ -681,17 +686,18 @@ namespace Widgets {
             remove_remote_panel ();
 
             if (command_panel == null) {
-                Gtk.Allocation rect;
-                get_allocation (out rect);
+                // 在GTK4中，使用get_width()和get_height()
+                int rect_width = get_width ();
+                int rect_height = get_height ();
 
                 command_panel = new CommandPanel (workspace, workspace_manager);
-                command_panel.set_size_request (Constant.SLIDER_WIDTH, rect.height);
+                command_panel.set_size_request (Constant.SLIDER_WIDTH, rect_height);
                 add_overlay (command_panel);
 
                 show_all ();
 
-                command_panel.margin_start = rect.width;
-                show_slider_start_x = rect.width;
+                command_panel.margin_start = rect_width;
+                show_slider_start_x = rect_width;
                 command_panel_show_timer.reset ();
             }
 
@@ -705,18 +711,19 @@ namespace Widgets {
             remove_command_panel ();
 
             if (encoding_panel == null) {
-                Gtk.Allocation rect;
-                get_allocation (out rect);
+                // 在GTK4中，使用get_width()和get_height()
+                int rect_width = get_width ();
+                int rect_height = get_height ();
 
                 Term focus_term = get_focus_term (this);
                 encoding_panel = new EncodingPanel (workspace, workspace_manager, focus_term);
-                encoding_panel.set_size_request (Constant.ENCODING_SLIDER_WIDTH, rect.height);
+                encoding_panel.set_size_request (Constant.ENCODING_SLIDER_WIDTH, rect_height);
                 add_overlay (encoding_panel);
 
                 show_all ();
 
-                encoding_panel.margin_start = rect.width;
-                show_slider_start_x = rect.width;
+                encoding_panel.margin_start = rect_width;
+                show_slider_start_x = rect_width;
                 encoding_panel_show_timer.reset ();
             }
 
@@ -748,17 +755,18 @@ namespace Widgets {
             remove_command_panel ();
 
             if (theme_panel == null) {
-                Gtk.Allocation rect;
-                get_allocation (out rect);
+                // 在GTK4中，使用get_width()和get_height()
+                int rect_width = get_width ();
+                int rect_height = get_height ();
 
                 theme_panel = new ThemePanel (workspace, workspace_manager);
-                theme_panel.set_size_request (Constant.THEME_SLIDER_WIDTH, rect.height);
+                theme_panel.set_size_request (Constant.THEME_SLIDER_WIDTH, rect_height);
                 add_overlay (theme_panel);
 
                 show_all ();
 
-                theme_panel.margin_start = rect.width;
-                show_slider_start_x = rect.width;
+                theme_panel.margin_start = rect_width;
+                show_slider_start_x = rect_width;
                 theme_panel_show_timer.reset ();
             }
 
@@ -910,7 +918,7 @@ namespace Widgets {
             if (panel != null) {
                 Gtk.Widget? panel_parent = panel.get_parent ();
                 if (panel_parent != null) {
-                    ((Gtk.Container) panel_parent).remove (panel);
+                    panel_parent.remove (panel);
                 }
                 panel.destroy ();
             }
@@ -940,10 +948,10 @@ namespace Widgets {
 
         private void hide_panel (Gtk.Widget? panel, int panel_width, AnimateTimer timer) {
             if (panel != null) {
-                Gtk.Allocation rect;
-                get_allocation (out rect);
+                // 在GTK4中，使用get_width()和get_height()
+                int rect_width = get_width ();
 
-                hide_slider_start_x = rect.width - panel_width;
+                hide_slider_start_x = rect_width - panel_width;
                 timer.reset ();
             }
         }

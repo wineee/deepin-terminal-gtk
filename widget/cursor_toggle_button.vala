@@ -25,7 +25,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class CursorToggleButton : Gtk.Bin {
+    public class CursorToggleButton : Gtk.Widget {
         public CursorStyleButton block_button;
         public CursorStyleButton ibeam_button;
         public CursorStyleButton underline_button;
@@ -58,11 +58,11 @@ namespace Widgets {
                     change_cursor_state ("underline");
                 });
 
-            box.pack_start (block_button, false, false, 0);
-            box.pack_start (ibeam_button, false, false, 0);
-            box.pack_start (underline_button, false, false, 0);
+            box.append (block_button);
+            box.append (ibeam_button);
+            box.append (underline_button);
 
-            this.add (box);
+            set_child (box);
 
             show_all ();
         }
@@ -84,7 +84,7 @@ namespace Widgets {
         }
     }
 
-    public class CursorStyleButton : Gtk.Button {
+    public class CursorStyleButton : Gtk.Widget {
         public bool is_active = false;
         public int cursor_width = 36;
         public int cursor_height = 26;
@@ -104,13 +104,13 @@ namespace Widgets {
             press_surface = Utils.create_image_surface (icon_name + "_press.svg");
             checked_surface = Utils.create_image_surface (icon_name + "_checked.svg");
 
-            button_press_event.connect ((w) => {
-                    active ();
-
-                    return false;
-                });
-
-            draw.connect (on_draw);
+            // 在GTK4中，使用EventController替代事件处理
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                active ();
+                return true;
+            });
+            add_controller (click_controller);
         }
 
         public void set_active (bool active) {
@@ -119,8 +119,9 @@ namespace Widgets {
             queue_draw ();
         }
 
-        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            var state_flags = widget.get_state_flags ();
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
+            var state_flags = get_state_flags ();
 
             if (is_active) {
                 Draw.draw_surface (cr, checked_surface);
@@ -131,8 +132,6 @@ namespace Widgets {
             } else {
                 Draw.draw_surface (cr, normal_surface);
             }
-
-            return true;
         }
     }
 }

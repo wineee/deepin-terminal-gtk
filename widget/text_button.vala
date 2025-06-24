@@ -51,7 +51,7 @@ namespace Widgets {
 
             enter_notify_event.connect ((w, e) => {
                     var display = Gdk.Display.get_default ();
-                    get_window ().set_cursor (new Gdk.Cursor.for_display (display, Gdk.CursorType.HAND1));
+                    get_window ().set_cursor (new Gdk.Cursor.from_name ("pointer", display));
 
                     is_hover = true;
                     queue_draw ();

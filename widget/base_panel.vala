@@ -24,7 +24,7 @@
 using Gtk;
 
 namespace Widgets {
-    public class BasePanel : Gtk.HBox {
+    public class BasePanel : Gtk.Box {
         public Widgets.ConfigWindow parent_window;
         public WorkspaceManager workspace_manager;
         public Gdk.RGBA background_color;
@@ -40,7 +40,8 @@ namespace Widgets {
         public int back_button_margin_start = 8;
         public int back_button_margin_top = 6;
 
-        public BasePanel () {
+        public BasePanel (Widgets.ConfigWindow parent_window, WorkspaceManager workspace_manager) {
+            Object (orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
             home_page_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             search_page_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 

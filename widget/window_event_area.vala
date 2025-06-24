@@ -27,9 +27,9 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class WindowEventArea : Gtk.EventBox {
+    public class WindowEventArea : Gtk.Widget {
         public FilterDoubleClick? filter_double_click_callback = null;
-        public Gtk.Container drawing_area;
+        public Gtk.Widget drawing_area;
         public Gtk.Widget? child_before_leave;
         public bool is_double_clicked = false;
         public bool is_press = false;
@@ -39,165 +39,107 @@ namespace Widgets {
 
         public delegate bool FilterDoubleClick (int x, int y);
 
-        public WindowEventArea (Gtk.Container area) {
+        public WindowEventArea (Gtk.Widget area) {
             drawing_area = area;
 
-            visible_window = false;
+            // 在GTK4中，使用EventController替代add_events
+            var motion_controller = new Gtk.EventControllerMotion ();
+            motion_controller.motion.connect ((x, y) => {
+                var child = get_child_at_pos (drawing_area, (int) x, (int) y);
+                child_before_leave = child;
 
-            add_events (Gdk.EventMask.BUTTON_PRESS_MASK
-                       | Gdk.EventMask.BUTTON_RELEASE_MASK
-                       | Gdk.EventMask.POINTER_MOTION_MASK
-                       | Gdk.EventMask.LEAVE_NOTIFY_MASK);
+                if (child != null) {
+                    int child_x, child_y;
+                    drawing_area.translate_coordinates (child, (int) x, (int) y, out child_x, out child_y);
 
-            leave_notify_event.connect ((w, e) => {
-                    if (child_before_leave != null) {
-                        var e2 = e.copy ();
-                        e2.crossing.window = child_before_leave.get_window ();
+                    // 在GTK4中，直接调用子组件的事件处理
+                    child.motion_notify_event (null);
+                }
 
-                        child_before_leave.get_window ().ref ();
-                        ((Gdk.Event*) e2)->put ();
-
-                        child_before_leave = null;
-                    }
-
-                    return false;
+                return true;
             });
 
-            motion_notify_event.connect ((w, e) => {
-                    var child = get_child_at_pos (drawing_area, (int) e.x, (int) e.y);
-                    child_before_leave = child;
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                is_press = true;
+                press_x = x;
+                press_y = y;
 
-                    if (child != null) {
-                        int x, y;
-                        drawing_area.translate_coordinates (child, (int) e.x, (int) e.y, out x, out y);
-
-                        Gdk.EventMotion* event;
-                        event = (Gdk.EventMotion) new Gdk.Event (Gdk.EventType.MOTION_NOTIFY);
-                        event->window = child.get_window ();
-                        event->send_event = 1;
-                        event->time = e.time;
-                        event->x = x;
-                        event->y = y;
-                        event->x_root = e.x_root;
-                        event->y_root = e.y_root;
-                        event->state = e.state;
-                        event->is_hint = e.is_hint;
-                        event->device = e.device;
-                        event->axes = e.axes;
-                        ((Gdk.Event*) event)->put ();
-                    }
-
-                    return true;
-                });
-
-            button_press_event.connect ((w, e) => {
-                    is_press = true;
-
-                    e.device.get_position (null, out press_x, out press_y);
-
-                    GLib.Timeout.add (10, () => {
-                        // blumia: should use begin_move_drag instead of send event to X
-                        //         so it should also works under wayland :)
-                        if (is_press) {
-                            int pointer_x, pointer_y;
-                            e.device.get_position (null, out pointer_x, out pointer_y);
-
-                            if (pointer_x != press_x || pointer_y != press_y) {
-                                Utils.move_window (this, e);
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        } else {
+                GLib.Timeout.add (10, () => {
+                    if (is_press) {
+                        if (x != press_x || y != press_y) {
+                            Utils.move_window (this, null);
                             return false;
+                        } else {
+                            return true;
                         }
-                    });
-
-
-                    var child = get_child_at_pos (drawing_area, (int) e.x, (int) e.y);
-                    if (child != null) {
-                        int x, y;
-                        drawing_area.translate_coordinates (child, (int) e.x, (int) e.y, out x, out y);
-
-                        Gdk.EventButton* event;
-                        event = (Gdk.EventButton) new Gdk.Event (Gdk.EventType.BUTTON_PRESS);
-                        event->window = child.get_window ();
-                        event->send_event = 1;
-                        event->time = e.time;
-                        event->x = x;
-                        event->y = y;
-                        event->x_root = e.x_root;
-                        event->y_root = e.y_root;
-                        event->state = e.state;
-                        event->device = e.device;
-                        event->button = e.button;
-                        ((Gdk.Event*) event)->put ();
+                    } else {
+                        return false;
                     }
+                });
 
-                    if (e.type == Gdk.EventType.BUTTON_PRESS) {
-                        is_double_clicked = true;
+                var child = get_child_at_pos (drawing_area, (int) x, (int) y);
+                if (child != null) {
+                    int child_x, child_y;
+                    drawing_area.translate_coordinates (child, (int) x, (int) y, out child_x, out child_y);
 
-                        // Add timeout to avoid long-long-long time double clicked to cause toggle maximize action.
-                        GLib.Timeout.add(   double_clicked_max_delay, () => {
-                                is_double_clicked = false;
+                    // 在GTK4中，直接调用子组件的事件处理
+                    child.button_press_event (null);
+                }
 
-                                return false;
-                            });
-                    } else if (e.type == Gdk.EventType.2BUTTON_PRESS) {
-                        if (is_double_clicked && Utils.is_left_button (e)) {
-                            if (filter_double_click_callback == null || !filter_double_click_callback ((int) e.x, (int) e.y)) {
-                                if (this.get_toplevel ().get_type ().is_a (typeof (Widgets.Window))) {
-                                    ((Widgets.Window) this.get_toplevel ()).toggle_max ();
-                                }
+                if (n_press == 1) {
+                    is_double_clicked = true;
+
+                    // Add timeout to avoid long-long-long time double clicked to cause toggle maximize action.
+                    GLib.Timeout.add(   double_clicked_max_delay, () => {
+                            is_double_clicked = false;
+
+                            return false;
+                        });
+                } else if (n_press == 2) {
+                    if (is_double_clicked) {
+                        if (filter_double_click_callback == null || !filter_double_click_callback ((int) x, (int) y)) {
+                            if (this.get_toplevel ().get_type ().is_a (typeof (Widgets.Window))) {
+                                ((Widgets.Window) this.get_toplevel ()).toggle_max ();
                             }
                         }
                     }
+                }
 
-                    return true;
-                });
+                return true;
+            });
 
-            button_release_event.connect ((w, e) => {
-                    is_press = false;
+            click_controller.released.connect ((n_press, x, y) => {
+                is_press = false;
 
-                    var child = get_child_at_pos (drawing_area, (int) e.x, (int) e.y);
-                    if (child != null) {
-                        int x, y;
-                        drawing_area.translate_coordinates (child, (int) e.x, (int) e.y, out x, out y);
+                var child = get_child_at_pos (drawing_area, (int) x, (int) y);
+                if (child != null) {
+                    int child_x, child_y;
+                    drawing_area.translate_coordinates (child, (int) x, (int) y, out child_x, out child_y);
 
-                        Gdk.EventButton* event;
-                        event = (Gdk.EventButton) new Gdk.Event (Gdk.EventType.BUTTON_RELEASE);
-                        event->window = child.get_window ();
-                        event->send_event = 1;
-                        event->time = e.time;
-                        event->x = x;
-                        event->y = y;
-                        event->x_root = e.x_root;
-                        event->y_root = e.y_root;
-                        event->state = e.state;
-                        event->device = e.device;
-                        event->button = e.button;
-                        ((Gdk.Event*) event)->put ();
-                    }
+                    // 在GTK4中，直接调用子组件的事件处理
+                    child.button_release_event (null);
+                }
 
-                    return true;
-                });
+                return true;
+            });
+
+            add_controller (motion_controller);
+            add_controller (click_controller);
         }
 
-        public Gtk.Widget? get_child_at_pos (Gtk.Container container, int x, int y) {
+        public Gtk.Widget? get_child_at_pos (Gtk.Widget container, int x, int y) {
             if (container.get_children ().length () > 0) {
                 foreach (Gtk.Widget child in container.get_children ()) {
-                    Gtk.Allocation child_rect;
-                    child.get_allocation (out child_rect);
+                    // 在GTK4中，使用get_width()和get_height()
+                    int child_width = child.get_width ();
+                    int child_height = child.get_height ();
 
                     int child_x, child_y;
                     child.translate_coordinates (container, 0, 0, out child_x, out child_y);
 
-                    if (x >= child_x && x <= child_x + child_rect.width && y >= child_y && y <= child_y + child_rect.height) {
-                        if (child.get_type ().is_a (typeof (Gtk.Container))) {
-                            return get_child_at_pos ((Gtk.Container) child, x - child_x, y - child_y);
-                        } else {
-                            return child;
-                        }
+                    if (x >= child_x && x <= child_x + child_width && y >= child_y && y <= child_y + child_height) {
+                        return child;
                     }
                 }
             }

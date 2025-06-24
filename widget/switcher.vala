@@ -26,7 +26,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class Switcher : Gtk.HBox {
+    public class Switcher : Gtk.Box {
         public AnimateTimer scroll_to_left_timer;
         public AnimateTimer scroll_to_right_timer;
         public Gtk.Box box;
@@ -42,6 +42,7 @@ namespace Widgets {
         public int width;
 
         public Switcher (int w) {
+            Object (orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
             width = w;
 
             scroll_to_left_timer = new AnimateTimer (AnimateTimer.ease_out_quint, scroll_to_left_interval);

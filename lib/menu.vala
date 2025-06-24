@@ -21,164 +21,66 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Gtk;
+using GLib;
 
 namespace Menu {
-    public class MenuItem : Object {
-        public string menu_item_id;
-        public string menu_item_text;
-        public List<MenuItem> menu_item_submenu;
+    public class MenuItem {
+        public string id;
+        public string text;
+        public List<MenuItem> submenu;
 
         public MenuItem (string item_id, string item_text) {
-            menu_item_id = item_id;
-            menu_item_text = item_text;
-
-            menu_item_submenu = new List<MenuItem> ();
-        }
-
-        public void add_submenu_item (MenuItem item) {
-            menu_item_submenu.append (item);
+            id = item_id;
+            text = item_text;
+            submenu = new List<MenuItem> ();
         }
     }
 
-    public class Menu : Object {
-        private bool inited = false;
+    public class MenuBuilder {
+        private Gtk.Popover create_gtk_menu (List<MenuItem> menu_content) {
+            var popover = new Gtk.Popover ();
+            var box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            popover.set_child (box);
 
-        public signal void click_item (string item_id);
-        public signal void destroy ();
-
-        public Menu () {}
-
-        private void init () {
-            if (inited) return;
-
-            inited = true;
-        }
-
-        public void popup_at_position (List<MenuItem> menu_content, int x, int y) {
-            init ();
-            show_gtk_menu_at_pointer (menu_content);
-        }
-
-        private Gtk.Menu create_gtk_menu (List<MenuItem> menu_content) {
-            CssProvider provider = new Gtk.CssProvider ();
-            try {
-                provider.load_from_data (Utils.get_menu_css ());
-            } catch (GLib.Error e) {
-                    warning ("Something bad happened with CSS load %s", e.message);
-            }
-#if USE_GTK3
-            Gdk.Screen screen = Gdk.Screen.get_default ();
-            Gtk.StyleContext.add_provider_for_screen (screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
-#else
-            Gdk.Display display = Gdk.Display.get_default ();
-            Gtk.StyleContext.add_provider_for_display (display, provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
-#endif
-            Gtk.Menu result = new Gtk.Menu ();
-
-            foreach (unowned MenuItem menu_item in menu_content) {
-                var item = create_gtk_menu_item (menu_item.menu_item_id, menu_item.menu_item_text);
-                if (menu_item.menu_item_submenu.length () > 0) {
-                    Gtk.Menu submenu = create_gtk_menu (menu_item.menu_item_submenu);
-                    item.set_submenu (submenu);
+            foreach (MenuItem menu_item in menu_content) {
+                if (menu_item.submenu.length () > 0) {
+                    var submenu_popover = create_gtk_menu (menu_item.submenu);
+                    var submenu_button = create_gtk_menu_button (menu_item.id, menu_item.text, submenu_popover);
+                    box.append (submenu_button);
+                } else {
+                    var menu_button = create_gtk_menu_button (menu_item.id, menu_item.text, null);
+                    box.append (menu_button);
                 }
-                result.append (item);
             }
 
-            return result;
+            return popover;
         }
 
-        private Gtk.MenuItem create_gtk_menu_item (string item_id, string item_text) {
-            Gtk.MenuItem item = (item_text == "") ? new Gtk.SeparatorMenuItem(   ) : new Gtk.MenuItem.with_label(   item_text);
-
-            item.activate.connect (() => {
-                click_item (item_id);
-            });
-
-            return item;
-        }
-
-        private void show_gtk_menu_at_pointer (List<MenuItem> menu_content) {
-            var gtk_menu = create_gtk_menu (menu_content);
-            gtk_menu.show_all ();
-            gtk_menu.popup_at_pointer ();
-        }
-
-        private string get_items_node (List<MenuItem> menu_content) {
-            Json.Builder builder = new Json.Builder ();
-
-            builder.begin_object ();
-
-            builder.set_member_name ("items");
-            builder.begin_array ();
-            foreach (MenuItem item in menu_content) {
-                builder.add_value (get_item_node (item));
-            }
-            builder.end_array ();
-
-            builder.end_object ();
-
-            Json.Generator generator = new Json.Generator ();
-            generator.set_root (builder.get_root ());
-
-            return generator.to_data (null);
-        }
-
-        private Json.Node get_item_node (MenuItem item) {
-            Json.Builder builder = new Json.Builder ();
-
-            builder.begin_object ();
-
-            builder.set_member_name ("itemId");
-            builder.add_string_value (item.menu_item_id);
-
-            builder.set_member_name ("itemText");
-            builder.add_string_value (item.menu_item_text);
-
-            builder.set_member_name ("itemIcon");
-            builder.add_string_value ("");
-
-            builder.set_member_name ("itemIconHover");
-            builder.add_string_value ("");
-
-            builder.set_member_name ("itemIconInactive");
-            builder.add_string_value ("");
-
-            builder.set_member_name ("itemExtra");
-            builder.add_string_value ("");
-
-            builder.set_member_name ("isActive");
-            builder.add_boolean_value (true);
-
-            builder.set_member_name ("checked");
-            builder.add_boolean_value (false);
-
-            builder.set_member_name ("itemSubMenu");
-            unowned List<MenuItem> submenu_items = item.menu_item_submenu;
-
-            if (submenu_items.length () == 0) {
-                builder.add_null_value ();
+        private Gtk.Button create_gtk_menu_button (string item_id, string item_text, Gtk.Popover? submenu) {
+            Gtk.Button button;
+            
+            if (item_text == "") {
+                button = new Gtk.Separator ();
             } else {
-                Json.Builder _builder = new Json.Builder ();
-
-                _builder.begin_object ();
-
-                _builder.set_member_name ("items");
-
-                _builder.begin_array ();
-                foreach (MenuItem _item in submenu_items) {
-                    _builder.add_value (get_item_node (_item));
-                }
-                _builder.end_array ();
-
-                _builder.end_object ();
-
-                builder.add_value (_builder.get_root ());
+                button = new Gtk.Button.with_label (item_text);
+                button.clicked.connect (() => {
+                    // 处理菜单项点击事件
+                    print ("Menu item clicked: %s\n", item_id);
+                });
             }
 
-            builder.end_object ();
+            if (submenu != null) {
+                var submenu_button = new Gtk.MenuButton ();
+                submenu_button.set_popover (submenu);
+                submenu_button.set_label (item_text);
+                return submenu_button;
+            }
 
-            return builder.get_root ();
+            return button;
+        }
+
+        public Gtk.Popover create_menu (List<MenuItem> menu_content) {
+            return create_gtk_menu (menu_content);
         }
     }
 }

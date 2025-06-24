@@ -123,11 +123,12 @@ namespace Widgets {
         }
 
         public void add_focus_handler (PreferenceSlideItem item) {
-            item.button_press_event.connect ((w, e) => {
-                    focus_item (item);
-
-                    return false;
-                });
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                focus_item (item);
+                return true;
+            });
+            item.add_controller (click_controller);
         }
 
         private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
@@ -141,7 +142,7 @@ namespace Widgets {
         }
     }
 
-    public class PreferenceSlideItem : Gtk.EventBox {
+    public class PreferenceSlideItem : Gtk.Widget {
         public string item_name;
         public bool item_active;
         public bool is_first_segment;
@@ -162,8 +163,6 @@ namespace Widgets {
         public int height = 30;
 
         public PreferenceSlideItem (PreferenceSlidebar bar, string display_name, string name, bool is_first) {
-            set_visible_window (false);
-
             item_name = display_name;
             is_first_segment = is_first;
 
@@ -173,34 +172,32 @@ namespace Widgets {
 
             set_size_request (width, height);
 
-            button_press_event.connect ((w, e) => {
-                    bar.click_item (name);
-
-                    return false;
-                });
-
-            draw.connect (on_draw);
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                bar.click_item (name);
+                return true;
+            });
+            add_controller (click_controller);
         }
 
-        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            Gtk.Allocation rect;
-            widget.get_allocation (out rect);
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
             cr.set_source_rgba (1, 1, 1, 1);
-            Draw.draw_rectangle (cr, 0, 0, rect.width - 1, rect.height, true);
+            Draw.draw_rectangle (cr, 0, 0, get_width () - 1, get_height (), true);
 
             if (is_selected) {
                 cr.set_source_rgba (43 / 255.0, 167 / 255.0, 248 / 255.0, 0.20);
-                Draw.draw_rectangle (cr, 0, 0, rect.width, rect.height, true);
+                Draw.draw_rectangle (cr, 0, 0, get_width (), get_height (), true);
 
                 cr.set_source_rgba (43 / 255.0, 167 / 255.0, 248 / 255.0, 0.10);
-                Draw.draw_rectangle (cr, 0, 0, rect.width, 1, true);
+                Draw.draw_rectangle (cr, 0, 0, get_width (), 1, true);
 
                 cr.set_source_rgba (43 / 255.0, 167 / 255.0, 248 / 255.0, 0.10);
-                Draw.draw_rectangle (cr, 0, rect.height - 1, rect.width, 1, true);
+                Draw.draw_rectangle (cr, 0, get_height () - 1, get_width (), 1, true);
 
                 cr.set_source_rgba (43 / 255.0, 167 / 255.0, 248 / 255.0, 1);
-                Draw.draw_rectangle (cr, rect.width - 3, 0, 3, rect.height, true);
+                Draw.draw_rectangle (cr, get_width () - 3, 0, 3, get_height (), true);
             }
 
             if (is_first_segment) {
@@ -209,17 +206,15 @@ namespace Widgets {
                 } else {
                     Utils.set_context_color (cr, first_segment_text_color);
                 }
-                Draw.draw_text (cr, "<b>" + item_name + "</b>", first_segment_margin, 0, rect.width - first_segment_margin, rect.height, first_segment_size);
+                Draw.draw_text (cr, "<b>" + item_name + "</b>", first_segment_margin, 0, get_width () - first_segment_margin, get_height (), first_segment_size);
             } else {
                 if (is_selected) {
                     Utils.set_context_color (cr, highlight_text_color);
                 } else {
                     Utils.set_context_color (cr, second_segment_text_color);
                 }
-                Draw.draw_text (cr, item_name, second_segment_margin, 0, rect.width - second_segment_margin, rect.height, second_segment_size);
+                Draw.draw_text (cr, item_name, second_segment_margin, 0, get_width () - second_segment_margin, get_height (), second_segment_size);
             }
-
-            return true;
         }
     }
 }

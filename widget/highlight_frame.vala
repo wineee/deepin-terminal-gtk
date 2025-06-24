@@ -25,16 +25,15 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class HighlightFrame : Gtk.EventBox {
+    public class HighlightFrame : Gtk.Widget {
         public Gdk.RGBA foreground_color = Gdk.RGBA ();
 
         public HighlightFrame () {
-            draw.connect (on_draw);
+            // 在GTK4中，使用snapshot替代draw
         }
 
-        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            Gtk.Allocation rect;
-            widget.get_allocation (out rect);
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
             try {
                 Widgets.ConfigWindow parent_window = (Widgets.ConfigWindow) this.get_toplevel ();
@@ -44,9 +43,7 @@ namespace Widgets {
             }
 
             cr.set_source_rgba (foreground_color.red, foreground_color.green, foreground_color.blue, 0.4);
-            Draw.draw_rectangle (cr, rect.x, rect.y, rect.width, rect.height, false);
-
-            return true;
+            Draw.draw_rectangle (cr, 0, 0, get_width (), get_height (), false);
         }
     }
 }

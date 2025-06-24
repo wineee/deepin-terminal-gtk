@@ -65,8 +65,8 @@ namespace Widgets {
                     queue_draw ();
 
                     // set cursor.
-                    get_window(   ).set_cursor(   new Gdk.Cursor.for_display(   Gdk.Display.get_default(   ),
-                                                                       Gdk.CursorType.HAND1));
+                    get_window(   ).set_cursor(   new Gdk.Cursor.from_name(   "pointer",
+                                                                       Gdk.Display.get_default(   )));
 
                     return false;
                 });

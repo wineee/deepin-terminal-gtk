@@ -25,27 +25,17 @@ using Gtk;
 using Utils;
 
 namespace Widgets {
-    public class ClickEventBox : Gtk.EventBox {
-        public bool is_press = false;
-
-        public signal void clicked (Gdk.EventButton event);
+    public class ClickEventBox : Gtk.Box {
+        public signal void clicked (double x, double y);
 
         public ClickEventBox () {
-            button_press_event.connect ((w, e) => {
-                    is_press = true;
-
-                    return false;
-                });
-
-            button_release_event.connect ((w, e) => {
-                    if (is_press && Utils.is_left_button (e) && Utils.pointer_in_widget_area (this)) {
-                        clicked (e);
-                    }
-
-                    is_press = false;
-
-                    return false;
-                });
+            Object (orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
+            
+            var gesture = new Gtk.GestureClick ();
+            gesture.pressed.connect ((n_press, x, y) => {
+                clicked (x, y);
+            });
+            add_controller (gesture);
         }
     }
 }

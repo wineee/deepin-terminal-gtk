@@ -19,7 +19,7 @@
 , json-glib
 , gnutls
 , pcre2
-, gtkVersion ? "3"
+, gtkVersion ? "4"
 }:
 
 stdenv.mkDerivation rec {

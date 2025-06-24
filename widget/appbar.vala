@@ -37,7 +37,6 @@ namespace Widgets {
         public Box window_button_box;
         public Box window_close_button_box;
         public Gtk.Widget? focus_widget;
-        public Menu.Menu menu;
         public Tabbar tabbar;
         public Widgets.Window window;
         public Widgets.WindowEventArea event_area;
@@ -51,6 +50,7 @@ namespace Widgets {
         public int logo_width = 48;
         public int titlebar_right_cache_width = 10;
         public int menu_button_width = Constant.WINDOW_BUTTON_WIDHT;
+        public Menu.MenuBuilder menu;
 
         public signal void close_window ();
         public signal void exit_terminal ();
@@ -170,10 +170,10 @@ namespace Widgets {
 
             max_toggle_box.add (max_button);
 
-            box.pack_start (tabbar, true, true, 0);
-            var cache_area = new Gtk.EventBox ();
+            box.pack_start (tabbar);
+            var cache_area = new Gtk.Widget ();
             cache_area.set_size_request (titlebar_right_cache_width, -1);
-            box.pack_start (cache_area, false, false, 0);
+            box.pack_start (cache_area);
             box.pack_start (window_button_box, false, false, 0);
             box.pack_start (window_close_button_box, false, false, 0);
 
@@ -210,7 +210,7 @@ namespace Widgets {
                         print ("Main window: %s\n", e.message);
                     }
 
-                    Utils.propagate_draw ((Container) w, cr);
+                    Utils.propagate_draw ((Gtk.Widget) w, cr);
 
                     return true;
                 });

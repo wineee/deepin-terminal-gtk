@@ -26,7 +26,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class EncodingButton : Gtk.EventBox {
+    public class EncodingButton : Gtk.Widget {
         public Cairo.ImageSurface active_theme_border_surface;
         public Cairo.ImageSurface dark_theme_border_surface;
         public Cairo.ImageSurface light_theme_border_surface;
@@ -67,13 +67,9 @@ namespace Widgets {
                 print ("EncodingButton: %s\n", e.message);
             }
 
-            visible_window = false;
-
             set_size_request (Constant.ENCODING_BUTTON_WIDTH, Constant.ENCODING_BUTTON_HEIGHT);
             margin_start = (Constant.ENCODING_SLIDER_WIDTH - Constant.ENCODING_BUTTON_WIDTH) / 2;
             margin_end = (Constant.ENCODING_SLIDER_WIDTH - Constant.ENCODING_BUTTON_WIDTH) / 2;
-
-            draw.connect (on_draw);
         }
 
         public void active () {
@@ -88,15 +84,14 @@ namespace Widgets {
             queue_draw ();
         }
 
-        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            Gtk.Allocation rect;
-            widget.get_allocation (out rect);
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
             cr.set_source_rgba (background_color.red, background_color.green, background_color.blue, background_color.alpha);
-            Draw.fill_rounded_rectangle (cr, background_padding, background_padding, rect.width - background_padding * 2, rect.height - background_padding * 2, button_radius);
+            Draw.fill_rounded_rectangle (cr, background_padding, background_padding, get_width () - background_padding * 2, get_height () - background_padding * 2, button_radius);
 
             cr.set_source_rgba (content_color.red, content_color.green, content_color.blue, content_color.alpha);
-            Draw.draw_text (cr, encoding_name, content_padding_x, content_padding_y, rect.width, rect.height, content_font_size, Pango.Alignment.LEFT, "top");
+            Draw.draw_text (cr, encoding_name, content_padding_x, content_padding_y, get_width (), get_height (), content_font_size, Pango.Alignment.LEFT, "top");
 
             if (is_active) {
                 Draw.draw_surface (cr, active_theme_border_surface);
@@ -105,12 +100,10 @@ namespace Widgets {
             } else {
                 Draw.draw_surface (cr, dark_theme_border_surface, border_padding, border_padding);
             }
-
-            return true;
         }
     }
 
-    public class EncodingList : Gtk.VBox {
+    public class EncodingList : Gtk.Box {
         public int encoding_button_padding = Constant.ENCODING_BUTTON_PADDING;
         public HashMap<string, EncodingButton> encoding_button_map;
         public EncodingButton? active_encoding_button = null;
@@ -118,20 +111,23 @@ namespace Widgets {
         public signal void active_encoding (string encoding_name);
 
         public EncodingList (string temrinal_encoding, ArrayList<string> encoding_names, Workspace space) {
+            set_orientation (Gtk.Orientation.VERTICAL);
             encoding_button_map = new HashMap<string, EncodingButton> ();
 
             foreach (string encoding_name in encoding_names) {
                 var button = new Widgets.EncodingButton (encoding_name, space);
-                pack_start (button, false, false, encoding_button_padding);
+                append (button);
 
-                button.button_press_event.connect ((w, e) => {
-                        if (Utils.is_left_button (e)) {
-                            active_button (encoding_name);
-                            active_encoding (encoding_name);
-                        }
-
-                        return false;
-                    });
+                // 在GTK4中，使用EventController替代事件处理
+                var click_controller = new Gtk.GestureClick ();
+                click_controller.pressed.connect ((n_press, x, y) => {
+                    if (Utils.is_left_button (x, y)) {
+                        active_button (encoding_name);
+                        active_encoding (encoding_name);
+                    }
+                    return true;
+                });
+                button.add_controller (click_controller);
 
                 encoding_button_map.set (encoding_name, button);
             }

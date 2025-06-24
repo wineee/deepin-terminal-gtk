@@ -25,7 +25,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class SearchPanel : Gtk.HBox {
+    public class SearchPanel : Gtk.Box {
         public Entry search_entry;
         public Gtk.Box clear_button_box;
         public ImageButton clear_button;
@@ -82,7 +82,7 @@ namespace Widgets {
                 });
 
             search_entry.key_press_event.connect ((w, e) => {
-                    string keyname = Keymap.get_keyevent_name (e);
+                    string keyname = Keymap.get_keyevent_name (e.keyval, e.state);
 
                     if (keyname == "Esc") {
                         quit_search ();

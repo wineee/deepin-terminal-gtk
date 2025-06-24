@@ -25,7 +25,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class PasswordButton : Gtk.EventBox {
+    public class PasswordButton : Gtk.Widget {
         public Gtk.Box box;
         public Gtk.Box button_box;
         public ImageButton hide_password_button;
@@ -34,8 +34,6 @@ namespace Widgets {
         public int height = 26;
 
         public PasswordButton () {
-            visible_window = false;
-
             set_size_request (-1, height);
 
             box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
@@ -51,8 +49,8 @@ namespace Widgets {
 
             button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 
-            box.pack_start (entry, true, true, 0);
-            box.pack_start (button_box, false, false, 0);
+            box.append (entry);
+            box.append (button_box);
 
             init ();
 
@@ -96,8 +94,7 @@ namespace Widgets {
                     }
                 });
 
-
-            add (box);
+            set_child (box);
         }
 
         public void init () {
@@ -106,7 +103,7 @@ namespace Widgets {
             entry.get_style_context ().remove_class ("password_invisible_entry");
             entry.get_style_context ().add_class ("password_visible_entry");
             entry.set_visibility (false);
-            button_box.pack_start (show_password_button, false, false, 0);
+            button_box.append (show_password_button);
 
             show_all ();
         }
@@ -117,7 +114,7 @@ namespace Widgets {
             entry.get_style_context ().remove_class ("password_invisible_entry");
             entry.get_style_context ().add_class ("password_visible_entry");
             entry.set_visibility (true);
-            button_box.pack_start (hide_password_button, false, false, 0);
+            button_box.append (hide_password_button);
 
             show_all ();
         }
@@ -128,7 +125,7 @@ namespace Widgets {
             entry.get_style_context ().remove_class ("password_visible_entry");
             entry.get_style_context ().add_class ("password_invisible_entry");
             entry.set_visibility (false);
-            button_box.pack_start (show_password_button, false, false, 0);
+            button_box.append (show_password_button);
 
             show_all ();
         }

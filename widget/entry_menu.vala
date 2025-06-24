@@ -26,7 +26,7 @@ using Utils;
 
 namespace Widgets {
     public class EntryMenu : Object {
-        public Menu.Menu menu;
+        public Menu.MenuBuilder menu;
 
         public EntryMenu () {
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
@@ -46,7 +46,7 @@ namespace Widgets {
             }
             menu_content.append (new Menu.MenuItem ("select_all", _("Select all")));
 
-            menu = new Menu.Menu ();
+            menu = new Menu.MenuBuilder ();
             menu.click_item.connect ((item_id) => {
                     handle_menu_item_click (entry, item_id);
                 });

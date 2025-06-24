@@ -81,10 +81,29 @@ namespace Widgets {
         public Tabbar () {
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
-            add_events (Gdk.EventMask.BUTTON_PRESS_MASK
-                        | Gdk.EventMask.BUTTON_RELEASE_MASK
-                        | Gdk.EventMask.POINTER_MOTION_MASK
-                        | Gdk.EventMask.LEAVE_NOTIFY_MASK);
+            // 在GTK4中，使用EventController替代add_events
+            var motion_controller = new Gtk.EventControllerMotion ();
+            motion_controller.motion.connect ((x, y) => {
+                on_motion_notify (this, x, y);
+                return true;
+            });
+            motion_controller.leave.connect (() => {
+                on_leave_notify (this);
+                return true;
+            });
+
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                on_button_press (this, x, y);
+                return true;
+            });
+            click_controller.released.connect ((n_press, x, y) => {
+                on_button_release (this, x, y);
+                return true;
+            });
+
+            add_controller (motion_controller);
+            add_controller (click_controller);
 
             tab_list = new ArrayList<int> ();
             tab_name_map = new HashMap<int, string> ();
@@ -118,12 +137,8 @@ namespace Widgets {
             text_active_color = Gdk.RGBA ();
             tab_text_color = Gdk.RGBA ();
 
-            draw.connect (on_draw);
-            configure_event.connect (on_configure);
-            button_press_event.connect (on_button_press);
-            button_release_event.connect (on_button_release);
-            motion_notify_event.connect (on_motion_notify);
-            leave_notify_event.connect (on_leave_notify);
+            // 在GTK4中，使用snapshot替代draw
+            snapshot.connect (on_snapshot);
         }
 
         public void init (WorkspaceManager workspace_manager, Widgets.ConfigWindow window) {
@@ -271,7 +286,7 @@ namespace Widgets {
             queue_draw ();
         }
 
-        public bool on_configure (Gtk.Widget widget, Gdk.EventConfigure event) {
+        public bool on_configure (Gtk.Widget widget) {
             update_tab_scale ();
 
             queue_draw ();
@@ -279,26 +294,27 @@ namespace Widgets {
             return false;
         }
 
-        public bool on_button_press (Gtk.Widget widget, Gdk.EventButton event) {
+        public bool on_button_press (Gtk.Widget widget, double x, double y) {
             is_button_press = true;
 
-            event.device.get_position (null, out button_press_x, out button_press_y);
+            button_press_x = x;
+            button_press_y = y;
 
             return false;
         }
 
-        public bool on_button_release (Gtk.Widget widget, Gdk.EventButton event) {
+        public bool on_button_release (Gtk.Widget widget, double x, double y) {
             is_button_press = false;
 
-            if (is_action_mouse_button (event)) {
-                int button_release_x, button_release_y;
-                event.device.get_position (null, out button_release_x, out button_release_y);
+            if (is_action_mouse_button (x, y)) {
+                int button_release_x = (int) x;
+                int button_release_y = (int) y;
 
                 if (button_release_x == button_press_x && button_release_y == button_press_y) {
-                    var release_x = (int)event.x;
+                    var release_x = (int) x;
 
-                    Gtk.Allocation alloc;
-                    widget.get_allocation (out alloc);
+                    // 在GTK4中，使用get_width()替代get_allocation
+                    int alloc_width = widget.get_width ();
 
                     int draw_x = 0;
                     int counter = 0;
@@ -309,14 +325,14 @@ namespace Widgets {
 
                         if (release_x > draw_x && release_x < draw_x + tab_width) {
                             if (release_x > draw_x && release_x < draw_x + tab_width - get_tab_close_button_padding ()) {
-                                if (is_left_button (event)) {
+                                if (is_left_button (x, y)) {
                                     select_nth_tab (counter);
 
                                     press_tab (counter, tab_id);
                                     return false;
                                 }
 
-                                if (is_mouse_wheel (event)) {
+                                if (is_mouse_wheel (x, y)) {
                                     close_nth_tab (counter);
                                     return false;
                                 }
@@ -343,8 +359,8 @@ namespace Widgets {
         }
 
         public int is_at_tab_close_button (int x) {
-            Gtk.Allocation alloc;
-            this.get_allocation (out alloc);
+            // 在GTK4中，使用get_width()替代get_allocation
+            int alloc_width = this.get_width ();
 
             int draw_x = 0;
             int counter = 0;
@@ -367,16 +383,16 @@ namespace Widgets {
             return -1;
         }
 
-        public bool on_motion_notify (Gtk.Widget widget, Gdk.EventMotion event) {
+        public bool on_motion_notify (Gtk.Widget widget, double x, double y) {
             draw_hover = true;
-            hover_x = (int) event.x;
+            hover_x = (int) x;
 
             queue_draw ();
 
             return false;
         }
 
-        public bool on_leave_notify (Gtk.Widget widget, Gdk.EventCrossing event) {
+        public bool on_leave_notify (Gtk.Widget widget) {
             draw_hover = false;
             hover_x = 0;
 
@@ -386,8 +402,8 @@ namespace Widgets {
         }
 
         public void update_tab_scale () {
-            Gtk.Allocation alloc;
-            this.get_allocation (out alloc);
+            // 在GTK4中，使用get_width()替代get_allocation
+            int alloc_width = this.get_width ();
 
             int tab_width = 0;
             foreach (int tab_id in tab_list) {
@@ -397,18 +413,18 @@ namespace Widgets {
                 tab_width += get_tab_render_width (name_width);
             }
 
-            if (tab_width + add_button_width > alloc.width) {
+            if (tab_width + add_button_width > alloc_width) {
                 // FIXME: I know 0.97 is magic number, this number avoid add_button render out of area of tabbar.
                 // Welcome to fix this.
-                draw_scale = (double) alloc.width / (tab_width + add_button_width) * 0.97;
+                draw_scale = (double) alloc_width / (tab_width + add_button_width) * 0.97;
             } else {
                 draw_scale = 1.0;
             }
         }
 
-        public bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            Gtk.Allocation alloc;
-            widget.get_allocation (out alloc);
+        public void on_snapshot (Gtk.Snapshot snapshot) {
+            // 在GTK4中，使用snapshot替代draw
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
             bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
 
@@ -531,7 +547,7 @@ namespace Widgets {
                     }
                 }
 
-                int text_render_y = (alloc.height - max_tab_height) / 2;
+                int text_render_y = (get_height () - max_tab_height) / 2;
                 if (is_hover) {
                     cr.rectangle (draw_x, text_render_y, tab_width - get_tab_close_button_padding () - hover_clip_right_offset, height);
                     cr.clip ();
@@ -570,8 +586,6 @@ namespace Widgets {
                     Draw.draw_surface (cr, add_normal_dark_surface, draw_x, 0, 0, height);
                 }
             }
-
-            return true;
         }
 
         public int get_tab_render_width (int name_width) {

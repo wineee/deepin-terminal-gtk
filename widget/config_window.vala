@@ -30,7 +30,7 @@ namespace Widgets {
         public Config.Config config;
         public Gdk.RGBA title_line_dark_color;
         public Gdk.RGBA title_line_light_color;
-        public Gdk.Screen screen_monitor;
+        public Gdk.Display display;
         public Gtk.Box box;
         public Gtk.Box top_box;
         public Gtk.Box window_frame_box;
@@ -54,6 +54,8 @@ namespace Widgets {
 
         private bool is_show_shortcut_viewer = false;
 
+        public Gtk.Widget? focus_widget;
+
         public ConfigWindow () {
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
@@ -70,8 +72,8 @@ namespace Widgets {
             box = new Box (Gtk.Orientation.VERTICAL, 0);
             top_box = new Box (Gtk.Orientation.HORIZONTAL, 0);
 
-            screen_monitor = Gdk.Screen.get_default ();
-            screen_monitor.composited_changed.connect (() => {
+            display = Gdk.Display.get_default ();
+            display.composited_changed.connect (() => {
                     update_frame ();
                 });
 
@@ -236,16 +238,15 @@ namespace Widgets {
                 });
         }
 
-        public void update_terminal (Gtk.Container container) {
-            container.forall ((child) => {
-                    var child_type = child.get_type ();
-
-                    if (child_type.is_a (typeof (Widgets.Term))) {
-                        ((Widgets.Term) child).setup_from_config ();
-                    } else if (child_type.is_a (typeof (Gtk.Container))) {
-                        update_terminal ((Gtk.Container) child);
-                    }
-                });
+        public void update_terminal (Gtk.Widget widget) {
+            if (widget is Widgets.Term) {
+                ((Widgets.Term) widget).update_font_info ();
+            } else if (widget is Gtk.Box) {
+                var box = (Gtk.Box) widget;
+                foreach (var child in box.get_children ()) {
+                    update_terminal (child);
+                }
+            }
         }
 
         public void show_shortcut_viewer (int x, int y) {
@@ -409,9 +410,9 @@ namespace Widgets {
             Gtk.main_quit ();
         }
 
-        private bool on_key_press (Gtk.Widget widget, Gdk.EventKey key_event) {
+        private bool on_key_press (Gtk.Widget widget, uint keyval, uint keycode, Gdk.ModifierType state) {
             try {
-                string keyname = Keymap.get_keyevent_name (key_event);
+                string keyname = Keymap.get_keyevent_name (keyval, state);
                 var select_workspace_key = config.config_file.get_string ("shortcut", "select_workspace");
                 string[] select_workspace_shortcuts = {
                     "%s + 1".printf(   select_workspace_key),
@@ -597,12 +598,12 @@ namespace Widgets {
                 }
 
                 if (keyname in select_workspace_shortcuts) {
-                    workspace_manager.switch_workspace_with_index (int.parse (Keymap.get_key_name (key_event.keyval)));
+                    workspace_manager.switch_workspace_with_index (int.parse (Keymap.get_key_name (keyval)));
                     return true;
                 }
 
                 if (keyname in new_terminal_shortcuts) {
-                    var theme_name = config.config_file.get_string ("theme_terminal", "theme%i".printf(   int.parse(   Keymap.get_key_name(   key_event.keyval))));
+                    var theme_name = config.config_file.get_string ("theme_terminal", "theme%i".printf(   int.parse(   Keymap.get_key_name(   keyval))));
 
                     try {
                         GLib.AppInfo appinfo = GLib.AppInfo.create_from_commandline ("deepin-terminal-gtk --load-theme '%s'".printf(   theme_name), null, GLib.AppInfoCreateFlags.NONE);
@@ -622,15 +623,15 @@ namespace Widgets {
             }
         }
 
-        private bool on_key_release (Gtk.Widget widget, Gdk.EventKey key_event) {
-            if (Keymap.is_no_key_press (key_event)) {
+        private bool on_key_release (Gtk.Widget widget, uint keyval, uint keycode, Gdk.ModifierType state) {
+            if (Keymap.is_no_key_press (keyval, state)) {
                 if (Utils.is_command_exist ("deepin-shortcut-viewer")) {
                     remove_shortcut_viewer ();
                 }
             }
 
             try {
-                string keyname = Keymap.get_keyevent_name (key_event);
+                string keyname = Keymap.get_keyevent_name (keyval, state);
                 var new_workspace_key = config.config_file.get_string ("shortcut", "new_workspace");
                 if (new_workspace_key != "" && keyname == new_workspace_key) {
                     workspace_manager.new_workspace_with_current_directory ();
@@ -692,15 +693,15 @@ namespace Widgets {
         public virtual void toggle_fullscreen () {
         }
 
-        public virtual Gdk.CursorType? get_frame_cursor_type (double x, double y) {
+        public virtual string? get_frame_cursor_type (double x, double y) {
+            return null;
+        }
+
+        public virtual string? get_cursor_type (double x, double y) {
             return null;
         }
 
         public virtual void update_frame () {
-        }
-
-        public virtual Gdk.CursorType? get_cursor_type (double x, double y) {
-            return null;
         }
 
         public void redraw_window () {

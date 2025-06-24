@@ -27,7 +27,7 @@ using Utils;
 using Widgets;
 
 namespace Widgets {
-    public class ThemePanel : Gtk.HBox {
+    public class ThemePanel : Gtk.Box {
         public Widgets.ConfigWindow parent_window;
         public Widgets.Switcher switcher;
         public WorkspaceManager workspace_manager;
@@ -49,7 +49,8 @@ namespace Widgets {
 
         public delegate void UpdatePageAfterEdit ();
 
-        public ThemePanel (Workspace space, WorkspaceManager manager) {
+        public ThemePanel () {
+            Object (orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace = space;

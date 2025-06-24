@@ -27,10 +27,16 @@ using Widgets;
 namespace Widgets {
     public class DropdownTextButton : Gtk.ComboBoxText {
         public DropdownTextButton () {
-            scroll_event.connect (on_scroll);
+            // 在GTK4中，使用EventController替代scroll_event
+            var scroll_controller = new Gtk.EventControllerScroll ();
+            scroll_controller.scroll.connect ((x, y) => {
+                on_scroll (this, x, y);
+                return true;
+            });
+            add_controller (scroll_controller);
         }
 
-        public bool on_scroll (Gtk.Widget widget, Gdk.EventScroll scroll_event) {
+        public bool on_scroll (Gtk.Widget widget, double x, double y) {
             return true;
         }
     }

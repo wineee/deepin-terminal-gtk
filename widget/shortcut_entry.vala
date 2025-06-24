@@ -24,7 +24,7 @@
 using Gtk;
 
 namespace Widgets {
-    public class ShortcutEntry : Gtk.EventBox {
+    public class ShortcutEntry : Gtk.Widget {
         public Cairo.ImageSurface button_left_surface;
         public Cairo.ImageSurface button_right_surface;
         public Gdk.RGBA active_frame_color;
@@ -53,7 +53,6 @@ namespace Widgets {
             button_left_surface = Utils.create_image_surface ("shortcut_button_left.svg");
             button_right_surface = Utils.create_image_surface ("shortcut_button_right.svg");
 
-            set_visible_window (false);
             set_can_focus (true);
 
             set_size_request (-1, 24);
@@ -74,50 +73,56 @@ namespace Widgets {
             shortcut_frame_color.alpha = 0.30;
             shortcut_font_color = Utils.hex_to_rgba ("#303030");
 
-            draw.connect (on_draw);
-            button_press_event.connect ((w, e) => {
-                    grab_focus ();
+            // 在GTK4中，使用EventController替代事件处理
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                grab_focus ();
 
-                    if (e.type == Gdk.EventType.BUTTON_PRESS) {
-                        is_double_clicked = true;
+                if (n_press == 1) {
+                    is_double_clicked = true;
 
-                        GLib.Timeout.add (double_clicked_max_delay, () => {
-                                is_double_clicked = false;
+                    GLib.Timeout.add (double_clicked_max_delay, () => {
+                            is_double_clicked = false;
 
-                                return false;
-                            });
-                    } else if (e.type == Gdk.EventType.2BUTTON_PRESS) {
-                        if (is_double_clicked) {
-                            shortcut = "";
-                            change_key (shortcut);
-
-                            queue_draw ();
-                        }
-                    }
-
-                    queue_draw ();
-
-                    return false;
-                });
-            key_press_event.connect ((w, e) => {
-                    string keyname = Keymap.get_keyevent_name (e);
-
-                    if (keyname == "Backspace") {
+                            return false;
+                        });
+                } else if (n_press == 2) {
+                    if (is_double_clicked) {
                         shortcut = "";
                         change_key (shortcut);
 
                         queue_draw ();
-                    } else if (keyname == "Ctrl + Tab" || keyname == "Ctrl + Shift + Tab" || keyname == "Shift + Tab") {
-                        return false;
-                    } else if (keyname.has_prefix ("F") || keyname.contains(   "+")) {
-                        shortcut = keyname;
-                        change_key (shortcut);
-
-                        queue_draw ();
                     }
+                }
 
+                queue_draw ();
+
+                return true;
+            });
+
+            var key_controller = new Gtk.EventControllerKey ();
+            key_controller.key_pressed.connect ((keyval, keycode, state) => {
+                string keyname = Keymap.get_keyevent_name (keyval, state);
+
+                if (keyname == "Backspace") {
+                    shortcut = "";
+                    change_key (shortcut);
+
+                    queue_draw ();
+                } else if (keyname == "Ctrl + Tab" || keyname == "Ctrl + Shift + Tab" || keyname == "Shift + Tab") {
                     return false;
-                });
+                } else if (keyname.has_prefix ("F") || keyname.contains(   "+")) {
+                    shortcut = keyname;
+                    change_key (shortcut);
+
+                    queue_draw ();
+                }
+
+                return false;
+            });
+
+            add_controller (click_controller);
+            add_controller (key_controller);
         }
 
         public void set_text (string text) {
@@ -130,14 +135,14 @@ namespace Widgets {
             return shortcut;
         }
 
-        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            Gtk.Allocation rect;
-            widget.get_allocation (out rect);
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            // 在GTK4中，使用snapshot替代draw
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
             if (is_focus) {
-                Draw.stroke_rounded_rectangle (cr, 0, 0, rect.width, rect.height, 4, active_frame_color, background_color);
+                Draw.stroke_rounded_rectangle (cr, 0, 0, get_width (), get_height (), 4, active_frame_color, background_color);
             } else {
-                Draw.stroke_rounded_rectangle (cr, 0, 0, rect.width, rect.height, 4, normal_frame_color, background_color);
+                Draw.stroke_rounded_rectangle (cr, 0, 0, get_width (), get_height (), 4, normal_frame_color, background_color);
             }
 
             if (shortcut == "") {
@@ -147,8 +152,8 @@ namespace Widgets {
                     _("Please enter a new shortcut"),
                     shortcut_font_padding_x,
                     shortcut_font_padding_y,
-                    rect.width - shortcut_font_padding_x * 2,
-                    rect.height - shortcut_font_padding_y * 2,
+                    get_width () - shortcut_font_padding_x * 2,
+                    get_height () - shortcut_font_padding_y * 2,
                     shortcut_font_size);
             } else {
                 int x = shortcut_font_padding_x;
@@ -196,8 +201,6 @@ namespace Widgets {
                 }
 
             }
-
-            return true;
         }
     }
 }

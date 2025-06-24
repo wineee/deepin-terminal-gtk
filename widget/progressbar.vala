@@ -25,7 +25,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class ProgressBar : Gtk.EventBox {
+    public class ProgressBar : Gtk.Widget {
         public double draw_percent;
         public double percent;
         public int height = 22;
@@ -47,25 +47,21 @@ namespace Widgets {
             background_color = Utils.hex_to_rgba ("#A4A4A4");
             pointer_surface = Utils.create_image_surface ("progress_pointer.svg");
 
-            button_press_event.connect ((w, e) => {
-                    Gtk.Allocation rect;
-                    w.get_allocation (out rect);
+            // 在GTK4中，使用EventController替代事件处理
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                set_percent (x * 1.0 / get_width ());
+                return true;
+            });
 
-                    set_percent (e.x * 1.0 / rect.width);
+            var motion_controller = new Gtk.EventControllerMotion ();
+            motion_controller.motion.connect ((x, y) => {
+                set_percent (x * 1.0 / get_width ());
+                return true;
+            });
 
-                    return false;
-                });
-
-            motion_notify_event.connect ((w, e) => {
-                    Gtk.Allocation rect;
-                    w.get_allocation (out rect);
-
-                    set_percent (e.x * 1.0 / rect.width);
-
-                    return false;
-                });
-
-            draw.connect (on_draw);
+            add_controller (click_controller);
+            add_controller (motion_controller);
 
             show_all ();
         }
@@ -79,9 +75,8 @@ namespace Widgets {
             queue_draw ();
         }
 
-        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            Gtk.Allocation rect;
-            widget.get_allocation (out rect);
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
             int left_offset = 0;
             int right_offset = 0;
@@ -97,22 +92,20 @@ namespace Widgets {
             }
 
             Utils.set_context_color (cr, background_color);
-            Draw.draw_rectangle (cr, left_offset, line_margin_top, rect.width - right_offset, line_height);
+            Draw.draw_rectangle (cr, left_offset, line_margin_top, get_width () - right_offset, line_height);
 
             if (draw_percent > 0) {
                 cr.set_source_rgba (1, 0, 1, 1);
                 Utils.set_context_color (cr, foreground_color);
-                Draw.draw_rectangle (cr, left_offset, line_margin_top, (int) (rect.width * draw_percent) - right_offset, line_height);
+                Draw.draw_rectangle (cr, left_offset, line_margin_top, (int) (get_width () * draw_percent) - right_offset, line_height);
             }
 
             Draw.draw_surface (cr,
                               pointer_surface,
                               int.max (-draw_pointer_offset,
-                                      int.min ((int) (rect.width * draw_percent) - pointer_surface.get_width () / 2 / 2,
-                                              rect.width - pointer_surface.get_width () + draw_pointer_offset)),
+                                      int.min ((int) (get_width () * draw_percent) - pointer_surface.get_width () / 2 / 2,
+                                              get_width () - pointer_surface.get_width () + draw_pointer_offset)),
                               0);
-
-            return true;
         }
     }
 }

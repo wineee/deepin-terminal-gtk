@@ -26,7 +26,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class SearchEntry : Gtk.EventBox {
+    public class SearchEntry : Gtk.Widget {
         public AnimateTimer timer;
         public Gtk.Box box;
         public Gtk.Box display_box;
@@ -44,10 +44,34 @@ namespace Widgets {
         public SearchEntry () {
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
-            this.add_events (Gdk.EventMask.BUTTON_PRESS_MASK
-                            | Gdk.EventMask.BUTTON_RELEASE_MASK
-                            | Gdk.EventMask.POINTER_MOTION_MASK
-                            | Gdk.EventMask.LEAVE_NOTIFY_MASK);
+            // 在GTK4中，使用EventController替代add_events
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                display_box.set_halign (Gtk.Align.START);
+                display_box.remove (search_label);
+
+                this.translate_coordinates (search_image, 0, 0, out search_image_animate_start_x, null);
+                search_image_animate_start_x = search_image_animate_start_x.abs () - search_image_margin_x;
+                search_image.margin_start = search_image_margin_x + search_image_animate_start_x;
+
+                timer.reset ();
+
+                return true;
+            });
+
+            var key_controller = new Gtk.EventControllerKey ();
+            key_controller.key_pressed.connect ((keyval, keycode, state) => {
+                string keyname = Keymap.get_keyevent_name (keyval, state);
+                if (keyname == "Esc") {
+                    switch_to_display ();
+                }
+
+                return false;
+            });
+
+            add_controller (click_controller);
+            add_controller (key_controller);
+
             set_size_request (-1, height);
 
             timer = new AnimateTimer (AnimateTimer.ease_in_out, animation_time);
@@ -84,29 +108,7 @@ namespace Widgets {
                     }
                 });
 
-            button_press_event.connect ((w, e) => {
-                    display_box.set_halign (Gtk.Align.START);
-                    display_box.remove (search_label);
-
-                    this.translate_coordinates (search_image, 0, 0, out search_image_animate_start_x, null);
-                    search_image_animate_start_x = search_image_animate_start_x.abs () - search_image_margin_x;
-                    search_image.margin_start = search_image_margin_x + search_image_animate_start_x;
-
-                    timer.reset ();
-
-                    return false;
-                });
-
-            key_press_event.connect ((w, e) => {
-                    string keyname = Keymap.get_keyevent_name (e);
-                    if (keyname == "Esc") {
-                        switch_to_display ();
-                    }
-
-                    return false;
-                });
-
-            add (box);
+            set_child (box);
         }
 
         public void on_animate (double progress) {
@@ -122,10 +124,10 @@ namespace Widgets {
             Utils.remove_all_children (box);
 
             search_image.margin_start = 0;
-            display_box.pack_start (search_image, false, false, 0);
-            display_box.pack_start (search_label, false, false, 0);
+            display_box.append (search_image);
+            display_box.append (search_label);
             display_box.set_halign (Gtk.Align.CENTER);
-            box.pack_start (display_box, true, true, 0);
+            box.append (display_box);
 
             show_all ();
         }
@@ -134,9 +136,9 @@ namespace Widgets {
              Utils.remove_all_children (box);
              Utils.remove_all_children (display_box);
 
-             box.pack_start (search_image, false, false, 0);
-             box.pack_start (search_entry, true, true, 0);
-             box.pack_start (clear_button, false, false, 0);
+             box.append (search_image);
+             box.append (search_entry);
+             box.append (clear_button);
 
              search_image.margin_start = search_image_margin_x;
              search_entry.grab_focus ();

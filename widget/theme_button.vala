@@ -26,7 +26,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class ThemeButton : Gtk.EventBox {
+    public class ThemeButton : Gtk.Widget {
         public Cairo.ImageSurface active_theme_border_surface;
         public Cairo.ImageSurface dark_theme_border_surface;
         public Cairo.ImageSurface light_theme_border_surface;
@@ -69,13 +69,9 @@ namespace Widgets {
                 print ("ThemeButton: %s\n", e.message);
             }
 
-            visible_window = false;
-
             set_size_request (Constant.THEME_BUTTON_WIDTH, Constant.THEME_BUTTON_HEIGHT);
             margin_start = (Constant.THEME_SLIDER_WIDTH - Constant.THEME_BUTTON_WIDTH) / 2;
             margin_end = (Constant.THEME_SLIDER_WIDTH - Constant.THEME_BUTTON_WIDTH) / 2;
-
-            draw.connect (on_draw);
         }
 
         public void active () {
@@ -90,12 +86,11 @@ namespace Widgets {
             queue_draw ();
         }
 
-        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            Gtk.Allocation rect;
-            widget.get_allocation (out rect);
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
-            int clip_width = rect.width - background_padding * 2;
-            int clip_height = rect.height - background_padding * 2;
+            int clip_width = get_width () - background_padding * 2;
+            int clip_height = get_height () - background_padding * 2;
 
             cr.save ();
             // Clip round rectangle when DPI > 1, for perfect radius effect.
@@ -121,18 +116,18 @@ namespace Widgets {
             string prompt_host = "dde@linux:", prompt_path = "~/Theme";
 
             Draw.set_context_source_color (cr, prompt_color_host);
-            Draw.draw_text (cr, prompt_host, title_padding_x, title_padding_y, rect.width, rect.height, title_font_size, Pango.Alignment.LEFT, "top");
+            Draw.draw_text (cr, prompt_host, title_padding_x, title_padding_y, get_width (), get_height (), title_font_size, Pango.Alignment.LEFT, "top");
             int prompt_host_width = Draw.get_text_render_width (cr, prompt_host, clip_width, clip_height, title_font_size);
 
             Draw.set_context_source_color (cr, prompt_color_path);
-            Draw.draw_text (cr, prompt_path, title_padding_x + prompt_host_width, title_padding_y, rect.width, rect.height, title_font_size, Pango.Alignment.LEFT, "top");
+            Draw.draw_text (cr, prompt_path, title_padding_x + prompt_host_width, title_padding_y, get_width (), get_height (), title_font_size, Pango.Alignment.LEFT, "top");
             int prompt_host_n_path_width = Draw.get_text_render_width (cr, prompt_path, clip_width, clip_height, title_font_size) + prompt_host_width;
 
             Draw.set_context_source_color (cr, foreground_color);
-            Draw.draw_text (cr, "$ _", title_padding_x + prompt_host_n_path_width, title_padding_y, rect.width, rect.height, title_font_size, Pango.Alignment.LEFT, "top");
+            Draw.draw_text (cr, "$ _", title_padding_x + prompt_host_n_path_width, title_padding_y, get_width (), get_height (), title_font_size, Pango.Alignment.LEFT, "top");
 
             Draw.set_context_source_color (cr, foreground_color);
-            Draw.draw_text (cr, theme_name, content_padding_x, content_padding_y, rect.width, rect.height, content_font_size, Pango.Alignment.LEFT, "top");
+            Draw.draw_text (cr, theme_name, content_padding_x, content_padding_y, get_width (), get_height (), content_font_size, Pango.Alignment.LEFT, "top");
 
             if (is_active) {
                 Draw.draw_surface (cr, active_theme_border_surface);
@@ -141,12 +136,10 @@ namespace Widgets {
             } else {
                 Draw.draw_surface (cr, dark_theme_border_surface, border_padding, border_padding);
             }
-
-            return true;
         }
     }
 
-    public class ThemeList : Gtk.VBox {
+    public class ThemeList : Gtk.Box {
         public int theme_button_padding = Constant.THEME_BUTTON_PADDING;
         public HashMap<string, ThemeButton> theme_button_map;
         public ThemeButton? active_theme_button = null;
@@ -154,6 +147,7 @@ namespace Widgets {
         public signal void active_theme (string theme_name);
 
         public ThemeList (string default_theme) {
+            set_orientation (Gtk.Orientation.VERTICAL);
             theme_button_map = new HashMap<string, ThemeButton> ();
 
             var theme_names = Utils.list_files (Utils.get_theme_dir ());
@@ -162,16 +156,18 @@ namespace Widgets {
             theme_names.sort ((CompareDataFunc) compare_color_brightness);
             foreach (string theme_name in theme_names) {
                 var button = new Widgets.ThemeButton (theme_name);
-                pack_start (button, false, false, theme_button_padding);
+                append (button);
 
-                button.button_press_event.connect ((w, e) => {
-                        if (Utils.is_left_button (e)) {
-                            active_button (theme_name);
-                            active_theme (theme_name);
-                        }
-
-                        return false;
-                    });
+                // 在GTK4中，使用EventController替代事件处理
+                var click_controller = new Gtk.GestureClick ();
+                click_controller.pressed.connect ((n_press, x, y) => {
+                    if (Utils.is_left_button (x, y)) {
+                        active_button (theme_name);
+                        active_theme (theme_name);
+                    }
+                    return true;
+                });
+                button.add_controller (click_controller);
 
                 theme_button_map.set (theme_name, button);
             }

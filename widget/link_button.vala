@@ -42,7 +42,7 @@ namespace Widgets {
             add (link_label);
             enter_notify_event.connect ((w, e) => {
                     var display = Gdk.Display.get_default ();
-                    get_window ().set_cursor (new Gdk.Cursor.for_display (display, Gdk.CursorType.HAND1));
+                    get_window ().set_cursor (new Gdk.Cursor.from_name ("pointer", display));
 
                     return false;
                 });

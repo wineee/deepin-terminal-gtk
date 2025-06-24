@@ -10,7 +10,6 @@ project(deepin-terminal-gtk
 set(target deepin-terminal-gtk)
 
 option(TEST_BUILD "Build local for test without install" OFF)
-option(USE_GTK4 "Use gtk4 ,Not yet supported" OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # C standard can be overridden when this is used as a sub-project.
@@ -53,14 +52,10 @@ pkg_check_modules(LIBSECRET REQUIRED IMPORTED_TARGET libsecret-1)
 pkg_check_modules(PCRE REQUIRED IMPORTED_TARGET libpcre2-8)
 pkg_check_modules(GNUTLS REQUIRED IMPORTED_TARGET gnutls)
 pkg_check_modules(JsonGlib REQUIRED IMPORTED_TARGET json-glib-1.0)
-if (USE_GTK4)
-    pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk4>=4.10.0)
-    pkg_check_modules(VTE REQUIRED IMPORTED_TARGET vte-2.91-gtk4>=0.69.0)
-else()
-    pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0>=3.22)
-    pkg_check_modules(VTE REQUIRED IMPORTED_TARGET vte-2.91)
-    pkg_check_modules(WNCK REQUIRED IMPORTED_TARGET libwnck-3.0)
-endif()
+
+# GTK4 and VTE4
+pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk4>=4.10.0)
+pkg_check_modules(VTE REQUIRED IMPORTED_TARGET vte-2.91-gtk4>=0.69.0)
 
 # There're 3 releases for 0.59.x, only 0.59.0 keeps old behaviour
 if("${VTE_VERSION}" VERSION_GREATER "0.59.0")
@@ -98,7 +93,6 @@ FOREACH(child ${valalist})
 ENDFOREACH()
 
 set(VALA_PRECOMPILE_PACKAGES
-	xcb
 	gee-0.8
 	json-glib-1.0
 	gio-2.0
@@ -106,24 +100,9 @@ set(VALA_PRECOMPILE_PACKAGES
 	libsecret-1
 	glib-2.0
 	librsvg-2.0
+	gtk4
+	vte-2.91-gtk4
 )
-
-if (USE_GTK4)
-    list(APPEND VALA_PRECOMPILE_PACKAGES
-	    gtk4
-	    vte-2.91-gtk4
-	    gtk4-x11
-	    gtk4-wayland
-	)
-else()
-    list(APPEND VALA_PRECOMPILE_PACKAGES 
-	    gtk+-3.0 
-	    vte-2.91
-	    gdk-x11-3.0
-	    libwnck-3.0
-	)
-	list(APPEND ARGS_DEFINITIONS "USE_GTK3")
-endif()
 
 vala_precompile(VALA_C ./main.vala ${APP_SOURCES}
 	        PACKAGES ${VALA_PRECOMPILE_PACKAGES})
@@ -161,13 +140,6 @@ target_link_libraries(${target}
 	m
 	z
 )
-if (NOT USE_GTK4)
-	target_link_libraries(${target} PkgConfig::WNCK)
-	target_compile_definitions(${target} PRIVATE 
-		USE_GTK3
-		WNCK_I_KNOW_THIS_IS_UNSTABLE
-	)
-endif()
 
 FILE(GLOB children LIST_DIRECTORIES true po/*)
 SET(dirlist "")

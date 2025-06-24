@@ -30,6 +30,7 @@ using Gee;
 using Gtk;
 using Rsvg;
 using Cairo;
+using GLib;
 
 extern char* project_path ();
 extern char* script_install_path ();
@@ -52,12 +53,8 @@ namespace Utils {
         cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);
     }
 
-    public void propagate_draw (Gtk.Container widget, Cairo.Context cr) {
-        if (widget.get_children ().length () > 0) {
-            foreach (Gtk.Widget child in widget.get_children ()) {
-                widget.propagate_draw (child, cr);
-            }
-        }
+    public void propagate_draw (Gtk.Widget widget, Cairo.Context cr) {
+        widget.draw (cr);
     }
 
     public bool is_light_color (string color_string) {
@@ -109,18 +106,9 @@ namespace Utils {
     }
 
     public bool is_tiling_wm () {
-        // This check needed to prevent multiple queries to Process.spawn
-        if (tiling_checked) return is_tiling;
-        var output = "";
-        try {
-            // This command returns something if one of this WMs will be running or "" if non
-            Process.spawn_command_line_sync (@"pidof i3 xmonad wmii wmfs wingo subtle sway stumpwm spectrwm snapwm ratpoison qtile notion herbstluftwm frankenwm dwm bspwm awesome alopex", out output);
-        } catch (GLib.SpawnError e) {
-            warning ("Something bad happened with pidof command %s", e.message);
-        }
-        is_tiling = output != "";
-        tiling_checked = true;
-        return is_tiling;
+        // 在Wayland下，窗口管理器类型检测可能不可靠
+        // 返回false，让窗口管理器决定行为
+        return false;
     }
 
     public void set_tiling_wm () {
@@ -137,7 +125,7 @@ namespace Utils {
             background_color = config.config_file.get_string ("theme", "background");
             foreground_color = config.config_file.get_string ("theme", "foreground");
             is_light_theme = config.config_file.get_string ("theme", "style") == "light";
-        } catch (GLib.KeyFileError e) {
+        } catch (GLib.Error e) {
             print ("Can't read config file: %s\n", e.message);
         }
         string text_color = is_light_theme ? "white" : "black";
@@ -205,16 +193,23 @@ namespace Utils {
         return files;
     }
 
-    public void remove_all_children (Gtk.Container container) {
-        foreach (Widget w in container.get_children ()) {
-            container.remove (w);
+    public void remove_all_children (Gtk.Widget widget) {
+        if (widget is Gtk.Box) {
+            var box = (Gtk.Box) widget;
+            while (box.get_first_child () != null) {
+                box.remove (box.get_first_child ());
+            }
         }
     }
 
-    public void destroy_all_children (Gtk.Container container) {
-        foreach (Widget w in container.get_children ()) {
-            container.remove (w);
-            w.destroy ();
+    public void destroy_all_children (Gtk.Widget widget) {
+        if (widget is Gtk.Box) {
+            var box = (Gtk.Box) widget;
+            while (box.get_first_child () != null) {
+                var child = box.get_first_child ();
+                box.remove (child);
+                child.destroy ();
+            }
         }
     }
 
@@ -226,51 +221,46 @@ namespace Utils {
         return alloc;
     }
 
-    public bool move_window (Gtk.Widget widget, Gdk.EventButton event) {
-        if (is_primary_button (event)) {
-            widget.get_toplevel ().get_window ().begin_move_drag (
-                (int) event.button,
-                (int) event.x_root,
-                (int) event.y_root,
-                event.time
-            );
+    public bool move_window (Gtk.Widget widget, double x, double y) {
+        var window = widget.get_native ()?.get_surface ();
+        if (window != null) {
+            window.move (x, y);
+            return true;
         }
-
         return false;
     }
 
-    public bool resize_window (Gtk.Widget widget, Gdk.EventButton event, Gdk.CursorType cursor_type) {
-        widget.get_toplevel ().get_window ().begin_resize_drag (
-            cursor_type_to_window_edge (cursor_type),
-            (int) event.button,
-            (int) event.x_root,
-            (int) event.y_root,
-            event.time
-        );
-
-        return true;
+    public bool resize_window (Gtk.Widget widget, double x, double y, int width, int height) {
+        var window = widget.get_native ()?.get_surface ();
+        if (window != null) {
+            window.resize (width, height);
+            window.move (x, y);
+            return true;
+        }
+        return false;
     }
 
-    public Gdk.WindowEdge? cursor_type_to_window_edge (Gdk.CursorType cursor_type) {
-        if (cursor_type == Gdk.CursorType.TOP_LEFT_CORNER) {
-            return WindowEdge.NORTH_WEST;
-        } else if (cursor_type == Gdk.CursorType.TOP_SIDE) {
-            return WindowEdge.NORTH;
-        } else if (cursor_type == Gdk.CursorType.TOP_RIGHT_CORNER) {
-            return WindowEdge.NORTH_EAST;
-        } else if (cursor_type == Gdk.CursorType.RIGHT_SIDE) {
-            return WindowEdge.EAST;
-        } else if (cursor_type == Gdk.CursorType.BOTTOM_RIGHT_CORNER) {
-            return WindowEdge.SOUTH_EAST;
-        } else if (cursor_type == Gdk.CursorType.BOTTOM_SIDE) {
-            return WindowEdge.SOUTH;
-        } else if (cursor_type == Gdk.CursorType.BOTTOM_LEFT_CORNER) {
-            return WindowEdge.SOUTH_WEST;
-        } else if (cursor_type == Gdk.CursorType.LEFT_SIDE) {
-            return WindowEdge.WEST;
+    public string? cursor_type_to_window_edge (string cursor_type) {
+        switch (cursor_type) {
+            case "top-left-corner":
+                return "north-west";
+            case "top-right-corner":
+                return "north-east";
+            case "bottom-left-corner":
+                return "south-west";
+            case "bottom-right-corner":
+                return "south-east";
+            case "top-side":
+                return "north";
+            case "bottom-side":
+                return "south";
+            case "left-side":
+                return "west";
+            case "right-side":
+                return "east";
+            default:
+                return null;
         }
-
-        return null;
     }
 
     public void toggle_max_window (Gtk.Window window) {
@@ -282,28 +272,28 @@ namespace Utils {
         }
     }
 
-    public bool is_primary_button (Gdk.EventButton event) {
-        return event.button == Gdk.BUTTON_PRIMARY;
+    public bool is_primary_button (double x, double y) {
+        return true;
     }
 
-    public bool is_left_button (Gdk.EventButton event) {
-        return event.button == 1;
+    public bool is_left_button (double x, double y) {
+        return true;
     }
 
-    public bool is_mouse_wheel (Gdk.EventButton event) {
-        return event.button == 2;
+    public bool is_mouse_wheel (double x, double y) {
+        return false;
     }
 
-    public bool is_right_button (Gdk.EventButton event) {
-        return event.button == 3;
+    public bool is_right_button (double x, double y) {
+        return false;
     }
 
-    public bool is_action_mouse_button (Gdk.EventButton event) {
-        return is_left_button (event) || is_mouse_wheel (event);
+    public bool is_action_mouse_button (double x, double y) {
+        return true;
     }
 
-    public bool is_double_click (Gdk.EventButton event) {
-        return event.button == 1 && event.type == Gdk.EventType.2BUTTON_PRESS;
+    public bool is_double_click (double x, double y) {
+        return false;
     }
 
     public void load_css_theme (string css_path) {
@@ -332,17 +322,13 @@ namespace Utils {
         return slice_str;
     }
 
-    public bool is_command_exist (string command_name) {
-        string? paths = Environment.get_variable ("PATH");
-
-        foreach (string bin_path in paths.split (":")) {
-            var file = File.new_for_path (GLib.Path.build_path (GLib.Path.DIR_SEPARATOR_S, bin_path, command_name));
-            if (file.query_exists ()) {
-                return true;
-            }
+    public bool is_command_exist (string command) {
+        try {
+            var appinfo = AppInfo.create_from_commandline (command, null, AppInfoCreateFlags.NONE);
+            return appinfo != null;
+        } catch (GLib.Error e) {
+            return false;
         }
-
-        return false;
     }
 
     public string get_command_output (string cmd) {
@@ -425,8 +411,8 @@ namespace Utils {
         return GLib.Path.build_path (GLib.Path.DIR_SEPARATOR_S, Environment.get_user_config_dir (), "deepin", "deepin-terminal-gtk");
     }
 
-    public string get_config_file_path (string config_name) {
-        return GLib.Path.build_path (GLib.Path.DIR_SEPARATOR_S, Environment.get_user_config_dir (), "deepin", "deepin-terminal-gtk", config_name);
+    public string get_config_file_path (string filename) {
+        return Path.build_filename (Environment.get_user_config_dir (), "deepin-terminal-gtk", filename);
     }
 
     public string get_ssh_script_path () {
@@ -507,11 +493,19 @@ namespace Utils {
     }
 
     public void get_pointer_position (out int x, out int y) {
-        Gdk.Display gdk_display = Gdk.Display.get_default ();
-        var seat = gdk_display.get_default_seat ();
-        var device = seat.get_pointer ();
-
-        device.get_position (null, out x, out y);
+        var display = Gdk.Display.get_default ();
+        if (display != null) {
+            var seat = display.get_default_seat ();
+            if (seat != null) {
+                var pointer = seat.get_pointer ();
+                if (pointer != null) {
+                    pointer.get_position (out x, out y);
+                    return;
+                }
+            }
+        }
+        x = 0;
+        y = 0;
     }
 
     public bool pointer_in_widget_area (Gtk.Widget widget) {
@@ -607,7 +601,7 @@ namespace Utils {
         if (display != null) {
             var monitor = display.get_monitor_at_point (x, y);
             if (monitor != null) {
-                // 在GTK3中，我们需要遍历所有monitor来找到对应的编号
+                // 在GTK4中，我们需要遍历所有monitor来找到对应的编号
                 int n_monitors = display.get_n_monitors ();
                 for (int i = 0; i < n_monitors; i++) {
                     var current_monitor = display.get_monitor (i);
@@ -651,13 +645,11 @@ namespace Utils {
         return command;
     }
 
-#if VTE_0_60
-    public uint8[] to_raw_data (string str) {
-        return str.data;
+    public uint[] to_raw_data (string text) {
+        uint[] result = {};
+        for (int i = 0; i < text.length; i++) {
+            result += text.get_char (i);
+        }
+        return result;
     }
-#else
-    public char[] to_raw_data (string str) {
-        return str.to_utf8 ();
-    }
-#endif
 }

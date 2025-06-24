@@ -31,12 +31,12 @@ namespace Widgets {
     private static int GRIP_WIDTH = 8;
     public static int GRIP_HEIGHT = 8;
 
-    public class Grip : Gtk.EventBox {
+    public class Grip : Gtk.Widget {
 
         public Cairo.ImageSurface resize_grip_surface;
         public int surface_y;
 
-        public signal void clicked (Gdk.EventButton event);
+        public signal void clicked ();
 
         public Grip () {
 
@@ -44,34 +44,34 @@ namespace Widgets {
             set_size_request (GRIP_WIDTH, GRIP_HEIGHT);
             surface_y = (GRIP_HEIGHT - resize_grip_surface.get_height () / get_scale_factor ()) / 2;
 
-            draw.connect (on_draw);
-
-            enter_notify_event.connect ((w, e) => {
+            // 在GTK4中，使用EventController替代事件处理
+            var motion_controller = new Gtk.EventControllerMotion ();
+            motion_controller.enter.connect ((x, y) => {
                 // set cursor.
-                get_window(   ).set_cursor(   new Gdk.Cursor.for_display(   Gdk.Display.get_default(   ),
-                                                                   Gdk.CursorType.BOTTOM_RIGHT_CORNER));
-
-                return false;
+                get_native ().get_surface ().set_cursor (new Gdk.Cursor.for_name ("se-resize"));
+                return true;
             });
 
-            leave_notify_event.connect ((w, e) => {
+            motion_controller.leave.connect (() => {
                 // set cursor back.
-                get_window(   ).set_cursor(   null);
-
-                return false;
+                get_native ().get_surface ().set_cursor (null);
+                return true;
             });
 
-            button_press_event.connect ((w, e) => {
-                get_window ().begin_resize_drag (Gdk.WindowEdge.SOUTH_EAST, (int)e.button, (int)e.x_root, (int)e.y_root, e.get_time ());
-
-                return false;
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                get_native ().begin_resize (Gdk.SurfaceEdge.SOUTH_EAST, null, x, y);
+                clicked ();
+                return true;
             });
+
+            add_controller (motion_controller);
+            add_controller (click_controller);
         }
 
-        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            var cr = snapshot.append_cairo ({{0, 0}, {GRIP_WIDTH, GRIP_HEIGHT}});
             Draw.draw_surface (cr, resize_grip_surface, 0, surface_y);
-
-            return true;
         }
     }
 
@@ -88,7 +88,7 @@ namespace Widgets {
             grip.set_halign (Gtk.Align.END);
 
             Box box = new Box (Gtk.Orientation.HORIZONTAL, 0);
-            box.pack_start (grip, true, true, 0);
+            box.append (grip);
 
             event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
@@ -100,19 +100,19 @@ namespace Widgets {
 
             Gdk.RGBA background_color = Gdk.RGBA ();
 
-            box.draw.connect ((w, cr) => {
-                Gtk.Allocation rect;
-                w.get_allocation (out rect);
+            box.snapshot.connect ((snapshot) => {
+                // 在GTK4中，使用snapshot替代draw
+                var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
                 try {
                     background_color = Utils.hex_to_rgba (window.config.config_file.get_string ("theme", "background"));
                     cr.set_source_rgba (background_color.red, background_color.green, background_color.blue, window.config.config_file.get_double ("general", "opacity"));
-                    Draw.draw_rectangle (cr, 0, 0, rect.width, rect.height);
+                    Draw.draw_rectangle (cr, 0, 0, get_width (), get_height ());
                 } catch (Error e) {
                     print ("ResizeGrip draw: %s\n", e.message);
                 }
 
-                Utils.propagate_draw ((Container) w, cr);
+                Utils.propagate_draw (box, cr);
 
                 return true;
             });

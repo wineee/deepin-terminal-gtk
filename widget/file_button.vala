@@ -25,7 +25,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class FileButton : Gtk.EventBox {
+    public class FileButton : Gtk.Widget {
         public Gtk.Box box;
         public Gtk.Box button_box;
         public ImageButton file_add_button;
@@ -34,8 +34,6 @@ namespace Widgets {
 
         public FileButton () {
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-
-            visible_window = false;
 
             set_size_request (-1, height);
 
@@ -49,17 +47,17 @@ namespace Widgets {
 
             button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
 
-            box.pack_start (entry, true, true, 0);
-            box.pack_start (button_box, false, false, 0);
+            box.append (entry);
+            box.append (button_box);
 
             entry.get_style_context ().add_class ("file_add_entry");
-            button_box.pack_start (file_add_button, false, false, 0);
+            button_box.append (file_add_button);
 
             file_add_button.clicked.connect ((w, e) => {
                     select_private_key_file ();
                 });
 
-            add (box);
+            set_child (box);
         }
 
         public void select_private_key_file () {

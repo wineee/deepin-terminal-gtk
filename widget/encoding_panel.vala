@@ -27,7 +27,7 @@ using Utils;
 using Widgets;
 
 namespace Widgets {
-    public class EncodingPanel : Gtk.HBox {
+    public class EncodingPanel : Gtk.Box {
         public Widgets.Switcher switcher;
         public Widgets.ConfigWindow parent_window;
         public Workspace workspace;
@@ -51,6 +51,7 @@ namespace Widgets {
         public delegate void UpdatePageAfterEdit ();
 
         public EncodingPanel (Workspace space, WorkspaceManager manager, Term term) {
+            Object (orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace = space;

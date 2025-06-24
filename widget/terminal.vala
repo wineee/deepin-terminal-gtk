@@ -43,7 +43,7 @@ namespace Widgets {
         public Gdk.RGBA background_color = Gdk.RGBA ();
         public Gdk.RGBA foreground_color = Gdk.RGBA ();
         public Gtk.Scrollbar scrollbar;
-        public Menu.Menu menu;
+        public Menu.MenuBuilder menu;
         public Terminal term;
         public WorkspaceManager workspace_manager;
         public bool child_has_exit = false;
@@ -212,17 +212,37 @@ namespace Widgets {
                 });
 
             /* target entries specify what kind of data the terminal widget accepts */
-            Gtk.TargetEntry uri_entry = { "text/uri-list", Gtk.TargetFlags.OTHER_APP, DropTargets.URILIST };
-            Gtk.TargetEntry string_entry = { "STRING", Gtk.TargetFlags.OTHER_APP, DropTargets.STRING };
-            Gtk.TargetEntry text_entry = { "text/plain", Gtk.TargetFlags.OTHER_APP, DropTargets.TEXT };
+            // 在GTK4中，使用DropTarget替代drag_dest_set
+            var drop_target = new Gtk.DropTarget (GType.STRING, Gdk.DragAction.COPY);
+            drop_target.drop.connect ((value, x, y) => {
+                var data = value.get_string ();
+                if (data != null) {
+                    this.term.feed_child (Utils.to_raw_data (data));
+                }
+                return true;
+            });
+            add_controller (drop_target);
 
-            Gtk.TargetEntry[] targets = { };
-            targets += uri_entry;
-            targets += string_entry;
-            targets += text_entry;
-
-            Gtk.drag_dest_set (this, Gtk.DestDefaults.ALL, targets, Gdk.DragAction.COPY);
-            this.drag_data_received.connect (drag_received);
+            // 添加URI列表支持
+            var uri_drop_target = new Gtk.DropTarget (GType.STRING, Gdk.DragAction.COPY);
+            uri_drop_target.drop.connect ((value, x, y) => {
+                var uris = value.get_string ();
+                if (uris != null) {
+                    // 处理URI列表
+                    string[] uri_array = uris.split ("\n");
+                    foreach (string uri in uri_array) {
+                        if (uri.has_prefix ("file://")) {
+                            var file = File.new_for_uri (uri);
+                            var path = file.get_path ();
+                            if (path != null) {
+                                this.term.feed_child (Utils.to_raw_data (path + " "));
+                            }
+                        }
+                    }
+                }
+                return true;
+            });
+            add_controller (uri_drop_target);
 
             /* Make Links Clickable */
             this.clickable (REGEX_STRINGS);
@@ -458,7 +478,7 @@ namespace Widgets {
             menu_content.append (new Menu.MenuItem ("", ""));
             menu_content.append (new Menu.MenuItem ("preference", _("Settings")));
 
-            menu = new Menu.Menu ();
+            menu = new Menu.MenuBuilder ();
             menu.click_item.connect (handle_menu_item_click);
             menu.destroy.connect (handle_menu_destroy);
             menu.popup_at_position (menu_content, x, y);
@@ -706,47 +726,23 @@ namespace Widgets {
         }
 
         public void press_ctrl_at () {
-            Gdk.EventKey* event;
-            event = (Gdk.EventKey*) new Gdk.Event (Gdk.EventType.KEY_PRESS);
-            var window = term.get_window ();
-            event->window = window;
-            event->keyval = 64;
-            event->state = (Gdk.ModifierType) 33554437;
-            event->hardware_keycode = (uint16) 11;
-            ((Gdk.Event*) event)->put ();
+            // 在GTK4中，直接使用VTE的feed_child方法
+            this.term.feed_child (Utils.to_raw_data ("@"));
         }
 
         public void press_ctrl_k () {
-            Gdk.EventKey* event;
-            event = (Gdk.EventKey*) new Gdk.Event (Gdk.EventType.KEY_PRESS);
-            var window = term.get_window ();
-            event->window = window;
-            event->keyval = 75;
-            event->state = (Gdk.ModifierType) 33554437;
-            event->hardware_keycode = (uint16) 45;
-            ((Gdk.Event*) event)->put ();
+            // 在GTK4中，直接使用VTE的feed_child方法
+            this.term.feed_child (Utils.to_raw_data ("\x0b")); // Ctrl+K
         }
 
         public void press_ctrl_a () {
-            Gdk.EventKey* event;
-            event = (Gdk.EventKey*) new Gdk.Event (Gdk.EventType.KEY_PRESS);
-            var window = term.get_window ();
-            event->window = window;
-            event->keyval = 97;
-            event->state = (Gdk.ModifierType) 33554436;
-            event->hardware_keycode = (uint16) 38;
-            ((Gdk.Event*) event)->put ();
+            // 在GTK4中，直接使用VTE的feed_child方法
+            this.term.feed_child (Utils.to_raw_data ("\x01")); // Ctrl+A
         }
 
         public void press_ctrl_e () {
-            Gdk.EventKey* event;
-            event = (Gdk.EventKey*) new Gdk.Event (Gdk.EventType.KEY_PRESS);
-            var window = term.get_window ();
-            event->window = window;
-            event->keyval = 69;
-            event->state = (Gdk.ModifierType) 33554437;
-            event->hardware_keycode = (uint16) 26;
-            ((Gdk.Event*) event)->put ();
+            // 在GTK4中，直接使用VTE的feed_child方法
+            this.term.feed_child (Utils.to_raw_data ("\x05")); // Ctrl+E
         }
 
         public void handle_menu_destroy () {
@@ -820,17 +816,18 @@ namespace Widgets {
             return current_dir;
         }
 
-        public bool on_scroll (Gtk.Widget widget, Gdk.EventScroll scroll_event) {
-            if ((scroll_event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+        public bool on_scroll (Gtk.Widget widget, double x, double y, double dx, double dy) {
+            // 在GTK4中，使用GestureScroll
+            if (dx != 0 || dy != 0) {
                 try {
                     Widgets.ConfigWindow window = (Widgets.ConfigWindow) term.get_toplevel ();
 
                     double old_opacity = window.config.config_file.get_double ("general", "opacity");
                     double new_opacity = old_opacity;
 
-                    if (scroll_event.delta_y < 0) {
+                    if (dy < 0) {
                         new_opacity = double.min (double.max (old_opacity + 0.01, Constant.TERMINAL_MIN_OPACITY), 1);
-                    } else if (scroll_event.delta_y > 0) {
+                    } else if (dy > 0) {
                         new_opacity = double.min (double.max (old_opacity - 0.01, Constant.TERMINAL_MIN_OPACITY), 1);
                     }
 
@@ -851,10 +848,10 @@ namespace Widgets {
             return false;
         }
 
-        private bool on_key_press (Gtk.Widget widget, Gdk.EventKey key_event) {
+        private bool on_key_press (Gtk.Widget widget, uint keyval, uint keycode, Gdk.ModifierType state) {
             // Exit terminal if got `child_exited' signal by command execute finish.
             if (child_has_exit && is_launch_command(   ) && workspace_manager.is_first_term(   this)) {
-                string keyname = Keymap.get_keyevent_name (key_event);
+                string keyname = Keymap.get_keyevent_name (keyval, state);
                 if (keyname == "Enter") {
                     // Exit key press callback if current terminal has exit.
                     exit(   );
@@ -867,7 +864,7 @@ namespace Widgets {
             press_anything = true;
 
             try {
-                string keyname = Keymap.get_keyevent_name (key_event);
+                string keyname = Keymap.get_keyevent_name (keyval, state);
 
                 Widgets.ConfigWindow parent_window = (Widgets.ConfigWindow) term.get_toplevel ();
 
@@ -1059,65 +1056,6 @@ namespace Widgets {
             }
         }
 
-        public void drag_received (Gdk.DragContext context, int x, int y,
-                                   Gtk.SelectionData selection_data, uint target_type, uint time_) {
-            term.grab_focus ();
-
-            switch (target_type) {
-            case DropTargets.URILIST:
-                var uris = selection_data.get_uris ();
-
-                string path;
-                File file;
-
-                // Drag file to remote server if terminal is login.
-                if (login_remote_server) {
-                    for (var i = 0; i < uris.length; i++) {
-                        file = File.new_for_uri (uris[i]);
-                        if ((path = file.get_path ()) != null) {
-                            uris[i] = Shell.quote (path);
-                        }
-                    }
-
-                    press_ctrl_at ();
-                    GLib.Timeout.add (500, () => {
-                            string upload_command = "sz ";
-                            foreach (string file_path in uris) {
-                                upload_command = upload_command + "'" + file_path + "' ";
-                            }
-                            upload_command = upload_command + "\n";
-
-                            this.term.feed_child (Utils.to_raw_data (upload_command));
-
-                            return false;
-                        });
-                }
-                // Just copy file path if terminal at local.
-                else {
-                    for (var i = 0; i < uris.length; i++) {
-                        file = File.new_for_uri (uris[i]);
-                        if ((path = file.get_path ()) != null) {
-                            uris[i] = Shell.quote (path) + " ";
-                        }
-                    }
-
-                    string uris_s = string.joinv ("", uris);
-                    this.term.feed_child (Utils.to_raw_data (uris_s));
-                }
-
-                break;
-            case DropTargets.STRING:
-            case DropTargets.TEXT:
-                var data = selection_data.get_text ();
-
-                if (data != null) {
-                    this.term.feed_child (Utils.to_raw_data (data));
-                }
-
-                break;
-            }
-        }
-
         private void clickable (string[] str) {
             try {
                 foreach (string exp in str) {
@@ -1132,7 +1070,8 @@ namespace Widgets {
                                                    GLib.RegexCompileFlags.MULTILINE,
                                                    0);
                         int id = term.match_add_gregex (regex, 0);
-                        term.match_set_cursor_type (id, Gdk.CursorType.HAND2);
+                        // 在GTK4中，使用cursor_name替代cursor_type
+                        term.match_set_cursor_name (id, "pointer");
 #endif
 
                     } catch (GLib.RegexError error) {

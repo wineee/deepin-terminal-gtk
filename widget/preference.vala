@@ -565,20 +565,19 @@ namespace Widgets {
             segment.set_xalign (0);
 
             var box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-            box.pack_start (segment, false, false, 0);
+            box.append (segment);
 
-            var line = new Gtk.EventBox ();
+            var line = new Gtk.Widget ();
             line.margin_start = preference_split_line_margin_start;
-            line.draw.connect ((w, cr) => {
-                    Gtk.Allocation rect;
-                    this.get_allocation (out rect);
+            line.snapshot.connect ((snapshot) => {
+                var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
-                    cr.set_source_rgba (0, 0, 0, 0.1);
-                    Draw.draw_rectangle (cr, 0, 12, rect.width, 1);
+                cr.set_source_rgba (0, 0, 0, 0.1);
+                Draw.draw_rectangle (cr, 0, 12, get_width (), 1);
 
-                    return true;
-                });
-            box.pack_start (line, true, true, 0);
+                return true;
+            });
+            box.append (line);
 
             box.margin_top = segment_margin_top;
             box.margin_bottom = segment_margin_bottom;
