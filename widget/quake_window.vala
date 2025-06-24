@@ -40,19 +40,12 @@ namespace Widgets {
             Gdk.Screen screen = Gdk.Screen.get_default(   );
             set_visual (screen.get_rgba_visual ());
 
-            int monitor = config.get_terminal_monitor ();
-
-            Gdk.Rectangle rect;
-            screen.get_monitor_geometry (monitor, out rect);
-
+            // 让窗口管理器决定窗口位置和大小，不再手动move/resize
             set_decorated (false);
             set_keep_above (true);
-
             set_skip_taskbar_hint (true);
             set_skip_pager_hint (true);
-            // NOTE: Don't change other type, otherwise window can't resize by user.
             set_type_hint(   Gdk.WindowTypeHint.MENU);
-            move (rect.x, 0);
 
             window_frame_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             window_widget_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
@@ -67,20 +60,8 @@ namespace Widgets {
                         var quake_window_fullscreen = config.config_file.get_boolean ("advanced", "quake_window_fullscreen");
                         if (quake_window_fullscreen) {
                             fullscreen ();
-                        } else {
-                            // Don't make quake window too height that can't resize quake window from bottom edge.
-                            var config_height = config.config_file.get_double(   "advanced", "quake_window_height");
-                            if (config_height > window_max_height_scale) {
-                                config_height = window_max_height_scale;
-                            }
-
-                            // Set default size.
-                            if (config_height == 0) {
-                                set_default_size (rect.width, (int) (rect.height * window_default_height_scale));
-                            } else {
-                                set_default_size (rect.width, (int) (rect.height * double.min (config_height, 1.0)));
-                            }
                         }
+                        // 不再手动设置窗口大小，交给窗口管理器
                     } catch (Error e) {
                         print ("QuakeWindow init: %s\n", e.message);
                     }
@@ -280,49 +261,28 @@ namespace Widgets {
         }
 
         public void toggle_quake_window () {
-            Gdk.Screen screen = Gdk.Screen.get_default ();
-            int monitor = config.get_terminal_monitor ();
-            int window_monitor = screen.get_monitor_at_window (get_window ());
-
-            Gdk.Rectangle rect;
-            screen.get_monitor_geometry (monitor, out rect);
-
-            if (monitor == window_monitor) {
-                var window_state = get_window ().get_state ();
-                if (Gdk.WindowState.WITHDRAWN in window_state) {
-                    show_quake_window (rect);
-                } else {
-
-                    try {
-                        // When option hide_quakewindow_after_lost_focus enable.
-                        // Focus terminal if terminal is not active, only hide temrinal after terminal focus.
-                        if (config.config_file.get_boolean(   "advanced", "hide_quakewindow_when_active")) {
-                            // Because some desktop environment, such as DDE will grab keyboard focus when press keystroke. :(
-                            // So i add 200ms timeout to wait desktop environment release keyboard focus and then get window active state.
-                            // Otherwise, window is always un-active state that quake terminal can't toggle to hide.
-                            GLib.Timeout.add(   200, () => {
-                                    if (is_active) {
-                                        hide ();
-                                    } else {
-                                        // blumia: present(), which send `_NET_ACTIVE_WINDOW` with current time (0) as timestamp,
-                                        //         doesn't works under KWin, a correct timestamp form X-server start is required.
-                                        //present();
-                                        present_with_time(   Gdk.X11.get_server_time(   (Gdk.X11.Window)get_window(   )));
-                                    }
-
-                                    return false;
-                                });
-                        }
-                        // Hide terminal immediately if option hide_quakewindow_when_active is false.
-                        else {
-                            hide ();
-                        }
-                    } catch (Error e) {
-                        print ("quake_window toggle_quake_window: %s\n", e.message);
-                    }
-                }
+            // 让窗口管理器决定窗口位置和大小，不再手动move/resize
+            var window_state = get_window ().get_state ();
+            if (Gdk.WindowState.WITHDRAWN in window_state) {
+                show_all();
+                present();
             } else {
-                show_quake_window (rect);
+                try {
+                    if (config.config_file.get_boolean(   "advanced", "hide_quakewindow_when_active")) {
+                        GLib.Timeout.add(   200, () => {
+                                if (is_active) {
+                                    hide ();
+                                } else {
+                                    present_with_time(   Gdk.X11.get_server_time(   (Gdk.X11.Window)get_window(   )));
+                                }
+                                return false;
+                            });
+                    } else {
+                        hide ();
+                    }
+                } catch (Error e) {
+                    print ("quake_window toggle_quake_window: %s\n", e.message);
+                }
             }
         }
 

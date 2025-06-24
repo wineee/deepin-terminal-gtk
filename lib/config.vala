@@ -465,9 +465,5 @@ namespace Config {
                 }
             }
         }
-
-        public int get_terminal_monitor () {
-            return Utils.get_pointer_monitor ();
-        }
     }
 }

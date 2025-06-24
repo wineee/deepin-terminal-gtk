@@ -67,16 +67,10 @@ namespace Widgets {
             transparent_window ();
             init_window ();
 
-            int monitor = config.get_terminal_monitor ();
-            Gdk.Rectangle rect;
-            screen.get_monitor_geometry (monitor, out rect);
-
-            if (tabbar_at_the_bottom)
-                window_fullscreen_monitor_height = rect.height - window_fullscreen_monitor_height;
-
+            // 让窗口管理器决定窗口的尺寸和位置，不再手动设置
             Gdk.Geometry geo = Gdk.Geometry ();
-            geo.min_width = rect.width / 3;
-            geo.min_height = rect.height / 3;
+            geo.min_width = 400;  // 设置固定的最小尺寸
+            geo.min_height = 300;
             this.set_geometry_hints (null, geo, Gdk.WindowHints.MIN_SIZE);
 
             top_line_dark_color = Utils.hex_to_rgba ("#000000", 0.2);
@@ -124,17 +118,13 @@ namespace Widgets {
                             }
                         }
 
+                        // 让窗口管理器决定窗口尺寸，不再手动设置
                         var width = config.config_file.get_integer ("advanced", "window_width");
                         var height = config.config_file.get_integer ("advanced", "window_height");
-                        if (width == 0 || height == 0) {
-                            if (rect.width == 0 || rect.height == 0) {
-                                set_default_size (800, 600);
-                            } else {
-                                set_default_size ((int) (rect.width * window_default_scale), (int) (rect.height * window_default_scale));
-                            }
-                        } else {
+                        if (width > 0 && height > 0) {
                             set_default_size (width, height);
                         }
+                        // 否则让窗口管理器使用默认尺寸
                     } catch (GLib.KeyFileError e) {
                         stdout.printf (e.message);
                     }

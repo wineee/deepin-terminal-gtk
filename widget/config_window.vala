@@ -563,27 +563,15 @@ namespace Widgets {
                     var show_helper_window_key = config.config_file.get_string ("shortcut", "display_shortcuts");
                     if (show_helper_window_key != "" && keyname == show_helper_window_key) {
                         int x, y;
-                        if (quake_mode) {
-                            Gdk.Screen screen = Gdk.Screen.get_default ();
-                            int monitor = config.get_terminal_monitor ();
-                            Gdk.Rectangle rect;
-                            screen.get_monitor_geometry (monitor, out rect);
+                        Gtk.Allocation window_rect;
+                        get_allocation (out window_rect);
 
-                            x = rect.width / 2;
-                            y = rect.height / 2;
+                        int win_x, win_y;
+                        get_window ().get_origin (out win_x, out win_y);
 
-                            show_shortcut_viewer (x, y);
-                        } else {
-                            Gtk.Allocation window_rect;
-                            get_allocation (out window_rect);
-
-                            int win_x, win_y;
-                            get_window ().get_origin (out win_x, out win_y);
-
-                            x = win_x + window_rect.width / 2;
-                            y = win_y + window_rect.height / 2;
-                            show_shortcut_viewer (x, y);
-                        }
+                        x = win_x + window_rect.width / 2;
+                        y = win_y + window_rect.height / 2;
+                        show_shortcut_viewer (x, y);
 
                         return true;
                     }
