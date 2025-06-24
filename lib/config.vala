@@ -467,8 +467,7 @@ namespace Config {
         }
 
         public int get_terminal_monitor () {
-            Gdk.Screen screen = Gdk.Screen.get_default ();
-            return Utils.get_pointer_monitor (screen);
+            return Utils.get_pointer_monitor ();
         }
     }
 }

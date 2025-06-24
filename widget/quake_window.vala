@@ -149,8 +149,6 @@ namespace Widgets {
                     // Update blur area.
                     update_blur_status(   );
 
-                    window_save_before_quit ();
-
                     return false;
                 });
 
@@ -455,19 +453,6 @@ namespace Widgets {
 
             add_widget (box);
             show_all ();
-        }
-
-        public override void window_save_before_quit () {
-            int monitor = config.get_terminal_monitor ();
-            Gdk.Rectangle rect;
-            screen.get_monitor_geometry (monitor, out rect);
-
-            int width, height;
-            get_size (out width, out height);
-
-            config.load_config ();
-            config.config_file.set_double ("advanced", "quake_window_height", height * 1.0 / rect.height);
-            config.save ();
         }
 
         public override Gdk.CursorType? get_cursor_type (double x, double y) {

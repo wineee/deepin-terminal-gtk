@@ -763,18 +763,6 @@ namespace Widgets {
             show_all ();
         }
 
-        public override void window_save_before_quit () {
-            Cairo.RectangleInt rect;
-            get_window ().get_frame_extents (out rect);
-
-            if (window_is_normal ()) {
-                config.load_config ();
-                config.config_file.set_integer ("advanced", "window_width", rect.width);
-                config.config_file.set_integer ("advanced", "window_height", rect.height);
-                config.save ();
-            }
-        }
-
         public override Gdk.CursorType? get_cursor_type (double x, double y) {
             int window_x, window_y;
             get_window ().get_origin (out window_x, out window_y);

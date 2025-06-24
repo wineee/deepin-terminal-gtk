@@ -396,11 +396,9 @@ namespace Widgets {
             if (workspace_manager.has_active_term ()) {
                 ConfirmDialog dialog = Widgets.create_running_confirm_dialog (this);
                 dialog.confirm.connect ((d) => {
-                        window_save_before_quit ();
                         fast_quit ();
                     });
             } else {
-                window_save_before_quit ();
                 fast_quit ();
             }
         }
@@ -704,9 +702,6 @@ namespace Widgets {
         }
 
         public virtual void toggle_fullscreen () {
-        }
-
-        public virtual void window_save_before_quit () {
         }
 
         public virtual Gdk.CursorType? get_frame_cursor_type (double x, double y) {

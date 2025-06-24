@@ -599,11 +599,26 @@ namespace Utils {
         return parsedScale == 0 ? 1.0 : parsedScale;
     }
 
-    public int get_pointer_monitor (Gdk.Screen screen) {
+    public int get_pointer_monitor () {
         int x, y;
         get_pointer_position (out x, out y);
 
-        return screen.get_monitor_at_point (x, y);
+        var display = Gdk.Display.get_default ();
+        if (display != null) {
+            var monitor = display.get_monitor_at_point (x, y);
+            if (monitor != null) {
+                // 在GTK3中，我们需要遍历所有monitor来找到对应的编号
+                int n_monitors = display.get_n_monitors ();
+                for (int i = 0; i < n_monitors; i++) {
+                    var current_monitor = display.get_monitor (i);
+                    if (current_monitor == monitor) {
+                        return i;
+                    }
+                }
+            }
+        }
+        // 没有找到monitor时返回-1
+        return -1;
     }
 
     public string get_process_cmdline (int pid) {
