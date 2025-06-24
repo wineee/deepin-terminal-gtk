@@ -91,7 +91,11 @@ namespace Widgets {
                 // If current temrinal is *first* one,
                 // broadcast 'quit' signal to other terminals and quit itself.
                 exit_terminal.connect(   () => {
-                        app.exit ();
+                        try {
+                            app.exit ();
+                        } catch (GLib.Error e) {
+                            print("App exit error: %s\n", e.message);
+                        }
                     });
             }
 

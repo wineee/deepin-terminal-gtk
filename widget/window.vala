@@ -58,7 +58,12 @@ namespace Widgets {
         private Widgets.ResizeGrip resize_grip;
 
         public Window (string? window_mode) {
-            tabbar_at_the_bottom = config.config_file.get_boolean ("advanced", "tabbar_at_the_bottom");
+            try {
+                tabbar_at_the_bottom = config.config_file.get_boolean ("advanced", "tabbar_at_the_bottom");
+            } catch (GLib.KeyFileError e) {
+                print("Config read error: %s\n", e.message);
+                tabbar_at_the_bottom = false;
+            }
             transparent_window ();
             init_window ();
 

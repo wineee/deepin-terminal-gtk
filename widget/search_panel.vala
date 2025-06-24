@@ -157,8 +157,8 @@ namespace Widgets {
                 terminal.term.search_set_gregex (regex, 0);
 #endif
                 terminal.term.search_set_wrap_around (true);
-            } catch (GLib.RegexError e) {
-                stdout.printf ("Got error %s", e.message);
+            } catch (GLib.Error e) {
+                print("Regex error: %s\n", e.message);
             }
 
         }
