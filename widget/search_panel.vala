@@ -52,11 +52,11 @@ namespace Widgets {
 
             search_entry.set_text (init_search_text);
 
-            pack_start (search_image, false, false, 0);
-            pack_start (search_entry, true, true, 0);
-            pack_start (clear_button_box, false, false, 0);
-            pack_start (search_previous_button, false, false, 0);
-            pack_start (search_next_button, false, false, 0);
+            append (search_image);
+            append (search_entry);
+            append (clear_button_box);
+            append (search_previous_button);
+            append (search_next_button);
 
             search_image.set_valign (Gtk.Align.CENTER);
             search_entry.set_valign (Gtk.Align.CENTER);
@@ -75,68 +75,70 @@ namespace Widgets {
             set_halign (Gtk.Align.END);
 
             adjust_css_with_theme (config_window);
-            realize.connect ((w) => {
-                    ((Widgets.ConfigWindow) this.get_toplevel ()).config.update.connect ((w) => {
-                            adjust_css_with_theme (config_window);
-                        });
-                });
 
-            search_entry.key_press_event.connect ((w, e) => {
-                    string keyname = Keymap.get_keyevent_name (e.keyval, e.state);
+            var key_controller = new Gtk.EventControllerKey ();
+            key_controller.key_pressed.connect ((keyval, keycode, state) => {
+                string keyname = Keymap.get_keyevent_name (keyval, state);
 
-                    if (keyname == "Esc") {
-                        quit_search ();
-                    } else if (keyname == "Enter") {
-                        update_search_text ();
-                    } else if (keyname == "Shift + Enter") {
-                        update_search_text ();
-                        terminal.term.search_find_previous ();
-                    }
+                if (keyname == "Esc") {
+                    quit_search ();
+                } else if (keyname == "Enter") {
+                    update_search_text ();
+                } else if (keyname == "Shift + Enter") {
+                    update_search_text ();
+                    terminal.term.search_find_previous ();
+                }
 
-                    return false;
-                });
+                return false;
+            });
+            search_entry.add_controller (key_controller);
+            
             search_entry.get_buffer ().deleted_text.connect ((buffer, p, nc) => {
-                    string entry_text = search_entry.get_text ().strip ();
-                    if (entry_text == "") {
-                        hide_clear_button ();
-                    }
+                string entry_text = search_entry.get_text ().strip ();
+                if (entry_text == "") {
+                    hide_clear_button ();
+                }
 
-                    update_search_text ();
-                });
+                update_search_text ();
+            });
             search_entry.get_buffer ().inserted_text.connect ((buffer, p, c, nc) => {
-                    string entry_text = search_entry.get_text ().strip ();
-                    if (entry_text != "") {
-                        show_clear_button ();
-                    }
-                    update_search_text ();
-                });
-            clear_button.button_press_event.connect ((w, e) => {
-                    search_entry.set_text ("");
-                    update_search_text ();
-
-                    return false;
-                });
+                string entry_text = search_entry.get_text ().strip ();
+                if (entry_text != "") {
+                    show_clear_button ();
+                }
+                update_search_text ();
+            });
+            
+            var clear_click_controller = new Gtk.GestureClick ();
+            clear_click_controller.pressed.connect ((n_press, x, y) => {
+                search_entry.set_text ("");
+                update_search_text ();
+            });
+            clear_button.add_controller (clear_click_controller);
+            
             search_entry.activate.connect ((w) => {
-                    if (search_text != "") {
-                        terminal.term.search_find_next ();
-                    }
-                });
-            search_next_button.button_press_event.connect ((w, e) => {
-                    if (search_text != "") {
-                        update_search_text ();
-                        terminal.term.search_find_next ();
-                    }
-
-                    return false;
-                });
-            search_previous_button.button_press_event.connect ((w, e) => {
-                    if (search_text != "") {
-                        update_search_text ();
-                        terminal.term.search_find_previous ();
-                    }
-
-                    return false;
-                });
+                if (search_text != "") {
+                    terminal.term.search_find_next ();
+                }
+            });
+            
+            var next_click_controller = new Gtk.GestureClick ();
+            next_click_controller.pressed.connect ((n_press, x, y) => {
+                if (search_text != "") {
+                    update_search_text ();
+                    terminal.term.search_find_next ();
+                }
+            });
+            search_next_button.add_controller (next_click_controller);
+            
+            var prev_click_controller = new Gtk.GestureClick ();
+            prev_click_controller.pressed.connect ((n_press, x, y) => {
+                if (search_text != "") {
+                    update_search_text ();
+                    terminal.term.search_find_previous ();
+                }
+            });
+            search_previous_button.add_controller (prev_click_controller);
         }
 
         public void update_search_text () {
@@ -181,10 +183,8 @@ namespace Widgets {
         }
 
         public void show_clear_button () {
-            if (clear_button_box.get_children ().length () == 0) {
-                clear_button_box.add (clear_button);
-                show_all ();
-            }
+            clear_button_box.append (clear_button);
+            show ();
         }
 
         public void hide_clear_button () {

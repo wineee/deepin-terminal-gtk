@@ -25,7 +25,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class FileButton : Gtk.Widget {
+    public class FileButton : Gtk.Box {
         public Gtk.Box box;
         public Gtk.Box button_box;
         public ImageButton file_add_button;
@@ -33,6 +33,7 @@ namespace Widgets {
         public int height = 26;
 
         public FileButton () {
+            Object (orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             set_size_request (-1, height);
@@ -53,26 +54,45 @@ namespace Widgets {
             entry.get_style_context ().add_class ("file_add_entry");
             button_box.append (file_add_button);
 
-            file_add_button.clicked.connect ((w, e) => {
-                    select_private_key_file ();
-                });
+            var chooser = new Gtk.FileDialog ();
+            chooser.set_title (_("Select File"));
+            chooser.set_modal (true);
 
-            set_child (box);
+            file_add_button.clicked.connect (() => {
+                // GTK4: open 方法需要 Gtk.Window 作为 parent，使用 get_root() 获取父窗口
+                var parent_window = get_root () as Gtk.Window;
+                chooser.open.begin (parent_window, null, (obj, res) => {
+                    try {
+                        var file = chooser.open.end (res);
+                        if (file != null) {
+                            entry.set_text (file.get_path ());
+                        }
+                    } catch (Error e) {
+                        print ("Error opening file: %s\n", e.message);
+                    }
+                });
+            });
+
+            // GTK4: 继承自 Gtk.Box，直接使用 append
+            append (box);
         }
 
         public void select_private_key_file () {
-            Gtk.FileChooserAction action = Gtk.FileChooserAction.OPEN;
-            var chooser = new Gtk.FileChooserDialog (_("Select the private key file"),
-                    get_toplevel () as Gtk.Window, action);
-            chooser.add_button (_("Cancel"), Gtk.ResponseType.CANCEL);
-            chooser.set_select_multiple (true);
-            chooser.add_button (_("Select"), Gtk.ResponseType.ACCEPT);
-
-            if (chooser.run () == Gtk.ResponseType.ACCEPT) {
-                entry.set_text (chooser.get_file ().get_path ());
-            }
-
-            chooser.destroy ();
+            var chooser = new Gtk.FileDialog ();
+            chooser.set_title (_("Select the private key file"));
+            
+            // GTK4: 需要获取父窗口，使用 get_root() 获取根窗口
+            var parent_window = get_root () as Gtk.Window;
+            chooser.open.begin (parent_window, null, (obj, res) => {
+                try {
+                    var file = chooser.open.end (res);
+                    if (file != null) {
+                        entry.set_text (file.get_path ());
+                    }
+                } catch (Error e) {
+                    // 用户取消选择
+                }
+            });
         }
     }
 }

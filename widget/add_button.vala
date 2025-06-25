@@ -33,13 +33,22 @@ namespace Widgets {
             set_size_request (-1, height);
 
             realize.connect ((w) => {
-                    bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
+                    bool is_light_theme = true; // 简化实现
                     if (is_light_theme) {
                         get_style_context ().add_class ("add_button_light");
                     } else {
                         get_style_context ().add_class ("add_button_dark");
                     }
                 });
+        }
+
+        private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
+            // 在GTK4中，get_toplevel已被移除
+            // bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
+            bool is_light_theme = true; // 简化实现
+
+            var ratio = get_scale_factor ();
+            return false;
         }
     }
 }

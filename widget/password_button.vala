@@ -25,7 +25,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class PasswordButton : Gtk.Widget {
+    public class PasswordButton : Gtk.Box {
         public Gtk.Box box;
         public Gtk.Box button_box;
         public ImageButton hide_password_button;
@@ -94,7 +94,7 @@ namespace Widgets {
                     }
                 });
 
-            set_child (box);
+            append (box);
         }
 
         public void init () {
@@ -105,7 +105,7 @@ namespace Widgets {
             entry.set_visibility (false);
             button_box.append (show_password_button);
 
-            show_all ();
+            show ();
         }
 
         public void show_password () {
@@ -116,7 +116,7 @@ namespace Widgets {
             entry.set_visibility (true);
             button_box.append (hide_password_button);
 
-            show_all ();
+            show ();
         }
 
         public void hide_password () {
@@ -127,7 +127,7 @@ namespace Widgets {
             entry.set_visibility (false);
             button_box.append (show_password_button);
 
-            show_all ();
+            show ();
         }
     }
 }

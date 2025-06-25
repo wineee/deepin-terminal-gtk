@@ -57,7 +57,7 @@ namespace Widgets {
                 background_color = Utils.hex_to_rgba (theme_file.get_string ("theme", "background").strip(   ));
                 is_light_color = Utils.is_light_color (theme_file.get_string ("theme", "background").strip(   ));
 
-                background_color.alpha = 0.8;
+                background_color.alpha = 0.8f;
                 foreground_color = Utils.hex_to_rgba (theme_file.get_string ("theme", "foreground").strip(   ));
                 prompt_color_host = Utils.hex_to_rgba (theme_file.get_string ("theme", "color_11").strip(   ));
                 prompt_color_path = Utils.hex_to_rgba (theme_file.get_string ("theme", "color_13").strip(   ));
@@ -165,7 +165,6 @@ namespace Widgets {
                         active_button (theme_name);
                         active_theme (theme_name);
                     }
-                    return true;
                 });
                 button.add_controller (click_controller);
 

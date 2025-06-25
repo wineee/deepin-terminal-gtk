@@ -60,7 +60,7 @@ namespace Keymap {
             modifiers += "Hyper";
         }
 
-        if ((state & Gdk.ModifierType.MOD1_MASK) != 0) {
+        if ((state & Gdk.ModifierType.ALT_MASK) != 0) {
             modifiers += "Alt";
         }
 

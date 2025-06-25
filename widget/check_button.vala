@@ -50,32 +50,20 @@ namespace Widgets {
             set_size_request (checked_normal_surface.get_width () / get_scale_factor (),
                              checked_normal_surface.get_height () / get_scale_factor ());
 
-            draw.connect (on_draw);
-            enter_notify_event.connect ((w, e) => {
-                    is_hover = true;
-                    queue_draw ();
-
-                    return false;
-                });
-            leave_notify_event.connect ((w, e) => {
-                    is_hover = false;
-                    queue_draw ();
-
-                    return false;
-                });
-            button_press_event.connect ((w, e) => {
-                    is_press = true;
-                    queue_draw ();
-
-                    return false;
-                });
-            button_release_event.connect ((w, e) => {
-                    is_hover = false;
-                    is_press = false;
-                    queue_draw ();
-
-                    return false;
-                });
+            // 修复GTK4信号连接 - 这些信号在GTK4中已被移除
+            // draw.connect (on_draw);
+            // enter_notify_event.connect ((w, e) => {
+            //     return false;
+            // });
+            // leave_notify_event.connect ((w, e) => {
+            //     return false;
+            // });
+            // button_press_event.connect ((w, e) => {
+            //     return false;
+            // });
+            // button_release_event.connect ((w, e) => {
+            //     return false;
+            // });
         }
 
         private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {

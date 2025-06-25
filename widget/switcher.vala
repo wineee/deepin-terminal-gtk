@@ -53,8 +53,7 @@ namespace Widgets {
 
             // NOTE: don's set policy of scrolledwindow to NEVER.
             // Otherwise scrolledwindow will increate width with child's size.
-            scrolledwindow = new ScrolledWindow(   null, null);
-            scrolledwindow.set_shadow_type (Gtk.ShadowType.NONE);
+            scrolledwindow = new ScrolledWindow ();
             scrolledwindow.get_style_context ().add_class ("scrolledwindow");
             scrolledwindow.get_vscrollbar ().get_style_context ().add_class ("switcher_scrollbar");
             scrolledwindow.get_hscrollbar ().get_style_context ().add_class ("switcher_scrollbar");
@@ -65,25 +64,27 @@ namespace Widgets {
 
             set_size_request (width, -1);
 
-            box.pack_start (left_box, false, false, 0);
-            box.pack_start (right_box, false, false, 0);
-            scrolledwindow.add (box);
-            pack_start (scrolledwindow, true, true, 0);
+            box.append (left_box);
+            box.append (right_box);
+
+            append (scrolledwindow);
+
+            scrolledwindow.set_child (box);
         }
 
         public void add_to_left_box (Gtk.Widget start_widget) {
             Utils.remove_all_children (left_box);
             Utils.remove_all_children (right_box);
 
-            left_box.pack_start (start_widget, true, true, 0);
+            left_box.append (start_widget);
         }
 
         public void scroll_to_left (Gtk.Widget start_widget, Gtk.Widget end_widget) {
             Utils.remove_all_children (left_box);
             Utils.remove_all_children (right_box);
 
-            left_box.pack_start (end_widget, true, true, 0);
-            right_box.pack_start (start_widget, true, true, 0);
+            left_box.append (end_widget);
+            right_box.append (start_widget);
 
             var adjust = scrolledwindow.get_hadjustment ();
             adjust.set_value (width);
@@ -98,8 +99,8 @@ namespace Widgets {
             Utils.remove_all_children (left_box);
             Utils.remove_all_children (right_box);
 
-            left_box.pack_start (start_widget, true, true, 0);
-            right_box.pack_start (end_widget, true, true, 0);
+            left_box.append (start_widget);
+            right_box.append (end_widget);
 
             var adjust = scrolledwindow.get_hadjustment ();
             adjust.set_value (0);

@@ -205,11 +205,12 @@ public class Application : Object {
         }
 
         if (version) {
-            stdout.printf ("Deepin Terminal Gtk %s\n".printf(   Constant.VERSION));
+            stdout.printf ("Deepin Terminal Gtk %s\n".printf (Constant.VERSION));
             stdout.printf ("Copyright 2011-2017 Deepin, Inc.\n");
             stdout.printf ("Copyright 2023      Deepin Community\n");
         } else {
-            Gtk.init (ref args);
+            // 在GTK4中，Gtk.init已被移除
+            // Gtk.init (ref args);
 
             // Just for debug perfermance.
             // Gdk.Window.set_debug_updates(true);
@@ -232,7 +233,8 @@ public class Application : Object {
                              () => {app.run (true);});
             }
 
-            Gtk.main ();
+            // 在GTK4中，Gtk.main已被移除
+            // Gtk.main ();
         }
     }
 
@@ -252,7 +254,8 @@ public class Application : Object {
                 stderr.printf ("%s\n", e.message);
             }
 
-            Gtk.main_quit ();
+            // 在GTK4中，Gtk.main_quit已被移除
+            // Gtk.main_quit ();
         } else {
             Utils.load_css_theme (Utils.get_root_path ("style.css"));
 

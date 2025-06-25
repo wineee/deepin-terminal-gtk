@@ -33,12 +33,12 @@ namespace Widgets {
             close_button = Widgets.create_close_button ();
 
             Box box = new Box (Gtk.Orientation.HORIZONTAL, 0);
-            box.pack_start (close_button, true, true, 0);
+            box.append (close_button);
 
             event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
 
-            add (box);
+            set_child (box);
             add_overlay (event_area);
 
             set_size_request (-1, Constant.TITLEBAR_HEIGHT);

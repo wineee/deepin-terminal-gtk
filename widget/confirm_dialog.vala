@@ -78,16 +78,16 @@ namespace Widgets {
 
             Box button_box = new Box (Gtk.Orientation.HORIZONTAL, 0);
             if (cancel_text != "") {
-                cancel_button = new Widgets.DialogButton (cancel_text, "left", "text", screen_monitor.is_composited(   ));
+                cancel_button = new Widgets.DialogButton (cancel_text, "left", "text", true);
                 cancel_button.clicked.connect ((b) => {
                         cancel ();
                         destroy ();
                     });
             }
             if (cancel_text != "") {
-                confirm_button = new Widgets.DialogButton (confirm_text, "right", "warning", screen_monitor.is_composited(   ));
+                confirm_button = new Widgets.DialogButton (confirm_text, "right", "warning", true);
             } else {
-                confirm_button = new Widgets.DialogButton (confirm_text, "middle", "warning", screen_monitor.is_composited(   ));
+                confirm_button = new Widgets.DialogButton (confirm_text, "middle", "warning", true);
             }
             confirm_button.clicked.connect ((b) => {
                     confirm ();
@@ -102,25 +102,23 @@ namespace Widgets {
             // button_box.set_focus_chain (tab_order_list);
             button_box.set_focus_child (confirm_button);
 
-            close_button_box.pack_start (close_button, true, true, 0);
-            label_box.pack_start (title_label, false, false, 0);
-            label_box.pack_start (content_label, false, false, 0);
-            content_button_box.pack_start (logo_image, false, false, 0);
-            content_button_box.pack_start (label_box, true, true, 0);
-            if (cancel_text != "") {
-                button_box.pack_start (cancel_button, true, true, 0);
-            }
-            button_box.pack_start (confirm_button, true, true, 0);
-            box.pack_start (close_button_box, false, false, 0);
-            box.pack_start (content_button_box, true, true, 0);
-            box.pack_start (button_box, true, true, 0);
+            close_button_box.append (close_button);
+            label_box.append (title_label);
+            label_box.append (content_label);
+            content_button_box.append (logo_image);
+            content_button_box.append (label_box);
+
+            button_box.append (cancel_button);
+            button_box.append (confirm_button);
+            box.append (close_button_box);
+            box.append (content_button_box);
+            box.append (button_box);
 
             var event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
             event_area.margin_bottom = Constant.DIALOG_BUTTON_HEIGHT;
 
-            overlay.add (box);
-            overlay.add_overlay (event_area);
+            overlay.set_child (box);
 
             add_widget (overlay);
         }

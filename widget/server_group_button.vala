@@ -58,11 +58,6 @@ namespace Widgets {
         public signal void show_group_servers (string group_name);
 
         public ServerGroupButton (string server_title, int number) {
-            this.add_events (Gdk.EventMask.BUTTON_PRESS_MASK
-                            | Gdk.EventMask.BUTTON_RELEASE_MASK
-                            | Gdk.EventMask.POINTER_MOTION_MASK
-                            | Gdk.EventMask.LEAVE_NOTIFY_MASK);
-
             title = server_title;
             server_number = number;
 
@@ -84,37 +79,13 @@ namespace Widgets {
 
             set_size_request (width, height);
 
-            draw.connect (on_draw);
-            enter_notify_event.connect ((w, e) => {
-                    is_hover = true;
-                    queue_draw ();
-
-                    return false;
-                });
-            leave_notify_event.connect ((w, e) => {
-                    is_hover = false;
-                    queue_draw ();
-
-                    return false;
-                });
-            button_press_event.connect ((w, e) => {
-                    queue_draw ();
-
-                    return false;
-                });
-            button_release_event.connect ((w, e) => {
-                    is_hover = false;
-                    queue_draw ();
-
-                    return false;
-                });
             clicked.connect ((w, e) => {
                     show_group_servers (server_title);
                 });
         }
 
         private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
+            bool is_light_theme = true;
 
             if (is_light_theme) {
                 Draw.draw_surface (cr, server_group_light_surface, image_x, 0, 0, height);
@@ -154,14 +125,7 @@ namespace Widgets {
                 Draw.draw_rectangle (cr, 8, height - 1, width - 16, 1);
             }
 
-            if (is_press) {
-                if (is_light_theme) {
-                    Utils.set_context_color (cr, press_light_color);
-                } else {
-                    Utils.set_context_color (cr, content_dark_color);
-                }
-                Draw.draw_rectangle (cr, 0, 0, width, height);
-            } else if (is_hover) {
+            if (is_hover) {
                 if (is_light_theme) {
                     Utils.set_context_color (cr, hover_light_color);
                 } else {

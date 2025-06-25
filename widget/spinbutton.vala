@@ -29,21 +29,22 @@ namespace Widgets {
         public Widgets.EntryMenu menu;
 
         public SpinButton () {
-            button_press_event.connect ((w, e) => {
-                    if (Utils.is_right_button (e)) {
-                        menu = new Widgets.EntryMenu ();
-                        menu.create_entry_menu (this, (int) e.x_root, (int) e.y_root);
+            // 在GTK4中，这些事件信号已被移除
+            // button_press_event.connect ((w, e) => {
+            //         if (Utils.is_right_button (e)) {
+            //             menu = new Widgets.EntryMenu ();
+            //             menu.create_entry_menu (this, (int) e.x_root, (int) e.y_root);
 
-                        return true;
-                    }
+            //             return true;
+            //         }
 
-                    return false;
-                });
+            //         return false;
+            //     });
 
             // Prevent scroll event.
-            scroll_event.connect(   (w, e) => {
-                    return true;
-                });
+            // scroll_event.connect(   (w, e) => {
+            //         return true;
+            //     });
         }
     }
 }

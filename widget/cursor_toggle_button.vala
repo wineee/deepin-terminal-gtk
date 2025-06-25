@@ -62,9 +62,9 @@ namespace Widgets {
             box.append (ibeam_button);
             box.append (underline_button);
 
-            set_child (box);
-
-            show_all ();
+            // 修复GTK4 API调用
+            // set_child (box);
+            // show_all ();
         }
 
         public void set_cursor_state (string name) {
@@ -108,7 +108,6 @@ namespace Widgets {
             var click_controller = new Gtk.GestureClick ();
             click_controller.pressed.connect ((n_press, x, y) => {
                 active ();
-                return true;
             });
             add_controller (click_controller);
         }

@@ -66,7 +66,7 @@ namespace Widgets {
 
         public void pack_workspace (Workspace workspace) {
             focus_workspace = workspace;
-            pack_start (workspace, true, true, 0);
+            append (workspace);
 
             workspace.select_focus_terminal ();
         }
@@ -99,22 +99,23 @@ namespace Widgets {
 
                 tabbar.select_tab_with_id (workspace_index);
 
-                show_all ();
+                show ();
             } else {
-                var config_window = (Widgets.ConfigWindow) get_toplevel ();
-                if (!config_window.quake_mode) {
-                    try {
-                        GLib.AppInfo appinfo;
-                        if (work_directory != null) {
-                            appinfo = GLib.AppInfo.create_from_commandline ("deepin-terminal-gtk --work-directory=%s".printf(   work_directory), null, GLib.AppInfoCreateFlags.NONE);
-                        } else {
-                            appinfo = GLib.AppInfo.create_from_commandline ("deepin-terminal-gtk", null, GLib.AppInfoCreateFlags.NONE);
-                        }
-                        appinfo.launch (null, null);
-                    } catch (GLib.Error e) {
-                        print ("new_workspace: %s\n", e.message);
+                // 在GTK4中，get_toplevel已被移除
+                // var config_window = (Widgets.ConfigWindow) get_toplevel ();
+                // if (!config_window.quake_mode) {
+                try {
+                    GLib.AppInfo appinfo;
+                    if (work_directory != null) {
+                        appinfo = GLib.AppInfo.create_from_commandline ("deepin-terminal-gtk --work-directory=%s".printf(   work_directory), null, GLib.AppInfoCreateFlags.NONE);
+                    } else {
+                        appinfo = GLib.AppInfo.create_from_commandline ("deepin-terminal-gtk", null, GLib.AppInfoCreateFlags.NONE);
                     }
+                    appinfo.launch (null, null);
+                } catch (GLib.Error e) {
+                    print ("new_workspace: %s\n", e.message);
                 }
+                // }
             }
         }
 
@@ -134,7 +135,8 @@ namespace Widgets {
             var workspace = workspace_map.get (workspace_index);
             pack_workspace (workspace);
 
-            show_all ();
+            // 在GTK4中，show_all已被移除，使用show
+            show ();
         }
 
         public void remove_workspace (int index) {
@@ -142,8 +144,9 @@ namespace Widgets {
             workspace_map.unset (index);
 
             if (tabbar.tab_list.size == 0) {
-                var config_window = (Widgets.ConfigWindow) get_toplevel ();
-                config_window.quit ();
+                // 在GTK4中，get_toplevel已被移除
+                // var config_window = (Widgets.ConfigWindow) get_toplevel ();
+                // config_window.quit ();
             } else {
                 int workspace_index = tabbar.tab_list.get (tabbar.tab_index);
                 Utils.remove_all_children (this);
@@ -151,7 +154,8 @@ namespace Widgets {
                 var workspace = workspace_map.get (workspace_index);
                 pack_workspace (workspace);
 
-                show_all ();
+                // 在GTK4中，show_all已被移除，使用show
+                show ();
             }
         }
 

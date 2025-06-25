@@ -56,17 +56,18 @@ namespace Menu {
             return popover;
         }
 
-        private Gtk.Button create_gtk_menu_button (string item_id, string item_text, Gtk.Popover? submenu) {
-            Gtk.Button button;
+        private Gtk.Widget create_gtk_menu_button (string item_id, string item_text, Gtk.Popover? submenu) {
+            Gtk.Widget widget;
             
             if (item_text == "") {
-                button = new Gtk.Separator ();
+                widget = new Gtk.Separator(Gtk.Orientation.HORIZONTAL);
             } else {
-                button = new Gtk.Button.with_label (item_text);
+                var button = new Gtk.Button.with_label (item_text);
                 button.clicked.connect (() => {
                     // 处理菜单项点击事件
                     print ("Menu item clicked: %s\n", item_id);
                 });
+                widget = button;
             }
 
             if (submenu != null) {
@@ -76,7 +77,7 @@ namespace Menu {
                 return submenu_button;
             }
 
-            return button;
+            return widget;
         }
 
         public Gtk.Popover create_menu (List<MenuItem> menu_content) {

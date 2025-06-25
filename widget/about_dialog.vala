@@ -38,20 +38,14 @@ namespace Widgets {
                     this.destroy ();
                 });
 
-            destroy.connect ((w) => {
-                    if (focus_widget != null) {
-                        focus_widget.grab_focus ();
-                    }
-                });
-
             var button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-            button_box.pack_start (close_button, true, true, 0);
+            button_box.append (close_button);
 
             var box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-            box.pack_start (button_box, false, false, 0);
+            box.append (button_box);
 
             var about_widget = new AboutWidget ();
-            box.pack_start (about_widget, true, true, 0);
+            box.append (about_widget);
 
             set_init_size (500, 460);
 
@@ -69,13 +63,9 @@ namespace Widgets {
 
             var event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
-            if (screen_monitor.is_composited ()) {
-                event_area.margin_bottom = window_init_height - window_frame_margin_top - window_frame_margin_bottom - Constant.TITLEBAR_HEIGHT;
-            } else {
-                event_area.margin_bottom = window_init_height - Constant.TITLEBAR_HEIGHT;
-            }
+            event_area.margin_bottom = window_init_height - Constant.TITLEBAR_HEIGHT;
 
-            overlay.add (box);
+            overlay.set_child (box);
             overlay.add_overlay (event_area);
 
             add_widget (overlay);

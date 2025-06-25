@@ -53,7 +53,7 @@ namespace Widgets {
                     this.destroy ();
                 });
             var close_button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-            close_button_box.pack_start (close_button, true, true, 0);
+            close_button_box.append (close_button);
 
             var content_button_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
             content_button_box.margin_top = box_margin_top;
@@ -83,16 +83,16 @@ namespace Widgets {
 
             Box button_box = new Box (Gtk.Orientation.HORIZONTAL, 0);
             if (cancel_text != "") {
-                cancel_button = new Widgets.DialogButton (cancel_text, "left", "text", screen_monitor.is_composited(   ));
+                cancel_button = new Widgets.DialogButton (cancel_text, "left", "text", false);
                 cancel_button.clicked.connect ((b) => {
                         cancel ();
                         destroy ();
                     });
             }
             if (cancel_text != "") {
-                rename_button = new Widgets.DialogButton (rename_text, "right", "warning", screen_monitor.is_composited(   ));
+                rename_button = new Widgets.DialogButton (rename_text, "right", "warning", false);
             } else {
-                rename_button = new Widgets.DialogButton (rename_text, "middle", "warning", screen_monitor.is_composited(   ));
+                rename_button = new Widgets.DialogButton (rename_text, "middle", "warning", false);
             }
             rename_button.clicked.connect ((b) => {
                     rename (title_entry.get_text ());
@@ -105,31 +105,30 @@ namespace Widgets {
                 tab_order_list.append ((Gtk.Widget) cancel_button);
             }
             tab_order_list.append ((Gtk.Widget) rename_button);
-            // button_box.set_focus_chain (tab_order_list);
             button_box.set_focus_child (title_entry);
 
-            close_button_box.pack_start (close_button, true, true, 0);
-            label_box.pack_start (title_label, false, false, 0);
-            label_box.pack_start (title_entry, false, false, 0);
-            content_button_box.pack_start (logo_image, false, false, 0);
-            content_button_box.pack_start (label_box, true, true, 0);
+            close_button_box.append (close_button);
+            label_box.append (title_label);
+            label_box.append (title_entry);
+            content_button_box.append (logo_image);
+            content_button_box.append (label_box);
             if (cancel_text != "") {
-                button_box.pack_start (cancel_button, true, true, 0);
+                button_box.append (cancel_button);
             }
-            button_box.pack_start (rename_button, true, true, 0);
-            box.pack_start (close_button_box, false, false, 0);
-            box.pack_start (content_button_box, true, true, 0);
-            box.pack_start (button_box, true, true, 0);
+            button_box.append (rename_button);
+            box.append (close_button_box);
+            box.append (content_button_box);
+            box.append (button_box);
 
             var event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
-            if (screen_monitor.is_composited ()) {
+            if (false) {
                 event_area.margin_bottom = window_init_height - window_frame_margin_top - window_frame_margin_bottom - Constant.TITLEBAR_HEIGHT;
             } else {
                 event_area.margin_bottom = window_init_height - Constant.TITLEBAR_HEIGHT;
             }
 
-            overlay.add (box);
+            overlay.set_child (box);
             overlay.add_overlay (event_area);
 
             add_widget (overlay);

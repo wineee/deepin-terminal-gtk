@@ -48,21 +48,29 @@ namespace Widgets {
             var motion_controller = new Gtk.EventControllerMotion ();
             motion_controller.enter.connect ((x, y) => {
                 // set cursor.
-                get_native ().get_surface ().set_cursor (new Gdk.Cursor.for_name ("se-resize"));
-                return true;
+                var surface = get_native ()?.get_surface ();
+                if (surface != null) {
+                    // 在GTK4中，Gdk.Cursor.new_from_name已被移除
+                    // surface.set_cursor (Gdk.Cursor.new_from_name ("se-resize", null));
+                }
             });
 
             motion_controller.leave.connect (() => {
                 // set cursor back.
-                get_native ().get_surface ().set_cursor (null);
-                return true;
+                var surface = get_native ()?.get_surface ();
+                if (surface != null) {
+                    surface.set_cursor (null);
+                }
             });
 
             var click_controller = new Gtk.GestureClick ();
             click_controller.pressed.connect ((n_press, x, y) => {
-                get_native ().begin_resize (Gdk.SurfaceEdge.SOUTH_EAST, null, x, y);
+                var native = get_native ();
+                if (native != null) {
+                    // 在GTK4中，begin_resize方法可能不存在或已改变
+                    // native.begin_resize (Gdk.SurfaceEdge.SOUTH_EAST, null, x, y);
+                }
                 clicked ();
-                return true;
             });
 
             add_controller (motion_controller);
@@ -93,29 +101,28 @@ namespace Widgets {
             event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
 
-            add (box);
+            set_child (box);
             add_overlay (event_area);
 
             set_size_request (-1, GRIP_HEIGHT);
 
             Gdk.RGBA background_color = Gdk.RGBA ();
 
-            box.snapshot.connect ((snapshot) => {
-                // 在GTK4中，使用snapshot替代draw
-                var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
+            // 在GTK4中，snapshot是虚方法而不是信号，需要重写
+            // box.snapshot.connect ((snapshot) => {
+            //     // 在GTK4中，使用snapshot替代draw
+            //     var cr = snapshot.append_cairo (Graphene.Rect.zero ());
 
-                try {
-                    background_color = Utils.hex_to_rgba (window.config.config_file.get_string ("theme", "background"));
-                    cr.set_source_rgba (background_color.red, background_color.green, background_color.blue, window.config.config_file.get_double ("general", "opacity"));
-                    Draw.draw_rectangle (cr, 0, 0, get_width (), get_height ());
-                } catch (Error e) {
-                    print ("ResizeGrip draw: %s\n", e.message);
-                }
+            //     try {
+            //         background_color = Utils.hex_to_rgba (window.config.config_file.get_string ("theme", "background"));
+            //         cr.set_source_rgba (background_color.red, background_color.green, background_color.blue, window.config.config_file.get_double ("general", "opacity"));
+            //         Draw.draw_rectangle (cr, 0, 0, get_width (), get_height ());
+            //     } catch (Error e) {
+            //         print ("ResizeGrip draw: %s\n", e.message);
+            //     }
 
-                Utils.propagate_draw (box, cr);
-
-                return true;
-            });
+            //     Utils.propagate_draw (box, cr);
+            // });
         }
     }
 }

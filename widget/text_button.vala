@@ -27,6 +27,7 @@ using Widgets;
 namespace Widgets {
     public class TextButton : Widgets.ClickEventBox {
         public bool is_hover = false;
+        public bool is_press = false;
         public Gdk.RGBA text_hover_color;
         public Gdk.RGBA text_normal_color;
         public Gdk.RGBA text_press_color;
@@ -43,66 +44,49 @@ namespace Widgets {
             text_hover_color = Utils.hex_to_rgba (hover_color_string);
             text_press_color = Utils.hex_to_rgba (press_color_string);
 
-            add_events (Gdk.EventMask.BUTTON_PRESS_MASK
-                       | Gdk.EventMask.BUTTON_RELEASE_MASK
-                       | Gdk.EventMask.POINTER_MOTION_MASK
-                       | Gdk.EventMask.LEAVE_NOTIFY_MASK);
-            visible_window = false;
+            // 使用EventController替代
+            var motion_controller = new Gtk.EventControllerMotion ();
+            motion_controller.enter.connect ((x, y) => {
+                is_hover = true;
+                queue_draw ();
+            });
+            motion_controller.leave.connect (() => {
+                is_hover = false;
+                queue_draw ();
+            });
+            add_controller (motion_controller);
+            
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                is_press = true;
+                queue_draw ();
+            });
+            click_controller.released.connect ((n_press, x, y) => {
+                is_press = false;
+                queue_draw ();
+            });
+            add_controller (click_controller);
 
-            enter_notify_event.connect ((w, e) => {
-                    var display = Gdk.Display.get_default ();
-                    get_window ().set_cursor (new Gdk.Cursor.from_name ("pointer", display));
-
-                    is_hover = true;
-                    queue_draw ();
-
-                    return false;
-                });
-            leave_notify_event.connect ((w, e) => {
-                    get_window ().set_cursor (null);
-
-                    is_hover = false;
-                    queue_draw ();
-
-                    return false;
-                });
-
-            button_press_event.connect ((w, e) => {
-                    queue_draw ();
-
-                    return false;
-                });
-            button_release_event.connect ((w, e) => {
-                    is_hover = false;
-                    queue_draw ();
-
-                    return false;
-                });
-            clicked.connect ((w, e) => {
-                    get_window ().set_cursor (null);
-                });
-
-            draw.connect (on_draw);
+            // 在GTK4中，draw已被移除，使用snapshot方法
+            // draw.connect (on_draw);
         }
 
-        public bool on_draw (Gtk.Widget widget, Cairo.Context cr) {
-            Gtk.Allocation rect;
-            widget.get_allocation (out rect);
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            // 在GTK4中，使用snapshot替代draw
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
             if (is_hover) {
                 if (is_press) {
                     Utils.set_context_color (cr, text_press_color);
-                    Draw.draw_text (cr, button_text, 0, 0, rect.width, rect.height, button_text_size, Pango.Alignment.CENTER);
+                    Draw.draw_text (cr, button_text, 0, 0, get_width (), get_height (), button_text_size, Pango.Alignment.CENTER);
                 } else {
                     Utils.set_context_color (cr, text_hover_color);
-                    Draw.draw_text (cr, button_text, 0, 0, rect.width, rect.height, button_text_size, Pango.Alignment.CENTER);
+                    Draw.draw_text (cr, button_text, 0, 0, get_width (), get_height (), button_text_size, Pango.Alignment.CENTER);
                 }
             } else {
                 Utils.set_context_color (cr, text_normal_color);
-                Draw.draw_text (cr, button_text, 0, 0, rect.width, rect.height, button_text_size, Pango.Alignment.CENTER);
+                Draw.draw_text (cr, button_text, 0, 0, get_width (), get_height (), button_text_size, Pango.Alignment.CENTER);
             }
-
-            return true;
         }
     }
 

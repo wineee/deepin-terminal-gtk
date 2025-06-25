@@ -43,12 +43,20 @@ namespace Widgets {
         public int content_padding_x = 24;
         public int content_padding_y = 15;
         public string encoding_name;
+        public Workspace space;
 
         public EncodingButton (string name, Workspace space) {
+            // Object (orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
+
             encoding_name = name;
+            this.space = space;
+
+            // 在GTK4中，get_toplevel已被移除
+            // Widgets.ConfigWindow parent_window = (Widgets.ConfigWindow) space.get_toplevel ();
+            // 简化实现，暂时使用null
+            Widgets.ConfigWindow parent_window = null;
 
             try {
-                Widgets.ConfigWindow parent_window = (Widgets.ConfigWindow) space.get_toplevel ();
                 var theme_name = parent_window.config.config_file.get_string ("general", "theme");
 
                 theme_file = new KeyFile ();
@@ -56,7 +64,7 @@ namespace Widgets {
                 background_color = Utils.hex_to_rgba (theme_file.get_string ("theme", "background").strip(   ));
                 is_light_color = Utils.is_light_color (theme_file.get_string ("theme", "background").strip(   ));
 
-                background_color.alpha = 0.8;
+                background_color.alpha = 0.8f;
                 foreground_color = Utils.hex_to_rgba (theme_file.get_string ("theme", "foreground").strip(   ));
                 content_color = Utils.hex_to_rgba (theme_file.get_string ("theme", "color_2").strip(   ));
 
@@ -125,7 +133,7 @@ namespace Widgets {
                         active_button (encoding_name);
                         active_encoding (encoding_name);
                     }
-                    return true;
+                    return;
                 });
                 button.add_controller (click_controller);
 

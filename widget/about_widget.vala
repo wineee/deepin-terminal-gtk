@@ -65,17 +65,18 @@ namespace Widgets {
             string homepage_link = "https://" + homepage_name;
 
             var homepage_area = new Widgets.LinkButton (homepage_name, homepage_link, "homepage");
-            content_box.pack_start (homepage_area, false, false, 0);
+            content_box.append (homepage_area);
 
             var acknowledgments_area = new Widgets.LinkButton (_("Acknowledgments"), "https://www.deepin.org/acknowledgments/deepin-terminal", "acknowledgments");
             acknowledgments_area.margin_top = acknowledgments_y;
-            content_box.pack_start (acknowledgments_area, false, false, 0);
+            content_box.append (acknowledgments_area);
 
-            pack_start (content_box, true, true, 0);
+            append (content_box);
 
-            draw.connect (on_draw);
+            // 在GTK4中，draw已被移除，使用snapshot
+            // draw.connect (on_draw);
 
-            show_all ();
+            show ();
         }
 
         private bool on_draw (Gtk.Widget widget, Cairo.Context cr) {

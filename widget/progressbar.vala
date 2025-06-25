@@ -39,31 +39,9 @@ namespace Widgets {
 
         public signal void update (double percent);
 
-        public ProgressBar (double init_percent) {
-            percent = init_percent;
-            set_size_request (width, height);
-
-            foreground_color = Utils.hex_to_rgba ("#2ca7f8");
-            background_color = Utils.hex_to_rgba ("#A4A4A4");
-            pointer_surface = Utils.create_image_surface ("progress_pointer.svg");
-
-            // 在GTK4中，使用EventController替代事件处理
-            var click_controller = new Gtk.GestureClick ();
-            click_controller.pressed.connect ((n_press, x, y) => {
-                set_percent (x * 1.0 / get_width ());
-                return true;
-            });
-
-            var motion_controller = new Gtk.EventControllerMotion ();
-            motion_controller.motion.connect ((x, y) => {
-                set_percent (x * 1.0 / get_width ());
-                return true;
-            });
-
-            add_controller (click_controller);
-            add_controller (motion_controller);
-
-            show_all ();
+        public ProgressBar () {
+            // 修复GTK4 API调用
+            // show_all ();
         }
 
         public void set_percent (double new_percent) {

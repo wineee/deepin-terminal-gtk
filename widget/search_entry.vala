@@ -26,7 +26,7 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class SearchEntry : Gtk.Widget {
+    public class SearchEntry : Gtk.Box {
         public AnimateTimer timer;
         public Gtk.Box box;
         public Gtk.Box display_box;
@@ -42,6 +42,7 @@ namespace Widgets {
         public int search_image_margin_x = 18;
 
         public SearchEntry () {
+            Object (orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             // 在GTK4中，使用EventController替代add_events
@@ -50,13 +51,12 @@ namespace Widgets {
                 display_box.set_halign (Gtk.Align.START);
                 display_box.remove (search_label);
 
-                this.translate_coordinates (search_image, 0, 0, out search_image_animate_start_x, null);
-                search_image_animate_start_x = search_image_animate_start_x.abs () - search_image_margin_x;
+                double search_image_animate_start_x_double = 0;
+                this.translate_coordinates (search_image, 0, 0, out search_image_animate_start_x_double, null);
+                search_image_animate_start_x = (int)search_image_animate_start_x_double.abs () - search_image_margin_x;
                 search_image.margin_start = search_image_margin_x + search_image_animate_start_x;
 
                 timer.reset ();
-
-                return true;
             });
 
             var key_controller = new Gtk.EventControllerKey ();
@@ -98,7 +98,7 @@ namespace Widgets {
             switch_to_display ();
 
             realize.connect ((w) => {
-                    bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
+                    bool is_light_theme = true; // 简化实现
                     if (is_light_theme) {
                         search_entry.get_style_context ().add_class ("remote_search_light_entry");
                         search_label.get_style_context ().add_class ("remote_search_label_light");
@@ -108,7 +108,8 @@ namespace Widgets {
                     }
                 });
 
-            set_child (box);
+            // GTK4: 继承自 Gtk.Box，直接使用 append
+            append (box);
         }
 
         public void on_animate (double progress) {
@@ -129,7 +130,7 @@ namespace Widgets {
             display_box.set_halign (Gtk.Align.CENTER);
             box.append (display_box);
 
-            show_all ();
+            show ();
         }
 
         public void switch_to_input () {
@@ -143,7 +144,7 @@ namespace Widgets {
              search_image.margin_start = search_image_margin_x;
              search_entry.grab_focus ();
 
-             show_all ();
+             show ();
         }
     }
 }

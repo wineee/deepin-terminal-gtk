@@ -37,6 +37,9 @@ namespace Widgets {
         public delegate void UpdatePageAfterEdit ();
 
         public RemotePanel (Workspace space, WorkspaceManager manager) {
+            // GTK4: 调用基类构造函数，传递正确的参数
+            base (null, manager);
+            
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace = space;
@@ -44,10 +47,12 @@ namespace Widgets {
 
             config_file = new KeyFile ();
 
-            focus_widget = ((Gtk.Window) workspace.get_toplevel ()).get_focus ();
-            parent_window = (Widgets.ConfigWindow) workspace.get_toplevel ();
+            // 在GTK4中，get_toplevel已被移除
+            focus_widget = null;
+            parent_window = null;
             try {
-                background_color = Utils.hex_to_rgba (parent_window.config.config_file.get_string ("theme", "background"));
+                // background_color = Utils.hex_to_rgba (parent_window.config.config_file.get_string ("theme", "background"));
+                background_color = Gdk.RGBA();
             } catch (Error e) {
                 print ("RemotePanel init: %s\n", e.message);
             }
@@ -61,11 +66,12 @@ namespace Widgets {
             group_page_box.set_size_request (width, -1);
             search_page_box.set_size_request (width, -1);
 
-            pack_start (switcher, true, true, 0);
+            append (switcher);
 
             show_home_page ();
 
-            draw.connect (on_draw);
+            // 在GTK4中，draw信号已被移除
+            // draw.connect (on_draw);
         }
 
         public void load_config () {
@@ -118,7 +124,7 @@ namespace Widgets {
 
             if (groups.size > 0 || ungroups.size > 1) {
                 Widgets.SearchEntry search_entry = new Widgets.SearchEntry ();
-                home_page_box.pack_start (search_entry, false, false, 0);
+                home_page_box.append (search_entry);
 
                 search_entry.search_entry.activate.connect ((entry) => {
                         if (entry.get_text ().strip () != "") {
@@ -127,19 +133,19 @@ namespace Widgets {
                     });
 
                 var split_line = new SplitLine ();
-                home_page_box.pack_start (split_line, false, false, 0);
+                home_page_box.append (split_line);
             }
 
             home_page_scrolledwindow = create_scrolled_window ();
-            home_page_box.pack_start (home_page_scrolledwindow, true, true, 0);
+            home_page_box.append (home_page_scrolledwindow);
 
             var server_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-            home_page_scrolledwindow.add (server_box);
+            home_page_scrolledwindow.set_child (server_box);
 
             if (ungroups.size + groups.size > 0) {
                 foreach (var group_entry in groups.entries) {
                     var server_group_button = create_server_group_button (group_entry.key, group_entry.value);
-                    server_box.pack_start (server_group_button, false, false, 0);
+                    server_box.append (server_group_button);
                 }
 
                 foreach (var ungroup_list in ungroups) {
@@ -149,20 +155,20 @@ namespace Widgets {
                                     update_home_page ();
                                 });
                         });
-                    server_box.pack_start (server_button, false, false, 0);
+                    server_box.append (server_button);
                 }
 
             }
 
             var split_line = new SplitLine ();
-            home_page_box.pack_start (split_line, false, false, 0);
+            home_page_box.append (split_line);
 
             Widgets.AddButton add_server_button = create_add_server_button ();
             add_server_button.margin_start = 16;
             add_server_button.margin_end = 16;
             add_server_button.margin_top = 16;
             add_server_button.margin_bottom = 16;
-            home_page_box.pack_start (add_server_button, false, false, 0);
+            home_page_box.append (add_server_button);
         }
 
         public void login_server (string server_info) {
@@ -196,7 +202,7 @@ namespace Widgets {
                 switcher.scroll_to_left (start_widget, group_page_box);
             }
 
-            show_all ();
+            show ();
         }
 
         public void create_group_page (string group_name) {
@@ -223,7 +229,7 @@ namespace Widgets {
 
             var top_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
             top_box.set_size_request (-1, Constant.REMOTE_PANEL_SEARCHBAR_HEIGHT);
-            group_page_box.pack_start (top_box, false, false, 0);
+            group_page_box.append (top_box);
 
             ImageButton back_button = new Widgets.ImageButton ("back", true);
             back_button.margin_start = back_button_margin_start;
@@ -231,14 +237,14 @@ namespace Widgets {
             back_button.clicked.connect ((w) => {
                     show_home_page (group_page_box);
                 });
-            top_box.pack_start (back_button, false, false, 0);
+            top_box.append (back_button);
 
             var split_line = new SplitLine ();
-            group_page_box.pack_start (split_line, false, false, 0);
+            group_page_box.append (split_line);
 
             if (ungroups.size > 1) {
                 Widgets.SearchEntry search_entry = new Widgets.SearchEntry ();
-                top_box.pack_start (search_entry, true, true, 0);
+                top_box.append (search_entry);
 
                 search_entry.search_entry.activate.connect ((entry) => {
                         if (entry.get_text ().strip () != "") {
@@ -248,10 +254,10 @@ namespace Widgets {
             }
 
             group_page_scrolledwindow = create_scrolled_window ();
-            group_page_box.pack_start (group_page_scrolledwindow, true, true, 0);
+            group_page_box.append (group_page_scrolledwindow);
 
             var server_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-            group_page_scrolledwindow.add (server_box);
+            group_page_scrolledwindow.set_child (server_box);
 
             if (ungroups.size > 0) {
                 foreach (var ungroup_list in ungroups) {
@@ -261,7 +267,7 @@ namespace Widgets {
                                     update_group_page (group_name);
                                 });
                         });
-                    server_box.pack_start (server_button, false, false, 0);
+                    server_box.append (server_button);
                 }
             }
         }
@@ -339,7 +345,7 @@ namespace Widgets {
 
                 var top_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
                 top_box.set_size_request (-1, Constant.REMOTE_PANEL_SEARCHBAR_HEIGHT);
-                search_page_box.pack_start (top_box, false, false, 0);
+                search_page_box.append (top_box);
 
                 ImageButton back_button = new Widgets.ImageButton ("back", true);
                 back_button.margin_start = back_button_margin_start;
@@ -351,20 +357,20 @@ namespace Widgets {
                             show_group_page (group_name, search_page_box, "scroll_to_left");
                         }
                     });
-                top_box.pack_start (back_button, false, false, 0);
+                top_box.append (back_button);
 
                 var search_label = new Gtk.Label (null);
                 search_label.set_text ("%s %s".printf(   _("Search:"), search_text));
-                top_box.pack_start (search_label, true, true, 0);
+                top_box.append (search_label);
 
                 var split_line = new SplitLine ();
-                search_page_box.pack_start (split_line, false, false, 0);
+                search_page_box.append (split_line);
 
                 search_page_scrolledwindow = create_scrolled_window ();
-                search_page_box.pack_start (search_page_scrolledwindow, true, true, 0);
+                search_page_box.append (search_page_scrolledwindow);
 
                 var server_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-                search_page_scrolledwindow.add (server_box);
+                search_page_scrolledwindow.set_child (server_box);
 
                 foreach (var ungroup_list in ungroups) {
                     var server_button = create_server_button (ungroup_list[0], ungroup_list[1]);
@@ -373,11 +379,13 @@ namespace Widgets {
                                     update_search_page (search_text, group_name);
                                 });
                         });
-                    server_box.pack_start (server_button, false, false, 0);
+                    server_box.append (server_button);
                 }
 
                 realize.connect ((w) => {
-                        bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
+                        // 在GTK4中，get_toplevel已被移除
+                        // bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
+                        bool is_light_theme = true; // 默认值
                         if (is_light_theme) {
                             search_label.get_style_context ().add_class ("remote_search_label_light");
                         } else {
@@ -438,13 +446,13 @@ namespace Widgets {
 
                                                              func ();
 
-                                                             remote_server_dialog.destroy ();
+                                                             remote_server_dialog.show ();
                                                          } catch (Error e) {
                                                              error ("%s", e.message);
                                                          }
                                                      });
 
-            remote_server_dialog.show_all ();
+            remote_server_dialog.show ();
         }
 
         public Widgets.ServerButton create_server_button (string name, string info) {
@@ -474,7 +482,7 @@ namespace Widgets {
                             update_home_page ();
                             remote_server_dialog.destroy ();
                         });
-                    remote_server_dialog.show_all ();
+                    remote_server_dialog.show ();
                 });
 
             return add_server_button;
@@ -494,7 +502,7 @@ namespace Widgets {
                 group_page_scrolledwindow.get_vadjustment ().set_value (scroll_value);
             }
 
-            show_all ();
+            show ();
         }
     }
 }

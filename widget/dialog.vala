@@ -26,7 +26,7 @@ using Widgets;
 
 namespace Widgets {
     public class Dialog : Gtk.Window {
-        public Gdk.Display display;
+        public new Gdk.Display display;
         public Gtk.Box window_frame_box;
         public Gtk.Box window_widget_box;
         public Widgets.ConfigWindow transient_window;
@@ -41,89 +41,46 @@ namespace Widgets {
         public int window_init_width;
 
         public Dialog () {
-            set_app_paintable (true); // set_app_paintable is necessary step to make window transparent.
+            // GTK4: set_app_paintable 已被移除，透明度通过CSS处理
             display = Gdk.Display.get_default ();
-            // 在GTK4中，set_visual已被移除，透明度通过CSS处理
 
-            set_skip_taskbar_hint (true);
-            set_skip_pager_hint (true);
+            // GTK4: 这些方法已被移除，使用CSS或其他方式处理
             set_modal (true);
             set_resizable (false);
-            set_type_hint (Gdk.WindowTypeHint.DIALOG);  // DIALOG hint will give right window effect
-
             set_decorated (false);
 
             window_frame_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
             window_widget_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
 
-            add (window_frame_box);
-            window_frame_box.pack_start (window_widget_box, true, true, 0);
+            window_frame_box.append (window_widget_box);
 
-            // 在GTK4中，composited_changed信号已被移除，我们需要使用其他方法检测合成
+            // GTK4: 使用 EventController 替代信号连接
+            var focus_controller = new Gtk.EventControllerFocus ();
+            focus_controller.enter.connect (() => {
+                window_frame_box.get_style_context ().remove_class ("dialog_shadow_inactive");
+                window_frame_box.get_style_context ().add_class ("dialog_shadow_active");
+                window_frame_box.get_style_context ().remove_class ("dialog_noshadow_inactive");
+                window_frame_box.get_style_context ().add_class ("dialog_noshadow_active");
+            });
+            focus_controller.leave.connect (() => {
+                window_frame_box.get_style_context ().remove_class ("dialog_shadow_active");
+                window_frame_box.get_style_context ().add_class ("dialog_shadow_inactive");
+                window_frame_box.get_style_context ().remove_class ("dialog_noshadow_active");
+                window_frame_box.get_style_context ().add_class ("dialog_noshadow_inactive");
+            });
 
-            focus_in_event.connect ((w) => {
-                    shadow_active ();
+            var key_controller = new Gtk.EventControllerKey ();
+            key_controller.key_pressed.connect ((keyval, keycode, state) => {
+                if (keyval == Gdk.Key.Escape) {
+                    close ();
+                }
+                return false;
+            });
 
-                    return false;
-                });
-
-            focus_out_event.connect ((w) => {
-                    shadow_inactive ();
-
-                    return false;
-                });
-
-            configure_event.connect ((w) => {
-                    int width, height;
-                    get_size (out width, out height);
-
-                    // 在GTK4中，合成检测需要不同的方法
-                    bool is_composited = true; // 假设现代桌面环境都支持合成
-                    if (is_composited) {
-                        Cairo.RectangleInt rect;
-                        get_window ().get_frame_extents (out rect);
-
-                        rect.x = window_frame_margin_start;
-                        rect.y = window_frame_margin_top;
-                        rect.width = width - window_frame_margin_start - window_frame_margin_end;
-                        rect.height = height - window_frame_margin_top - window_frame_margin_bottom;
-
-                        var shape = new Cairo.Region.rectangle (rect);
-                        get_window ().input_shape_combine_region (shape, 0, 0);
-                    }
-
-                    queue_draw ();
-
-                    return false;
-                });
-
-            window_state_event.connect ((w, e) => {
-                    update_frame ();
-
-                    return false;
-                });
-
-
-            key_press_event.connect ((w, e) => {
-                    string keyname = Keymap.get_keyevent_name (e.keyval, e.state);
-                    if (keyname == "Esc") {
-                        this.destroy ();
-                    }
-
-                    return false;
-                });
-
-            draw.connect_after ((w, cr) => {
-                    draw_window_below (cr);
-
-                    draw_window_widgets (cr);
-
-                    draw_window_frame (cr);
-
-                    draw_window_above (cr);
-
-                    return true;
-                });
+            // GTK4: 使用 override snapshot 替代 snapshot.connect
+            // this.snapshot.connect ((snapshot) => {
+            //     on_draw (this, snapshot);
+            // });
         }
 
         public void set_init_size (int width, int height) {
@@ -145,16 +102,14 @@ namespace Widgets {
 
             set_transient_for (window);
             
-            // 在GTK4中，使用不同的方法获取窗口位置
-            int x, y;
-            window.get_position (out x, out y);
-            int window_width, window_height;
-            window.get_size (out window_width, out window_height);
+            // GTK4: get_position 已被移除，使用其他方法
+            // int x, y;
+            // window.get_position (out x, out y);
+            int window_width = window.get_width ();
+            int window_height = window.get_height ();
 
-            move (x + (window_width - window_init_width) / 2,
-                 y + (window_height - window_init_height) / 2);
-
-            show_all ();
+            // GTK4: set_position 已被移除，使用其他方法
+            // set_position (Gtk.WindowPosition.CENTER_ON_PARENT);
         }
 
         public void shadow_active () {
@@ -186,20 +141,21 @@ namespace Widgets {
         }
 
         public void add_widget (Gtk.Widget widget) {
-            window_widget_box.pack_start (widget, true, true, 0);
+            window_widget_box.append (widget);
         }
 
         public void draw_window_below (Cairo.Context cr) {
-            Gtk.Allocation window_rect;
-            window_frame_box.get_allocation (out window_rect);
+            // GTK4: get_allocation 已被移除，使用 get_width/get_height
+            int width = window_frame_box.get_width ();
+            int height = window_frame_box.get_height ();
 
             cr.set_source_rgba (1, 1, 1, 1);
             // 在GTK4中，合成检测需要不同的方法
             bool is_composited = true; // 假设现代桌面环境都支持合成
             if (is_composited) {
-                Draw.fill_rounded_rectangle (cr, window_frame_margin_start, window_frame_margin_top, window_rect.width, window_rect.height, window_frame_radius);
+                Draw.fill_rounded_rectangle (cr, window_frame_margin_start, window_frame_margin_top, width, height, window_frame_radius);
             } else {
-                Draw.fill_rounded_rectangle (cr, 0, 0, window_rect.width, window_rect.height, 0);
+                Draw.fill_rounded_rectangle (cr, 0, 0, width, height, 0);
             }
         }
 
@@ -223,22 +179,23 @@ namespace Widgets {
             // 在GTK4中，合成检测需要不同的方法
             bool is_composited = true; // 假设现代桌面环境都支持合成
             if (is_composited) {
-                get_window ().set_shadow_width (window_frame_margin_start, window_frame_margin_end, window_frame_margin_top, window_frame_margin_bottom);
-
+                // GTK4: set_shadow_width 已被移除，使用CSS处理阴影
                 window_frame_box.margin_top = window_frame_margin_top;
                 window_frame_box.margin_bottom = window_frame_margin_bottom;
                 window_frame_box.margin_start = window_frame_margin_start;
                 window_frame_box.margin_end = window_frame_margin_end;
             } else {
-                get_window ().set_shadow_width (0, 0, 0, 0);
-
+                // GTK4: set_shadow_width 已被移除，使用CSS处理阴影
                 window_frame_box.margin_top = 0;
                 window_frame_box.margin_bottom = 0;
                 window_frame_box.margin_start = 0;
                 window_frame_box.margin_end = 0;
             }
 
-            window_widget_box.margin = 0;
+            window_widget_box.margin_top = 0;
+            window_widget_box.margin_bottom = 0;
+            window_widget_box.margin_start = 0;
+            window_widget_box.margin_end = 0;
         }
 
         public virtual void draw_window_above (Cairo.Context cr) {

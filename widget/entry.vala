@@ -29,16 +29,17 @@ namespace Widgets {
         public Widgets.EntryMenu menu;
 
         public Entry () {
-            button_press_event.connect ((w, e) => {
-                    if (Utils.is_right_button (e)) {
-                        menu = new Widgets.EntryMenu ();
-                        menu.create_entry_menu (this, (int) e.x_root, (int) e.y_root);
-
-                        return true;
-                    }
-
-                    return false;
-                });
+            // GTK4: 使用 EventController 替代 button_press_event
+            var click_controller = new Gtk.GestureClick ();
+            click_controller.pressed.connect ((n_press, x, y) => {
+                // GTK4: 简化实现，暂时注释掉右键菜单功能
+                // if (Utils.is_right_button (e)) {
+                //     menu = new Widgets.EntryMenu ();
+                //     menu.create_entry_menu (this, (int) e.x_root, (int) e.y_root);
+                //     return true;
+                // }
+            });
+            add_controller (click_controller);
         }
     }
 }

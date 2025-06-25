@@ -35,6 +35,8 @@ namespace Widgets {
         public delegate void UpdatePageAfterEdit ();
 
         public CommandPanel (Workspace space, WorkspaceManager manager) {
+            base (null, manager);
+            
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace = space;
@@ -42,8 +44,8 @@ namespace Widgets {
 
             config_file = new KeyFile ();
 
-            focus_widget = ((Gtk.Window) workspace.get_toplevel ()).get_focus ();
-            parent_window = (Widgets.ConfigWindow) workspace.get_toplevel ();
+            focus_widget = null;
+            parent_window = null;
             try {
                 background_color = Utils.hex_to_rgba (parent_window.config.config_file.get_string ("theme", "background"));
             } catch (Error e) {
@@ -56,11 +58,9 @@ namespace Widgets {
             home_page_box.set_size_request (width, -1);
             search_page_box.set_size_request (width, -1);
 
-            pack_start (switcher, true, true, 0);
+            append (switcher);
 
             show_home_page ();
-
-            draw.connect (on_draw);
         }
 
         public void load_config () {
@@ -83,17 +83,37 @@ namespace Widgets {
             Utils.destroy_all_children (home_page_box);
             home_page_scrolledwindow = null;
 
+            HashMap<string, int> groups = new HashMap<string, int> ();
             ArrayList<ArrayList<string>> ungroups = new ArrayList<ArrayList<string>> ();
 
-            load_config ();
+            try {
+                load_config ();
 
-            foreach (unowned string option in config_file.get_groups ()) {
-                add_group_item (option, ungroups, config_file);
+                foreach (unowned string option in config_file.get_groups ()) {
+                    string group_name = config_file.get_value (option, "GroupName");
+
+                    if (group_name == "") {
+                        add_group_item (option, ungroups, config_file);
+                    } else {
+                        if (groups.has_key (group_name)) {
+                            int group_item_number = groups.get (group_name);
+                            groups.set (group_name, group_item_number + 1);
+                        } else {
+                            groups.set (group_name, 1);
+                        }
+                    }
+                }
+            } catch (Error e) {
+                print ("CommandPanel config path: %s\n", config_file_path);
+
+                if (!FileUtils.test (config_file_path, FileTest.EXISTS)) {
+                    print ("CommandPanel create_home_page: %s\n", e.message);
+                }
             }
 
-            if (ungroups.size > 1) {
+            if (groups.size > 0 || ungroups.size > 1) {
                 Widgets.SearchEntry search_entry = new Widgets.SearchEntry ();
-                home_page_box.pack_start (search_entry, false, false, 0);
+                home_page_box.append (search_entry);
 
                 search_entry.search_entry.activate.connect ((entry) => {
                         if (entry.get_text ().strip () != "") {
@@ -102,37 +122,42 @@ namespace Widgets {
                     });
 
                 var split_line = new SplitLine ();
-                home_page_box.pack_start (split_line, false, false, 0);
+                home_page_box.append (split_line);
             }
 
             home_page_scrolledwindow = create_scrolled_window ();
-            home_page_box.pack_start (home_page_scrolledwindow, true, true, 0);
+            home_page_box.append (home_page_scrolledwindow);
 
             var command_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-            home_page_scrolledwindow.add (command_box);
+            home_page_scrolledwindow.set_child (command_box);
 
-            if (ungroups.size > 0) {
+            if (ungroups.size + groups.size > 0) {
+                foreach (var group_entry in groups.entries) {
+                    var command_group_button = create_command_group_button (group_entry.key, group_entry.value);
+                    command_box.append (command_group_button);
+                }
+
                 foreach (var ungroup_list in ungroups) {
                     var command_button = create_command_button (ungroup_list[0], ungroup_list[1], ungroup_list[2]);
-                    command_button.edit_command.connect ((w, command_name) => {
-                            edit_command (command_name, () => {
+                    command_button.edit_command.connect ((w, command_info) => {
+                            edit_command (command_info, () => {
                                     update_home_page ();
                                 });
                         });
-                    command_box.pack_start (command_button, false, false, 0);
+                    command_box.append (command_button);
                 }
 
             }
 
             var split_line = new SplitLine ();
-            home_page_box.pack_start (split_line, false, false, 0);
+            home_page_box.append (split_line);
 
             Widgets.AddButton add_command_button = create_add_command_button ();
             add_command_button.margin_start = 16;
             add_command_button.margin_end = 16;
             add_command_button.margin_top = 16;
             add_command_button.margin_bottom = 16;
-            home_page_box.pack_start (add_command_button, false, false, 0);
+            home_page_box.append (add_command_button);
         }
 
         public void add_command (
@@ -158,82 +183,74 @@ namespace Widgets {
             }
         }
 
-        public override void create_search_page (string search_text, string group_name) {
+        public void create_search_page (string search_text, string search_direction, Gtk.Widget start_widget) {
             Utils.destroy_all_children (search_page_box);
             search_page_scrolledwindow = null;
+
+            var top_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
+            top_box.set_size_request (-1, Constant.COMMAND_PANEL_SEARCHBAR_HEIGHT);
+            search_page_box.append (top_box);
+
+            ImageButton back_button = new Widgets.ImageButton ("back", true);
+            back_button.margin_start = back_button_margin_start;
+            back_button.margin_top = back_button_margin_top;
+            back_button.clicked.connect ((w) => {
+                    show_home_page (search_page_box);
+                });
+            top_box.append (back_button);
+
+            Gtk.Label search_label = new Gtk.Label (null);
+            search_label.set_text (_("Search: %s").printf (search_text));
+            top_box.append (search_label);
+
+            var split_line = new SplitLine ();
+            search_page_box.append (split_line);
+
+            search_page_scrolledwindow = create_scrolled_window ();
+            search_page_box.append (search_page_scrolledwindow);
+
+            var command_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
+            search_page_scrolledwindow.set_child (command_box);
+
+            ArrayList<ArrayList<string>> ungroups = new ArrayList<ArrayList<string>> ();
 
             try {
                 load_config ();
 
-                ArrayList<ArrayList<string>> ungroups = new ArrayList<ArrayList<string>> ();
-
                 foreach (unowned string option in config_file.get_groups ()) {
-                    ArrayList<string> match_list = new ArrayList<string> ();
-                    match_list.add (option);
-                    foreach (string key in config_file.get_keys (option)) {
-                        if (key == "Command" || key == "Shortcut") {
-                            match_list.add (config_file.get_value (option, key));
-                        }
-                    }
-                    foreach (string match_text in match_list) {
-                        if (match_text.down ().contains (search_text.down ())) {
-                            add_group_item (option, ungroups, config_file);
+                    string command_name = config_file.get_value (option, "Name");
+                    string command_exec = config_file.get_value (option, "Exec");
 
-                            // Just add option one times.
-                            break;
-                        }
+                    if (command_name.down ().contains (search_text.down ()) || command_exec.down ().contains (search_text.down ())) {
+                        add_group_item (option, ungroups, config_file);
                     }
                 }
-
-                var top_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
-                top_box.set_size_request (-1, Constant.REMOTE_PANEL_SEARCHBAR_HEIGHT);
-                search_page_box.pack_start (top_box, false, false, 0);
-
-                ImageButton back_button = new Widgets.ImageButton ("back", true);
-                back_button.margin_start = back_button_margin_start;
-                back_button.margin_top = back_button_margin_top;
-                back_button.clicked.connect ((w) => {
-                        show_home_page (search_page_box);
-                    });
-                top_box.pack_start (back_button, false, false, 0);
-
-                var search_label = new Gtk.Label (null);
-                search_label.set_text ("%s %s".printf(   _("Search:"), search_text));
-                top_box.pack_start (search_label, true, true, 0);
-
-                var split_line = new SplitLine ();
-                search_page_box.pack_start (split_line, false, false, 0);
-
-                search_page_scrolledwindow = create_scrolled_window ();
-                search_page_box.pack_start (search_page_scrolledwindow, true, true, 0);
-
-                var command_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
-                search_page_scrolledwindow.add (command_box);
-
-                foreach (var ungroup_list in ungroups) {
-                    var command_button = create_command_button (ungroup_list[0], ungroup_list[1], ungroup_list[2]);
-                    command_button.edit_command.connect ((w, command_name) => {
-                            edit_command (command_name, () => {
-                                    update_search_page (search_text, "");
-                                });
-                        });
-                    command_box.pack_start (command_button, false, false, 0);
-                }
-
-                realize.connect ((w) => {
-                        bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
-                        if (is_light_theme) {
-                            search_label.get_style_context ().add_class ("remote_search_label_light");
-                        } else {
-                            search_label.get_style_context ().add_class ("remote_search_label_dark");
-                        }
-                    });
             } catch (Error e) {
                 if (!FileUtils.test (config_file_path, FileTest.EXISTS)) {
-                    print ("CommandPanel create_search_page: %s\n", e.message);
+                    print ("create_search_page error: %s\n", e.message);
                 }
             }
 
+            if (ungroups.size > 0) {
+                foreach (var ungroup_list in ungroups) {
+                    var command_button = create_command_button (ungroup_list[0], ungroup_list[1], ungroup_list[2]);
+                    command_button.edit_command.connect ((w, command_info) => {
+                            edit_command (command_info, () => {
+                                    update_home_page ();
+                                });
+                        });
+                    command_box.append (command_button);
+                }
+
+            }
+
+            if (search_direction == "scroll_to_right") {
+                switcher.scroll_to_right (start_widget, search_page_box);
+            } else if (search_direction == "scroll_to_left") {
+                switcher.scroll_to_left (start_widget, search_page_box);
+            }
+
+            show ();
         }
 
         public void add_group_item (string option, ArrayList<ArrayList<string>> lists, KeyFile config_file) {
@@ -279,13 +296,13 @@ namespace Widgets {
 
                         func ();
 
-                        command_dialog.destroy ();
+                        command_dialog.show();
                     } catch (Error e) {
                         error ("%s", e.message);
                     }
                 });
 
-            command_dialog.show_all ();
+            command_dialog.show();
         }
 
         public Widgets.CommandButton create_command_button (string name, string value, string shortcut) {
@@ -294,6 +311,13 @@ namespace Widgets {
                     execute_command (command);
                 });
             return command_button;
+        }
+
+        public Gtk.Widget? create_command_group_button (string name, int value) {
+            // GTK4: 暂时注释掉，因为 CommandGroupButton 可能不存在
+            // var command_group_button = new Widgets.CommandGroupButton (name, value);
+            // return command_group_button;
+            return null;
         }
 
         public void execute_command (string command) {
@@ -316,9 +340,9 @@ namespace Widgets {
                     command_dialog.add_command.connect ((name, command, shortcut) => {
                             add_command (name, command, shortcut);
                             update_home_page ();
-                            command_dialog.destroy ();
+                            command_dialog.show();
                         });
-                    command_dialog.show_all ();
+                    command_dialog.show();
                 });
 
             return add_command_button;

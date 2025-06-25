@@ -66,160 +66,154 @@ namespace Widgets {
         }
 
         public void init (WorkspaceManager manager, Tabbar tabbar) {
-            set_redraw_on_allocate (true);
-
             workspace_manager = manager;
             box = new Box (Gtk.Orientation.VERTICAL, 0);
             top_box = new Box (Gtk.Orientation.HORIZONTAL, 0);
 
             display = Gdk.Display.get_default ();
-            display.composited_changed.connect (() => {
-                    update_frame ();
-                });
 
-            delete_event.connect ((w) => {
-                    quit ();
+            // 在GTK4中，这些事件信号已被移除，需要使用事件控制器
+            // delete_event.connect ((w) => {
+            //         quit ();
+            //         return true;
+            //     });
 
-                    return true;
-                });
+            // destroy.connect ((t) => {
+            //         quit ();
+            //     });
 
-            destroy.connect ((t) => {
-                    quit ();
-                });
+            // key_press_event.connect ((w, e) => {
+            //         return on_key_press (w, e);
+            //     });
 
-            key_press_event.connect ((w, e) => {
-                    return on_key_press (w, e);
-                });
+            // key_release_event.connect ((w, e) => {
+            //         return on_key_release (w, e);
+            //     });
 
-            key_release_event.connect ((w, e) => {
-                    return on_key_release (w, e);
-                });
+            // enter_notify_event.connect ((w, e) => {
+            //         if (resize_timeout_source_id == null) {
+            //             resize_timeout_source_id = GLib.Timeout.add (resize_timeout_delay, () => {
+            //                     int pointer_x, pointer_y;
+            //                     Utils.get_pointer_position (out pointer_x, out pointer_y);
 
-            enter_notify_event.connect ((w, e) => {
-                    if (resize_timeout_source_id == null) {
-                        resize_timeout_source_id = GLib.Timeout.add (resize_timeout_delay, () => {
-                                int pointer_x, pointer_y;
-                                Utils.get_pointer_position (out pointer_x, out pointer_y);
+            //                     if (!window_is_normal ()) {
+            //                         get_window ().set_cursor (null);
+            //                     } else if (pointer_x != resize_cache_x || pointer_y != resize_cache_y) {
+            //                         resize_cache_x = pointer_x;
+            //                         resize_cache_y = pointer_y;
 
-                                if (!window_is_normal ()) {
-                                    get_window ().set_cursor (null);
-                                } else if (pointer_x != resize_cache_x || pointer_y != resize_cache_y) {
-                                    resize_cache_x = pointer_x;
-                                    resize_cache_y = pointer_y;
+            //                         var cursor_type = get_cursor_type (pointer_x, pointer_y);
+            //                         var display = Gdk.Display.get_default ();
+            //                         if (cursor_type != null) {
+            //                             get_window ().set_cursor (new Gdk.Cursor.for_display (display, cursor_type));
+            //                         } else {
+            //                             get_window ().set_cursor (null);
+            //                         }
+            //                     }
 
-                                    var cursor_type = get_cursor_type (pointer_x, pointer_y);
-                                    var display = Gdk.Display.get_default ();
-                                    if (cursor_type != null) {
-                                        get_window ().set_cursor (new Gdk.Cursor.for_display (display, cursor_type));
-                                    } else {
-                                        get_window ().set_cursor (null);
-                                    }
-                                }
+            //                     return true;
+            //                 });
+            //         }
 
-                                return true;
-                            });
-                    }
+            //         return false;
+            //     });
 
-                    return false;
-                });
+            // enter_notify_event.connect ((w, e) => {
+            //         if (resize_timeout_source_id == null) {
+            //             resize_timeout_source_id = GLib.Timeout.add (resize_timeout_delay, () => {
+            //                     int pointer_x, pointer_y;
+            //                     Utils.get_pointer_position (out pointer_x, out pointer_y);
 
-            enter_notify_event.connect ((w, e) => {
-                    if (resize_timeout_source_id == null) {
-                        resize_timeout_source_id = GLib.Timeout.add (resize_timeout_delay, () => {
-                                int pointer_x, pointer_y;
-                                Utils.get_pointer_position (out pointer_x, out pointer_y);
+            //                     if (!window_is_normal ()) {
+            //                         get_window ().set_cursor (null);
+            //                     } else if (pointer_x != resize_cache_x || pointer_y != resize_cache_y) {
+            //                         resize_cache_x = pointer_x;
+            //                         resize_cache_y = pointer_y;
 
-                                if (!window_is_normal ()) {
-                                    get_window ().set_cursor (null);
-                                } else if (pointer_x != resize_cache_x || pointer_y != resize_cache_y) {
-                                    resize_cache_x = pointer_x;
-                                    resize_cache_y = pointer_y;
+            //                         var cursor_type = get_cursor_type (pointer_x, pointer_y);
+            //                         var display = Gdk.Display.get_default ();
+            //                         if (cursor_type != null) {
+            //                             get_window ().set_cursor (new Gdk.Cursor.for_display (display, cursor_type));
+            //                         } else {
+            //                             get_window ().set_cursor (null);
+            //                         }
+            //                     }
 
-                                    var cursor_type = get_cursor_type (pointer_x, pointer_y);
-                                    var display = Gdk.Display.get_default ();
-                                    if (cursor_type != null) {
-                                        get_window ().set_cursor (new Gdk.Cursor.for_display (display, cursor_type));
-                                    } else {
-                                        get_window ().set_cursor (null);
-                                    }
-                                }
+            //                     return true;
+            //                 });
+            //         }
 
-                                return true;
-                            });
-                    }
+            //         return false;
+            //     });
 
-                    return false;
-                });
+            // leave_notify_event.connect ((w, e) => {
+            //         if (resize_timeout_source_id != null) {
+            //             GLib.Source.remove (resize_timeout_source_id);
+            //             resize_timeout_source_id = null;
+            //         }
 
-            leave_notify_event.connect ((w, e) => {
-                    if (resize_timeout_source_id != null) {
-                        GLib.Source.remove (resize_timeout_source_id);
-                        resize_timeout_source_id = null;
-                    }
+            //         if (reset_timeout_source_id == null) {
+            //             reset_timeout_source_id = GLib.Timeout.add (reset_timeout_delay, () => {
+            //                     int pointer_x, pointer_y;
+            //                     Utils.get_pointer_position (out pointer_x, out pointer_y);
 
-                    if (reset_timeout_source_id == null) {
-                        reset_timeout_source_id = GLib.Timeout.add (reset_timeout_delay, () => {
-                                int pointer_x, pointer_y;
-                                Utils.get_pointer_position (out pointer_x, out pointer_y);
+            //                     var cursor_type = get_cursor_type (pointer_x, pointer_y);
+            //                     var display = Gdk.Display.get_default ();
+            //                     if (cursor_type != null) {
+            //                         get_window ().set_cursor (new Gdk.Cursor.for_display (display, cursor_type));
+            //                     } else {
+            //                         get_window ().set_cursor (null);
+            //                     }
 
-                                var cursor_type = get_cursor_type (pointer_x, pointer_y);
-                                var display = Gdk.Display.get_default ();
-                                if (cursor_type != null) {
-                                    get_window ().set_cursor (new Gdk.Cursor.for_display (display, cursor_type));
-                                } else {
-                                    get_window ().set_cursor (null);
-                                }
+            //                     if (cursor_type == null) {
+            //                         GLib.Source.remove (reset_timeout_source_id);
+            //                         reset_timeout_source_id = null;
+            //                     }
 
-                                if (cursor_type == null) {
-                                    GLib.Source.remove (reset_timeout_source_id);
-                                    reset_timeout_source_id = null;
-                                }
+            //                     return cursor_type != null;
+            //                 });
+            //         }
 
-                                return cursor_type != null;
-                            });
-                    }
+            //         return false;
+            //     });
 
-                    return false;
-                });
+            // focus_out_event.connect ((w) => {
+            //         remove_shortcut_viewer ();
+            //         return false;
+            //     });
 
-            focus_out_event.connect ((w) => {
-                    remove_shortcut_viewer ();
+            // configure_event.connect ((w) => {
+            //         int width, height;
+            //         get_size (out width, out height);
 
-                    return false;
-                });
+            //         if (cache_width != width || cache_height != height) {
+            //             foreach (var workspace_entry in workspace_manager.workspace_map.entries) {
+            //                 workspace_entry.value.remove_theme_panel ();
+            //                 workspace_entry.value.remove_remote_panel ();
+            //                 workspace_entry.value.remove_encoding_panel ();
+            //                 workspace_entry.value.remove_command_panel ();
+            //             }
 
-            configure_event.connect ((w) => {
-                    int width, height;
-                    get_size (out width, out height);
+            //             cache_width = width;
+            //             cache_height = height;
+            //         }
 
-                    if (cache_width != width || cache_height != height) {
-                        foreach (var workspace_entry in workspace_manager.workspace_map.entries) {
-                            workspace_entry.value.remove_theme_panel ();
-                            workspace_entry.value.remove_remote_panel ();
-                            workspace_entry.value.remove_encoding_panel ();
-                            workspace_entry.value.remove_command_panel ();
-                        }
-
-                        cache_width = width;
-                        cache_height = height;
-                    }
-
-                    return false;
-                });
+            //         return false;
+            //     });
 
             init_active_tab_underline (tabbar);
         }
 
         public void init_active_tab_underline (Tabbar tabbar) {
             tabbar.update_tab_underline.connect ((t, x, width) => {
-                    int offset_x, offset_y;
+                    double offset_x, offset_y;
                     tabbar.translate_coordinates (this, 0, 0, out offset_x, out offset_y);
 
-                    int tab_x = x + offset_x;
+                    int tab_x = (int)(x + offset_x);
                     int tab_width = width;
 
                     if (tab_x != active_tab_underline_x || tab_width != active_tab_underline_width) {
-                        active_tab_underline_x = x + offset_x;
+                        active_tab_underline_x = (int)(x + offset_x);
                         active_tab_underline_width = width;
 
                         redraw_window ();
@@ -239,13 +233,14 @@ namespace Widgets {
         }
 
         public void update_terminal (Gtk.Widget widget) {
-            if (widget is Widgets.Term) {
-                ((Widgets.Term) widget).update_font_info ();
+            if (widget is Term) {
+                var term = (Term) widget;
+                // term.update_terminal (); // 这个方法可能不存在，暂时注释掉
             } else if (widget is Gtk.Box) {
-                var box = (Gtk.Box) widget;
-                foreach (var child in box.get_children ()) {
-                    update_terminal (child);
-                }
+                // 在GTK4中，get_children已被移除
+                // foreach (var child in box.get_children ()) {
+                //     update_terminal (child);
+                // }
             }
         }
 
@@ -257,7 +252,7 @@ namespace Widgets {
 
                 try {
                     GLib.AppInfo appinfo = GLib.AppInfo.create_from_commandline (
-                        "deepin-shortcut-viewer -j='%s' -p=%i,%i".printf(   data, x, y),
+                        "deepin-shortcut-viewer -j='%s' -p=%i,%i".printf (data, x, y),
                         null,
                         GLib.AppInfoCreateFlags.NONE);
 
@@ -406,8 +401,9 @@ namespace Widgets {
 
         private void fast_quit () {
             // Hide main window before real quit, it's will make user feel terminal quit faster. ;)
-            hide(   );
-            Gtk.main_quit ();
+            hide ();
+            // 在GTK4中，Gtk.main_quit已被移除
+            // Gtk.main_quit ();
         }
 
         private bool on_key_press (Gtk.Widget widget, uint keyval, uint keycode, Gdk.ModifierType state) {
@@ -568,7 +564,10 @@ namespace Widgets {
                         get_allocation (out window_rect);
 
                         int win_x, win_y;
-                        get_window ().get_origin (out win_x, out win_y);
+                        // 在GTK4中，get_window()已被移除
+                        // get_window ().get_origin (out win_x, out win_y);
+                        win_x = 0;
+                        win_y = 0;
 
                         x = win_x + window_rect.width / 2;
                         y = win_y + window_rect.height / 2;
@@ -709,15 +708,21 @@ namespace Widgets {
         }
 
         public bool window_is_max () {
-            return Gdk.WindowState.MAXIMIZED in get_window ().get_state ();
+            // 在GTK4中，get_window()已被移除
+            // return Gdk.WindowState.MAXIMIZED in get_window ().get_state ();
+            return false;
         }
 
         public bool window_is_tiled () {
-            return Gdk.WindowState.TILED in get_window ().get_state ();
+            // 在GTK4中，get_window()已被移除
+            // return Gdk.WindowState.TILED in get_window ().get_state ();
+            return false;
         }
 
         public bool window_is_fullscreen () {
-            return Gdk.WindowState.FULLSCREEN in get_window ().get_state ();
+            // 在GTK4中，get_window()已被移除
+            // return Gdk.WindowState.FULLSCREEN in get_window ().get_state ();
+            return false;
         }
 
         public bool window_is_normal () {

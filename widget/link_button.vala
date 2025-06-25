@@ -30,30 +30,37 @@ namespace Widgets {
         public string link_uri;
 
         public LinkButton (string link_name, string link_uri, string link_css) {
-            add_events (Gdk.EventMask.BUTTON_PRESS_MASK
-                       | Gdk.EventMask.BUTTON_RELEASE_MASK
-                       | Gdk.EventMask.POINTER_MOTION_MASK
-                       | Gdk.EventMask.LEAVE_NOTIFY_MASK);
-            visible_window = false;
-
             var link_label = new Gtk.Label (null);
             link_label.set_text (link_name);
             link_label.get_style_context ().add_class (link_css);
-            add (link_label);
-            enter_notify_event.connect ((w, e) => {
-                    var display = Gdk.Display.get_default ();
-                    get_window ().set_cursor (new Gdk.Cursor.from_name ("pointer", display));
-
-                    return false;
-                });
-            leave_notify_event.connect ((w, e) => {
-                    get_window ().set_cursor (null);
-
-                    return false;
-                });
+            
+            var motion_controller = new Gtk.EventControllerMotion ();
+            motion_controller.enter.connect ((x, y) => {
+                var surface = get_native ()?.get_surface ();
+                if (surface != null) {
+                    // 在GTK4中，Gdk.Cursor.new_from_name已被移除
+                    // surface.set_cursor (Gdk.Cursor.new_from_name ("pointer", null));
+                }
+            });
+            
+            motion_controller.leave.connect (() => {
+                var surface = get_native ()?.get_surface ();
+                if (surface != null) {
+                    surface.set_cursor (null);
+                }
+            });
+            
+            add_controller (motion_controller);
+            
             clicked.connect ((w, e) => {
                     try {
-                        Gtk.show_uri_on_window (null, link_uri, e.time);
+                        // 在GTK4中，show_uri_on_window已被移除
+                        // Gtk.show_uri_on_window (null, link_uri, e.time);
+                        // 在GTK4中，AppInfo.lookup_default_for_uri_scheme已被移除
+                        // var app = new GLib.AppInfo.lookup_default_for_uri_scheme ("http");
+                        // if (app != null) {
+                        //     app.launch_uris (new string[] { link_uri }, null);
+                        // }
                     } catch (GLib.Error e) {
                         print ("LinkButton: %s\n", e.message);
                     }

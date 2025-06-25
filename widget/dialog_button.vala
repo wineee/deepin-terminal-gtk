@@ -45,11 +45,12 @@ namespace Widgets {
                 }
             }
 
-            enter_notify_event.connect ((w) => {
-                    grab_focus ();
-
-                    return false;
-                });
+            // GTK4: 使用 EventControllerMotion 替代 motion_enter
+            var motion_controller = new Gtk.EventControllerMotion ();
+            motion_controller.enter.connect ((x, y) => {
+                grab_focus ();
+            });
+            add_controller (motion_controller);
         }
     }
 }

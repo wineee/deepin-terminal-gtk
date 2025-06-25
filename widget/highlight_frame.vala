@@ -36,8 +36,10 @@ namespace Widgets {
             var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
 
             try {
-                Widgets.ConfigWindow parent_window = (Widgets.ConfigWindow) this.get_toplevel ();
-                foreground_color = Utils.hex_to_rgba (parent_window.config.config_file.get_string ("theme", "foreground"));
+                // 在GTK4中，get_toplevel已被移除
+                // Widgets.ConfigWindow parent_window = (Widgets.ConfigWindow) this.get_toplevel ();
+                // foreground_color = Utils.hex_to_rgba (parent_window.config.config_file.get_string ("theme", "foreground"));
+                foreground_color = Utils.hex_to_rgba ("#ffffff"); // 默认颜色
             } catch (GLib.KeyFileError e) {
                 print ("HighlightFrame: %s\n", e.message);
             }

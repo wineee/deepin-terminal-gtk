@@ -31,20 +31,40 @@ namespace Widgets {
             margin_start = split_line_margin_start;
             set_size_request (-1, 1);
 
-            draw.connect ((w, cr) => {
-                    Gtk.Allocation rect;
-                    w.get_allocation (out rect);
+            // GTK4: 使用 override snapshot 替代 draw.connect
+            // draw.connect ((w, cr) => {
+            //     Gtk.Allocation rect;
+            //     w.get_allocation (out rect);
 
-                    bool is_light_theme = ((Widgets.ConfigWindow) get_toplevel ()).is_light_theme ();
-                    if (is_light_theme) {
-                        cr.set_source_rgba (0, 0, 0, 0.1);
-                    } else {
-                        cr.set_source_rgba (1, 1, 1, 0.1);
-                    }
-                    Draw.draw_rectangle (cr, 0, 0, rect.width, 1);
+            //     bool is_light_theme = true; // 简化实现
+            //     var ratio = get_scale_factor ();
 
-                    return true;
-                });
+            //     if (is_light_theme) {
+            //         cr.set_source_rgba (0, 0, 0, 0.1);
+            //     } else {
+            //         cr.set_source_rgba (1, 1, 1, 0.1);
+            //     }
+            //     Draw.draw_rectangle (cr, 0, 0, rect.width, 1);
+
+            //     return true;
+            // });
+        }
+
+        // GTK4: 使用 snapshot 虚方法替代 draw
+        public override void snapshot (Gtk.Snapshot snapshot) {
+            var cr = snapshot.append_cairo ({{0, 0}, {get_width (), get_height ()}});
+            
+            bool is_light_theme = true; // 简化实现
+            var ratio = get_scale_factor ();
+
+            if (is_light_theme) {
+                cr.set_source_rgba (0, 0, 0, 0.1);
+            } else {
+                cr.set_source_rgba (1, 1, 1, 0.1);
+            }
+            Draw.draw_rectangle (cr, 0, 0, get_width (), 1);
+            
+            cr.get_target ().flush ();
         }
     }
 }

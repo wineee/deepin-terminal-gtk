@@ -106,19 +106,19 @@ namespace Widgets {
                 event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
 
                 var overlay = new Gtk.Overlay ();
-                overlay.add (top_box);
+                overlay.set_child (top_box);
                 overlay.add_overlay (event_area);
 
-                box.pack_start (overlay, false, false, 0);
+                box.append (overlay);
 
                 // Make label center of titlebar.
                 var spacing_box = new Gtk.Box(   Gtk.Orientation.HORIZONTAL, 0);
                 spacing_box.set_size_request (Constant.CLOSE_BUTTON_WIDTH, -1);
-                top_box.pack_start (spacing_box, false, false, 0);
+                top_box.append (spacing_box);
 
                 Gtk.Label title_label = new Gtk.Label (null);
-                title_label.get_style_context ().add_class ("remote_server_label");
-                top_box.pack_start (title_label, true, true, 0);
+                title_label.get_style_context ().add_class ("command_dialog_label");
+                top_box.append (title_label);
 
                 if (command_info != null) {
                     title_label.set_text (_("Edit Command"));
@@ -131,23 +131,25 @@ namespace Widgets {
                         this.destroy ();
                     });
 
-                top_box.pack_start (close_button, false, false, 0);
+                top_box.append (close_button);
 
-                destroy.connect ((w) => {
+                // 连接窗口关闭信号
+                close_request.connect ((w) => {
                         if (focus_widget != null) {
                             focus_widget.grab_focus ();
                         }
+                        return false;
                     });
 
                 content_box = new Gtk.Box (Gtk.Orientation.VERTICAL, 0);
                 content_box.set_halign (Gtk.Align.CENTER);
                 content_box.margin_start = preference_margin_start;
                 content_box.margin_end = preference_margin_end;
-                box.pack_start (content_box, false, false, 0);
+                box.append (content_box);
 
                 var grid = new Gtk.Grid ();
                 grid.margin_end = label_margin_start;
-                content_box.pack_start (grid, false, false, 0);
+                content_box.append (grid);
 
                 // Name.
                 Label name_label = new Gtk.Label(   null);
@@ -181,7 +183,7 @@ namespace Widgets {
 
                 command_action_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 0);
                 command_action_box.set_size_request (-1, 30);
-                content_box.pack_start (command_action_box, false, false, 0);
+                content_box.append (command_action_box);
 
                 if (command_info != null) {
                     add_delete_button ();
@@ -189,14 +191,14 @@ namespace Widgets {
 
                 Box button_box = new Box (Gtk.Orientation.HORIZONTAL, 0);
                 button_box.margin_top = action_button_margin_top;
-                DialogButton cancel_button = new Widgets.DialogButton (_("Cancel"), "left", "text", parent_window.screen_monitor.is_composited(   ));
+                DialogButton cancel_button = new Widgets.DialogButton (_("Cancel"), "left", "text", true);
                 string button_name;
                 if (command_info != null) {
                     button_name = _("Save");
                 } else {
                     button_name = _("Add");
                 }
-                DialogButton confirm_button = new Widgets.DialogButton (button_name, "right", "action", parent_window.screen_monitor.is_composited(   ));
+                DialogButton confirm_button = new Widgets.DialogButton (button_name, "right", "action", true);
                 cancel_button.clicked.connect ((b) => {
                         destroy ();
                     });
@@ -225,9 +227,9 @@ namespace Widgets {
                 // button_box.set_focus_chain (tab_order_list);
                 button_box.set_focus_child (confirm_button);
 
-                button_box.pack_start (cancel_button, true, true, 0);
-                button_box.pack_start (confirm_button, true, true, 0);
-                box.pack_start (button_box, false, false, 0);
+                button_box.append (cancel_button);
+                button_box.append (confirm_button);
+                box.append (button_box);
 
                 add_widget (box);
             } catch (Error e) {
@@ -260,9 +262,9 @@ namespace Widgets {
                         });
                 });
 
-            command_action_box.pack_start (delete_command_button, true, true, 0);
+            command_action_box.append (delete_command_button);
 
-            command_action_box.show_all ();
+            command_action_box.show();
         }
 
         public Label create_label (string text) {
