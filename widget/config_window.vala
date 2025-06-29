@@ -26,7 +26,7 @@ using Widgets;
 using Utils;
 
 namespace Widgets {
-    public class ConfigWindow : Gtk.Window {
+    public class ConfigWindow : Gtk.ApplicationWindow {
         public Config.Config config;
         public Gdk.RGBA title_line_dark_color;
         public Gdk.RGBA title_line_light_color;
@@ -56,7 +56,8 @@ namespace Widgets {
 
         public Gtk.Widget? focus_widget;
 
-        public ConfigWindow () {
+        public ConfigWindow (Gtk.Application app) {
+            Object(application: app);
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             load_config ();

@@ -33,7 +33,8 @@ namespace Widgets {
         public int press_y;
         public int window_frame_margin_bottom = 60;
 
-        public QuakeWindow () {
+        public QuakeWindow (Gtk.Application app) {
+            base(app);
             quake_mode = true;
 
             // 在GTK4中，set_app_paintable已被移除，透明度通过CSS处理

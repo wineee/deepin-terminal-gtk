@@ -69,7 +69,7 @@ interface QuakeDaemon : Object {
 [CCode (cname="GETTEXT_PACKAGE")] extern const string GETTEXT_PACKAGE;
 [CCode (cname="LOCALEDIR")] extern const string LOCALEDIR;
 
-public class Application : Object {
+public class Application : Gtk.Application {
 
     private static bool quake_mode = false;
     private static string? window_mode = null;
@@ -83,6 +83,9 @@ public class Application : Object {
 
     public Widgets.QuakeWindow quake_window;
     public Widgets.Window window;
+    public Application () {
+        Object (application_id: "com.deepin.terminal", flags: ApplicationFlags.FLAGS_NONE);
+    }
     public WorkspaceManager workspace_manager;
     public static ArrayList<string> commands;
     public static int64 start_time;
@@ -209,36 +212,45 @@ public class Application : Object {
             stdout.printf ("Copyright 2011-2017 Deepin, Inc.\n");
             stdout.printf ("Copyright 2023      Deepin Community\n");
         } else {
-            // 在GTK4中，Gtk.init已被移除
-            // Gtk.init (ref args);
+            // 在GTK4中，Gtk.init已被移除，但需要确保应用正确初始化
+            print ("Initializing Deepin Terminal Gtk...\n");
 
             // Just for debug perfermance.
             // Gdk.Window.set_debug_updates(true);
 
             if (quake_mode) {
+                print ("Starting in quake mode...
+");
                 QuakeTerminalApp app = new QuakeTerminalApp ();
                 Bus.own_name (BusType.SESSION,
                              "com.deepin.quake_terminal",
                              BusNameOwnerFlags.NONE,
                              ((con) => {QuakeTerminalApp.on_bus_acquired (con, app);}),
-                             () => {app.run (false);},
-                             () => {app.run (true);});
+                             () => {},
+                             () => {});
+                app.run (args);
             } else {
+                print ("Starting in normal mode...
+");
                 TerminalApp app = new TerminalApp ();
                 Bus.own_name (BusType.SESSION,
                              "com.deepin.terminal",
                              BusNameOwnerFlags.NONE,
                              ((con) => {TerminalApp.on_bus_acquired (con, app);}),
-                             () => {app.run (false);},
-                             () => {app.run (true);});
+                             () => {},
+                             () => {});
+                app.run (args);
             }
-
-            // 在GTK4中，Gtk.main已被移除
+            // 在GTK4中，Gtk.main已被移除，应用会通过GApplication.run()管理主循环
             // Gtk.main ();
         }
     }
 
-    public void run (bool has_start) {
+    public override void activate () {
+        print ("Application activated...\n");
+        start_app (false);
+    }
+    public void start_app (bool has_start) {
         // Bus.own_name is callback, when application exit will execute `run` function.
         // Use inited variable to avoid application run by Bus.own_name release.
         if (inited) {
@@ -275,20 +287,25 @@ public class Application : Object {
             }
 
             if (quake_mode) {
-                quake_window = new Widgets.QuakeWindow ();
+                quake_window = new Widgets.QuakeWindow (this);
+                this.add_window(quake_window);
                 quake_window.show_window (workspace_manager, tabbar);
                 Utils.write_log ("Deepin quake terminal start in: %s\n".printf(   (GLib.get_real_time(   ) / 1000 - Application.start_time).to_string(   )));
+                print ("Initializing tabbar for quake window...\n");
                 tabbar.init (workspace_manager, quake_window);
             } else {
-                window = new Widgets.Window (window_mode);
+                window = new Widgets.Window(this, window_mode);
+                this.add_window(window);
 
                 // Change theme temporary if 'load_theme' option is valid.
                 if (load_theme != null) {
                     window.config.load_temp_theme (load_theme);
                 }
 
+                print ("Showing main window...\n");
                 window.show_window ((TerminalApp) this, workspace_manager, tabbar, has_start);
                 Utils.write_log ("Deepin terminal start in: %s\n".printf(   (GLib.get_real_time(   ) / 1000 - Application.start_time).to_string(   )));
+                print ("Initializing tabbar for main window...\n");
                 tabbar.init (workspace_manager, window);
             }
 

@@ -57,7 +57,8 @@ namespace Widgets {
 
         private Widgets.ResizeGrip resize_grip;
 
-        public Window (string? window_mode) {
+        public Window (Gtk.Application app, string? window_mode) {
+            base(app);
             try {
                 tabbar_at_the_bottom = config.config_file.get_boolean ("advanced", "tabbar_at_the_bottom");
             } catch (GLib.KeyFileError e) {
