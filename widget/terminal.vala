@@ -29,7 +29,7 @@ using Vte;
 using Widgets;
 
 namespace Widgets {
-    public class Term : Gtk.Overlay {
+    public class Term : Gtk.Box {
         enum DropTargets {
             URILIST,
             STRING,
@@ -67,6 +67,9 @@ namespace Widgets {
         public uint launch_idle_id;
         public uint? hide_scrollbar_timeout_source_id = null;
 
+        // 使用组合模式：包含一个Gtk.Overlay
+        private Gtk.Overlay overlay;
+
         public static string USERCHARS = "-[:alnum:]";
         public static string USERCHARS_CLASS = "[" + USERCHARS + "]";
         public static string PASSCHARS_CLASS = "[-[:alnum:]\\Q,?;.:/!%$^*&~\"#'\\E]";
@@ -96,6 +99,9 @@ namespace Widgets {
         public signal void exit_with_bad_code (int exit_status);
 
         public Term (bool first_term, string? work_directory, WorkspaceManager manager) {
+            // 设置Box为垂直方向
+            Object (orientation: Gtk.Orientation.VERTICAL, spacing: 0);
+            
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             workspace_manager = manager;
@@ -216,6 +222,13 @@ namespace Widgets {
             /* Make Links Clickable */
             this.clickable (REGEX_STRINGS);
 
+            // 创建overlay并设置内容
+            overlay = new Gtk.Overlay ();
+            overlay.child = term;
+
+            // 将overlay添加到Term中
+            append (overlay);
+
             // NOTE: if terminal start with option '-e', use functional 'launch_command' and don't use function 'launch_shell'.
             // terminal will crash if we launch_command after launch_shell.
             if (is_launch_command(   ) && workspace_manager.is_first_term(   this)) {
@@ -223,10 +236,6 @@ namespace Widgets {
             } else {
                 launch_shell (work_directory);
             }
-
-            // 在GTK4中，add已被移除，使用append
-            // 但是Term类需要继承自Gtk.Box才能使用append
-            // append (term);
 
             // Create overlay scrollbar.
             // NOTE: Why not use vte in Gtk.ScrolledWindow?
@@ -236,7 +245,7 @@ namespace Widgets {
             scrollbar.set_halign (Gtk.Align.END);
             scrollbar.set_child_visible (false);
 
-            add_overlay (scrollbar);
+            overlay.add_overlay (scrollbar);
         }
 
         public void try_hide_scrollbar () {

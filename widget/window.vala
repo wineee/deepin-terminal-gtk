@@ -664,7 +664,7 @@ namespace Widgets {
             }
 
             overlay.set_child (box);
-            overlay.add_overlay (appbar);
+            overlay.add_overlay (appbar.get_overlay ());
 
             add_widget (overlay);
             show ();

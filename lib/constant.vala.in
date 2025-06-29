@@ -32,6 +32,7 @@ public class Constant {
     public static int COMMAND_BUTTON_HEIGHT = 54;
     public static int COMMAND_BUTTON_PADDING = 5;
     public static int COMMAND_BUTTON_WIDTH = 190;
+    public static int COMMAND_PANEL_SEARCHBAR_HEIGHT = 36;
     public static int COMMAND_SLIDER_WIDTH = 280;
     public static int DIALOG_BUTTON_HEIGHT = 28;
     public static int ENCODING_BUTTON_HEIGHT = 54;

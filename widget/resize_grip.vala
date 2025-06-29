@@ -83,7 +83,8 @@ namespace Widgets {
         }
     }
 
-    public class ResizeGrip : Gtk.Overlay {
+    public class ResizeGrip : Gtk.Box {
+        private Gtk.Overlay overlay;
         public Widgets.WindowEventArea event_area;
         public Widgets.Window window;
         public Grip grip;
@@ -101,9 +102,11 @@ namespace Widgets {
             event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
 
-            set_child (box);
-            add_overlay (event_area);
+            overlay = new Gtk.Overlay ();
+            overlay.child = box;
+            overlay.add_overlay (event_area);
 
+            this.append (overlay);
             set_size_request (-1, GRIP_HEIGHT);
 
             Gdk.RGBA background_color = Gdk.RGBA ();

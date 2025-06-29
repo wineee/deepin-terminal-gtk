@@ -288,12 +288,12 @@ namespace Widgets {
                 Label encode_label = new Gtk.Label(   null);
                 encode_box = new Widgets.DropdownTextButton ();
                 foreach (string name in parent_window.config.encoding_names) {
-                    encode_box.append (name, name);
+                    encode_box.add_item(name);
                 }
                 if (server_infos != null) {
-                    encode_box.set_active (parent_window.config.encoding_names.index_of (config_file.get_value (server_info, "Encode")));
+                    encode_box.selected = parent_window.config.encoding_names.index_of (config_file.get_value (server_info, "Encode"));
                 } else {
-                    encode_box.set_active (parent_window.config.encoding_names.index_of ("UTF-8"));
+                    encode_box.selected = parent_window.config.encoding_names.index_of ("UTF-8");
                 }
                 create_follow_key_row (encode_label, encode_box, _("Encoding:"), command_label, advanced_grid, "preference_comboboxtext");
 
@@ -301,12 +301,12 @@ namespace Widgets {
                 Label backspace_key_label = new Gtk.Label(   null);
                 backspace_key_box = new Widgets.DropdownTextButton ();
                 foreach (string name in parent_window.config.backspace_key_erase_names) {
-                    backspace_key_box.append (name, parent_window.config.erase_map.get (name));
+                    backspace_key_box.add_item(parent_window.config.erase_map.get(name));
                 }
                 if (server_infos != null) {
-                    backspace_key_box.set_active (parent_window.config.backspace_key_erase_names.index_of (config_file.get_value (server_info, "Backspace")));
+                    backspace_key_box.selected = parent_window.config.backspace_key_erase_names.index_of (config_file.get_value (server_info, "Backspace"));
                 } else {
-                    backspace_key_box.set_active (parent_window.config.backspace_key_erase_names.index_of ("ascii-del"));
+                    backspace_key_box.selected = parent_window.config.backspace_key_erase_names.index_of ("ascii-del");
                 }
                 create_follow_key_row (backspace_key_label, backspace_key_box, _("Backspace key:"), encode_label, advanced_grid, "preference_comboboxtext");
 
@@ -314,12 +314,12 @@ namespace Widgets {
                 Label del_key_label = new Gtk.Label(   null);
                 del_key_box = new Widgets.DropdownTextButton ();
                 foreach (string name in parent_window.config.del_key_erase_names) {
-                    del_key_box.append (name, parent_window.config.erase_map.get (name));
+                    del_key_box.add_item(parent_window.config.erase_map.get(name));
                 }
                 if (server_infos != null) {
-                    del_key_box.set_active (parent_window.config.del_key_erase_names.index_of (config_file.get_value (server_info, "Del")));
+                    del_key_box.selected = parent_window.config.del_key_erase_names.index_of (config_file.get_value (server_info, "Del"));
                 } else {
-                    del_key_box.set_active (parent_window.config.del_key_erase_names.index_of ("escape-sequence"));
+                    del_key_box.selected = parent_window.config.del_key_erase_names.index_of ("escape-sequence");
                 }
                 create_follow_key_row (del_key_label, del_key_box, _("Delete key:"), backspace_key_label, advanced_grid, "preference_comboboxtext");
 
@@ -353,13 +353,13 @@ namespace Widgets {
                                             password_button.entry.get_text (),
                                             file_button.entry.get_text (),
                                             (int) port_spinbutton.get_value (),
-                                            parent_window.config.encoding_names[encode_box.get_active ()],
+                                            parent_window.config.encoding_names[(int)encode_box.selected],
                                             path_entry.get_text (),
                                             command_entry.get_text (),
                                             name_entry.get_text (),
                                             groupname_entry.get_text (),
-                                            parent_window.config.backspace_key_erase_names[backspace_key_box.get_active ()],
-                                            parent_window.config.del_key_erase_names[del_key_box.get_active ()]
+                                            parent_window.config.backspace_key_erase_names[(int)backspace_key_box.selected],
+                                            parent_window.config.del_key_erase_names[(int)del_key_box.selected]
                                     );
                             }
                         } else {
@@ -369,13 +369,13 @@ namespace Widgets {
                                            password_button.entry.get_text (),
                                            file_button.entry.get_text (),
                                            (int) port_spinbutton.get_value (),
-                                           parent_window.config.encoding_names[encode_box.get_active ()],
+                                           parent_window.config.encoding_names[(int)encode_box.selected],
                                            path_entry.get_text (),
                                            command_entry.get_text (),
                                            name_entry.get_text (),
                                            groupname_entry.get_text (),
-                                           parent_window.config.backspace_key_erase_names[backspace_key_box.get_active ()],
-                                           parent_window.config.del_key_erase_names[del_key_box.get_active ()]
+                                           parent_window.config.backspace_key_erase_names[(int)backspace_key_box.selected],
+                                           parent_window.config.del_key_erase_names[(int)del_key_box.selected]
                                     );
                             }
                         }

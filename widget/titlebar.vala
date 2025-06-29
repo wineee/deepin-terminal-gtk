@@ -25,7 +25,8 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class Titlebar : Gtk.Overlay {
+    public class Titlebar : Gtk.Box {
+        private Gtk.Overlay overlay;
         public Widgets.WindowEventArea event_area;
         public WindowButton close_button;
 
@@ -38,8 +39,8 @@ namespace Widgets {
             event_area = new Widgets.WindowEventArea (this);
             event_area.margin_end = Constant.CLOSE_BUTTON_WIDTH;
 
-            set_child (box);
-            add_overlay (event_area);
+            overlay.child = box;
+            overlay.add_overlay (event_area);
 
             set_size_request (-1, Constant.TITLEBAR_HEIGHT);
         }

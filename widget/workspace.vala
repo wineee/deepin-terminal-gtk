@@ -28,7 +28,7 @@ using Utils;
 using Widgets;
 
 namespace Widgets {
-    public class Workspace : Gtk.Overlay {
+    public class Workspace : Gtk.Box {
         public WorkspaceManager workspace_manager;
         public AnimateTimer command_panel_hide_timer;
         public AnimateTimer command_panel_show_timer;
@@ -59,6 +59,8 @@ namespace Widgets {
             LEFT, RIGHT, UP, DOWN
         }
 
+        private Gtk.Overlay overlay;
+
         public signal void change_title (int index, string dir);
         public signal void exit (int index);
         public signal void highlight_tab (int index);
@@ -67,6 +69,9 @@ namespace Widgets {
             index = workspace_index;
             term_list = new ArrayList<Term> ();
             workspace_manager = manager;
+
+            overlay = new Gtk.Overlay ();
+            this.append (overlay);
 
             remote_panel_show_timer = new AnimateTimer (AnimateTimer.ease_out_quint, show_slider_interval);
             remote_panel_show_timer.animate.connect (remote_panel_show_animate);
@@ -95,7 +100,7 @@ namespace Widgets {
             Term term = new_term (true, work_directory);
             workspace_manager.set_first_term (term);
 
-            set_child (term);
+            overlay.set_child (term);
         }
 
         public Term new_term (bool first_term, string? work_directory) {
@@ -203,7 +208,7 @@ namespace Widgets {
             term_list = new ArrayList<Term>(   );
             term_list.add (except_term);
             // 在GTK4中，Workspace继承自Gtk.Overlay，使用set_child
-            set_child (except_term);
+            overlay.set_child (except_term);
         }
 
         public void close_term (Term term) {
@@ -214,7 +219,7 @@ namespace Widgets {
             } else if (parent_widget is Gtk.Overlay) {
                 ((Gtk.Overlay) parent_widget).remove_overlay (term);
             } else if (parent_widget is Workspace) {
-                ((Workspace) parent_widget).set_child (null);
+                ((Workspace) parent_widget).overlay.remove_overlay (term);
             } else if (parent_widget is Gtk.Window) {
                 ((Gtk.Window) parent_widget).set_child (null);
             } else {
@@ -240,7 +245,7 @@ namespace Widgets {
                     } else if (parent_widget is Gtk.Overlay) {
                         ((Gtk.Overlay) parent_widget).remove_overlay (container);
                     } else if (parent_widget is Workspace) {
-                        ((Workspace) parent_widget).set_child (null);
+                        ((Workspace) parent_widget).overlay.remove_overlay (container);
                     } else if (parent_widget is Gtk.Window) {
                         ((Gtk.Window) parent_widget).set_child (null);
                     } else {
@@ -363,7 +368,7 @@ namespace Widgets {
 
             // GTK4: 使用 set_child 替代 add
             if (parent_widget.get_type ().is_a (typeof (Workspace))) {
-                ((Workspace) parent_widget).set_child (paned);
+                ((Workspace) parent_widget).overlay.set_child (paned);
             } else if (parent_widget.get_type ().is_a (typeof (Paned))) {
                 if (focus_term.is_first_term) {
                     ((Paned) parent_widget).set_start_child (paned);
@@ -373,7 +378,7 @@ namespace Widgets {
                 }
             }
 
-            show ();
+            overlay.show ();
         }
 
         public void select_left_window () {
@@ -430,7 +435,7 @@ namespace Widgets {
                     // Remove temp highlight frame and timeout source id.
                     if (highlight_frame != null) {
                         // 在GTK4中，remove方法已被移除，使用remove_overlay
-                        remove_overlay (highlight_frame);
+                        overlay.remove_overlay (highlight_frame);
                         highlight_frame = null;
                     }
                     if (highlight_frame_timeout_source_id != null) {
@@ -445,14 +450,14 @@ namespace Widgets {
                     highlight_frame.margin_end = rect_width - (int)term_x - term_width;
                     highlight_frame.margin_top = (int)term_y;
                     highlight_frame.margin_bottom = rect_height - (int)term_y - term_height;
-                    add_overlay (highlight_frame);
-                    show ();
+                    overlay.add_overlay (highlight_frame);
+                    overlay.show ();
 
                     // Hide highlight frame when timeout finish.
                     highlight_frame_timeout_source_id = GLib.Timeout.add(   300, () => {
                             if (highlight_frame != null) {
                                 // 在GTK4中，remove方法已被移除，使用remove_overlay
-                                remove_overlay (highlight_frame);
+                                overlay.remove_overlay (highlight_frame);
                                 highlight_frame = null;
                             }
 
@@ -617,8 +622,8 @@ namespace Widgets {
 
             if (search_text.length > 0) {
                 search_panel = new SearchPanel (((Widgets.ConfigWindow) get_root ()), terminal_before_popup, search_text);
-                add_overlay (search_panel);
-                show ();
+                overlay.add_overlay (search_panel);
+                overlay.show ();
             }
         }
 
@@ -651,9 +656,9 @@ namespace Widgets {
 
                 remote_panel = new RemotePanel (workspace, workspace_manager);
                 remote_panel.set_size_request (Constant.SLIDER_WIDTH, rect_height);
-                add_overlay (remote_panel);
+                overlay.add_overlay (remote_panel);
 
-                show ();
+                overlay.show ();
 
                 remote_panel.margin_start = rect_width;
                 show_slider_start_x = rect_width;
@@ -676,9 +681,9 @@ namespace Widgets {
 
                 command_panel = new CommandPanel (workspace, workspace_manager);
                 command_panel.set_size_request (Constant.SLIDER_WIDTH, rect_height);
-                add_overlay (command_panel);
+                overlay.add_overlay (command_panel);
 
-                show ();
+                overlay.show ();
 
                 command_panel.margin_start = rect_width;
                 show_slider_start_x = rect_width;
@@ -701,9 +706,9 @@ namespace Widgets {
 
                 encoding_panel = new EncodingPanel (workspace, workspace_manager);
                 encoding_panel.set_size_request (Constant.ENCODING_SLIDER_WIDTH, rect_height);
-                add_overlay (encoding_panel);
+                overlay.add_overlay (encoding_panel);
 
-                show ();
+                overlay.show ();
 
                 encoding_panel.margin_start = rect_width;
                 show_slider_start_x = rect_width;
@@ -744,9 +749,9 @@ namespace Widgets {
 
                 theme_panel = new ThemePanel (workspace, workspace_manager);
                 theme_panel.set_size_request (Constant.THEME_SLIDER_WIDTH, rect_height);
-                add_overlay (theme_panel);
+                overlay.add_overlay (theme_panel);
 
-                show ();
+                overlay.show ();
 
                 theme_panel.margin_start = rect_width;
                 show_slider_start_x = rect_width;
@@ -907,7 +912,7 @@ namespace Widgets {
                     } else if (panel_parent is Gtk.Box) {
                         ((Gtk.Box) panel_parent).remove (panel);
                     } else if (panel_parent is Workspace) {
-                        ((Workspace) panel_parent).set_child (null);
+                        ((Workspace) panel_parent).overlay.remove_overlay (panel);
                     } else if (panel_parent is Gtk.Window) {
                         ((Gtk.Window) panel_parent).set_child (null);
                     } else {

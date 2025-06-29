@@ -25,19 +25,30 @@ using Gtk;
 using Widgets;
 
 namespace Widgets {
-    public class DropdownTextButton : Gtk.ComboBoxText {
+    public class DropdownTextButton : Gtk.Box {
+        public Gtk.DropDown dropdown;
+        public Gtk.StringList string_list;
+
         public DropdownTextButton () {
-            // 在GTK4中，使用EventController替代scroll_event
-            var scroll_controller = new Gtk.EventControllerScroll (Gtk.EventControllerScrollFlags.VERTICAL);
-            scroll_controller.scroll.connect ((x, y) => {
-                on_scroll (this, x, y);
-                return true;
+            Object (orientation: Gtk.Orientation.HORIZONTAL);
+            string_list = new Gtk.StringList (null);
+            dropdown = new Gtk.DropDown (string_list, null);
+            append (dropdown);
+            
+            dropdown.notify["selected"].connect (() => {
+                changed ();
             });
-            add_controller (scroll_controller);
         }
 
-        public bool on_scroll (Gtk.Widget widget, double x, double y) {
-            return true;
+        public void add_item (string text) {
+            string_list.append (text);
         }
+
+        public uint selected {
+            get { return dropdown.selected; }
+            set { dropdown.selected = value; }
+        }
+
+        public signal void changed ();
     }
 }

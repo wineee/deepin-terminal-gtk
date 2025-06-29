@@ -474,8 +474,8 @@ namespace Widgets {
         public void init_config () {
             try {
                 opacity_progressbar.set_percent (parent_window.config.config_file.get_double ("general", "opacity"));
-                font_combox.set_active (font_names.index_of (parent_window.config.config_file.get_value ("general", "font")));
-                window_combox.set_active (window_state_list.index_of (parent_window.config.config_file.get_value ("advanced", "use_on_starting")));
+                font_combox.selected = font_names.index_of (parent_window.config.config_file.get_value ("general", "font"));
+                window_combox.selected = window_state_list.index_of (parent_window.config.config_file.get_value ("advanced", "use_on_starting"));
 
                 copy_key_entry.set_text (parent_window.config.config_file.get_string ("shortcut", "copy"));
                 paste_key_entry.set_text (parent_window.config.config_file.get_string ("shortcut", "paste"));
@@ -642,18 +642,18 @@ namespace Widgets {
 
             if (values != null) {
                 foreach (string value in values) {
-                    combox.append (value, value);
+                    combox.add_item (value);
                 }
 
                 try {
-                    combox.set_active (values.index_of (parent_window.config.config_file.get_value (group_name, key)));
+                    combox.selected = values.index_of (parent_window.config.config_file.get_value (group_name, key));
                 } catch (GLib.KeyFileError e) {
                     print ("create_combox_row error: %s\n".printf(   e.message));
                 }
 
-                combox.changed.connect ((w) => {
+                combox.notify["selected"].connect ((w) => {
                         parent_window.config.load_config ();
-                        parent_window.config.config_file.set_string (group_name, key, values[combox.get_active ()]);
+                        parent_window.config.config_file.set_string (group_name, key, values[(int)combox.selected]);
                         parent_window.config.save ();
 
                         parent_window.config.update ();
@@ -671,19 +671,19 @@ namespace Widgets {
             if (values != null) {
                 int index = 0;
                 foreach (string value in values) {
-                    combox.append (value, names[index]);
+                    combox.add_item (names[index]);
                     index++;
                 }
 
                 try {
-                    combox.set_active (values.index_of (parent_window.config.config_file.get_value (group_name, key)));
+                    combox.selected = values.index_of (parent_window.config.config_file.get_value (group_name, key));
                 } catch (GLib.KeyFileError e) {
                     print ("create_combox_row error: %s\n".printf(   e.message));
                 }
 
-                combox.changed.connect ((w) => {
+                combox.notify["selected"].connect ((w) => {
                         parent_window.config.load_config ();
-                        parent_window.config.config_file.set_string (group_name, key, values[combox.get_active ()]);
+                        parent_window.config.config_file.set_string (group_name, key, values[(int)combox.selected]);
                         parent_window.config.save ();
 
                         parent_window.config.update ();

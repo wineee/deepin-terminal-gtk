@@ -31,7 +31,7 @@ interface TerminalBus : Object {
 }
 
 namespace Widgets {
-    public class Appbar : Gtk.Overlay {
+    public class Appbar : Gtk.Box {
         public int height = Constant.TITLEBAR_HEIGHT;
         public Box max_toggle_box;
         public Box window_button_box;
@@ -51,12 +51,19 @@ namespace Widgets {
         public int titlebar_right_cache_width = 10;
         public int menu_button_width = Constant.WINDOW_BUTTON_WIDHT;
         public Menu.MenuBuilder menu;
+        
+        // 使用组合模式：包含一个Gtk.Overlay
+        private Gtk.Overlay overlay;
+        private Gtk.Box content_box;
 
         public signal void close_window ();
         public signal void exit_terminal ();
         public signal void quit_fullscreen ();
 
         public Appbar (TerminalApp app, Widgets.Window win, Tabbar tab_bar, WorkspaceManager manager, bool has_start) {
+            // 设置Box为垂直方向
+            Object (orientation: Gtk.Orientation.VERTICAL, spacing: 0);
+            
             Intl.bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 
             window = win;
@@ -171,23 +178,23 @@ namespace Widgets {
                     // ((Gtk.Window) w.get_toplevel ()).unmaximize ();
                 });
 
-            Box box = new Box (Gtk.Orientation.HORIZONTAL, 0);
+            content_box = new Box (Gtk.Orientation.HORIZONTAL, 0);
 
             var logo_box = new Box (Gtk.Orientation.VERTICAL, 0);
             logo_box.set_size_request (logo_width, Constant.TITLEBAR_HEIGHT);
             Gtk.Image logo_image = new Gtk.Image.from_file (Utils.get_image_path ("title_icon.svg"));
             logo_box.append (logo_image);
-            box.append (logo_box);
+            content_box.append (logo_box);
 
             max_toggle_box.append (max_button);
 
-            box.append (tabbar);
+            content_box.append (tabbar);
             // 在GTK4中，不能直接创建Gtk.Widget实例
             // var cache_area = new Gtk.Widget ();
             // cache_area.set_size_request (titlebar_right_cache_width, -1);
             // box.append (cache_area);
-            box.append (window_button_box);
-            box.append (window_close_button_box);
+            content_box.append (window_button_box);
+            content_box.append (window_close_button_box);
 
             show_window_button ();
 
@@ -204,15 +211,35 @@ namespace Widgets {
                     return tabbar.is_at_tab_close_button ((int) tabbar_x) != -1;
                 });
 
-            set_child (box);
-            add_overlay (event_area);
+            // 创建overlay并设置内容
+            overlay = new Gtk.Overlay ();
+            overlay.child = content_box;
+            overlay.add_overlay (event_area);
+
+            // 将overlay添加到Appbar中
+            append (overlay);
 
             Gdk.RGBA background_color = Gdk.RGBA ();
 
             // 修复snapshot信号连接
-            // box.snapshot.connect ((snapshot) => {
+            // content_box.snapshot.connect ((snapshot) => {
             //     // GTK4中snapshot信号处理方式不同
             // });
+        }
+
+        // 提供访问overlay的方法
+        public Gtk.Overlay get_overlay () {
+            return overlay;
+        }
+
+        // 提供添加overlay的方法
+        public void add_overlay (Gtk.Widget widget) {
+            overlay.add_overlay (widget);
+        }
+
+        // 提供设置child的方法
+        public void set_child (Gtk.Widget widget) {
+            overlay.child = widget;
         }
 
         public void show_window_button () {
