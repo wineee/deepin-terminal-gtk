@@ -128,6 +128,23 @@ namespace Utils {
         is_tiling = true;
     }
 
+    private bool should_use_menu_rounded_corners() {
+        // For KDE Wayland, we need to be more careful with rounded corners
+        // as they can cause visual artifacts with certain themes
+        string? desktop = Environment.get_variable("XDG_CURRENT_DESKTOP");
+        string? wayland = Environment.get_variable("WAYLAND_DISPLAY");
+        
+        // If we're on KDE Plasma with Wayland, check if we should disable rounded corners
+        if (desktop != null && desktop.contains("KDE") && wayland != null) {
+            // On KDE Wayland, let's use a more conservative approach
+            // and only use rounded corners if explicitly supported
+            return false;
+        }
+        
+        // For other environments, use rounded corners by default
+        return true;
+    }
+
     public string get_menu_css () {
         string background_color = "#ffffff";
         string foreground_color = "#000000";
@@ -143,21 +160,40 @@ namespace Utils {
         string text_color = is_light_theme ? "white" : "black";
         string text_color_on_hover = is_light_theme ? "black" : "white";
 
+        // Check if we should use rounded corners for menus
+        string menu_border_radius = should_use_menu_rounded_corners() ? "6px" : "0px";
+
         return @"
             menu {
                 background: $background_color;
                 opacity: 0.95;
                 border: 0;
+                border-radius: $menu_border_radius;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
             }
             menu menuitem{
                 color: $text_color_on_hover;
                 background: $background_color;
                 opacity: 0.95;
+                border-radius: 0px;
             }
             menu menuitem:hover {
                 background-color: $foreground_color;
                 color: $text_color;
                 transition: color 10ms linear;
+                border-radius: 0px;
+            }
+            menu menuitem:first-child {
+                border-radius: $menu_border_radius $menu_border_radius 0px 0px;
+            }
+            menu menuitem:last-child {
+                border-radius: 0px 0px $menu_border_radius $menu_border_radius;
+            }
+            menu menuitem:first-child:last-child {
+                border-radius: $menu_border_radius;
+            }
+            menu separator {
+                border-radius: 0px;
             }
             ";
     }

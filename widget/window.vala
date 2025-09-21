@@ -246,13 +246,35 @@ namespace Widgets {
                 });
         }
 
+        private bool should_use_window_rounded_corners() {
+            // Check if window should use rounded corners based on state and environment
+            if (!window_is_normal()) {
+                // Never use rounded corners for maximized, fullscreen, or tiled windows
+                return false;
+            }
+            
+            // For KDE Wayland, be more conservative with rounded corners
+            string? desktop = Environment.get_variable("XDG_CURRENT_DESKTOP");
+            string? wayland = Environment.get_variable("WAYLAND_DISPLAY");
+            
+            if (desktop != null && desktop.contains("KDE") && wayland != null) {
+                // On KDE Wayland, only use rounded corners if not using server-side decorations
+                // Check if we have client-side decorations
+                return !get_decorated();
+            }
+            
+            // For other environments, use rounded corners in normal window state
+            return true;
+        }
+
         public void update_style () {
             clean_style ();
 
             bool is_light_theme = is_light_theme ();
+            bool use_rounded_corners = should_use_window_rounded_corners();
 
             if (is_active) {
-                if (window_is_normal ()) {
+                if (use_rounded_corners) {
                     if (is_light_theme) {
                         if (screen_monitor.is_composited ()) {
                             window_frame_box.get_style_context ().add_class ("window_light_shadow_active");
@@ -274,7 +296,7 @@ namespace Widgets {
                     }
                 }
             } else {
-                if (window_is_normal ()) {
+                if (use_rounded_corners) {
                     if (is_light_theme) {
                         if (screen_monitor.is_composited ()) {
                             window_frame_box.get_style_context ().add_class ("window_light_shadow_inactive");
@@ -569,8 +591,6 @@ namespace Widgets {
                 titlebar_y -= 1;
             }
             Gdk.RGBA frame_color = Gdk.RGBA ();
-
-            bool is_light_theme = is_light_theme ();
 
             try {
                 frame_color = Utils.hex_to_rgba (config.config_file.get_string ("theme", "background"));
