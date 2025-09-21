@@ -31,7 +31,6 @@ namespace Widgets {
         public Gtk.Box server_action_box;
         public Widgets.DropdownTextButton backspace_key_box;
         public Widgets.DropdownTextButton del_key_box;
-        public Widgets.DropdownTextButton encode_box;
         public Gtk.Grid advanced_grid;
         public Gtk.Widget? focus_widget;
         public Widgets.ConfigWindow parent_window;
@@ -104,7 +103,7 @@ namespace Widgets {
             var font_description = new Pango.FontDescription ();
             font_description.set_size ((int)(font_size * Pango.SCALE));
             int max_width = 0;
-            string[] label_names = {_("Server name"), _("Address"), _("Username"), _("Password"), _("Certificate"), _("Path"), _("Command"), _("Group"), _("Encoding"), _("Backspace key"), _("Delete key")};
+            string[] label_names = {_("Server name"), _("Address"), _("Username"), _("Password"), _("Certificate"), _("Path"), _("Command"), _("Group"), _("Backspace key"), _("Delete key")};
             foreach (string label_name in label_names) {
                 var layout = create_pango_layout (label_name);
                 layout.set_font_description (font_description);
@@ -294,19 +293,6 @@ namespace Widgets {
                 command_entry.set_placeholder_text (_("Optional"));
                 create_follow_key_row (command_label, command_entry, _("Command:"), path_label, advanced_grid);
 
-                // Encoding.
-                Label encode_label = new Gtk.Label(   null);
-                encode_box = new Widgets.DropdownTextButton ();
-                foreach (string name in parent_window.config.encoding_names) {
-                    encode_box.append (name, name);
-                }
-                if (server_infos != null) {
-                    encode_box.set_active (parent_window.config.encoding_names.index_of (config_file.get_value (server_info, "Encode")));
-                } else {
-                    encode_box.set_active (parent_window.config.encoding_names.index_of ("UTF-8"));
-                }
-                create_follow_key_row (encode_label, encode_box, _("Encoding:"), command_label, advanced_grid, "preference_comboboxtext");
-
                 // Backspace sequence.
                 Label backspace_key_label = new Gtk.Label(   null);
                 backspace_key_box = new Widgets.DropdownTextButton ();
@@ -318,7 +304,7 @@ namespace Widgets {
                 } else {
                     backspace_key_box.set_active (parent_window.config.backspace_key_erase_names.index_of ("ascii-del"));
                 }
-                create_follow_key_row (backspace_key_label, backspace_key_box, _("Backspace key:"), encode_label, advanced_grid, "preference_comboboxtext");
+                create_follow_key_row (backspace_key_label, backspace_key_box, _("Backspace key:"), command_label, advanced_grid, "preference_comboboxtext");
 
                 // Delete sequence.
                 Label del_key_label = new Gtk.Label(   null);
@@ -363,7 +349,7 @@ namespace Widgets {
                                             password_button.entry.get_text (),
                                             file_button.entry.get_text (),
                                             (int) port_spinbutton.get_value (),
-                                            parent_window.config.encoding_names[encode_box.get_active ()],
+                                            "UTF-8",
                                             path_entry.get_text (),
                                             command_entry.get_text (),
                                             name_entry.get_text (),
@@ -379,7 +365,7 @@ namespace Widgets {
                                            password_button.entry.get_text (),
                                            file_button.entry.get_text (),
                                            (int) port_spinbutton.get_value (),
-                                           parent_window.config.encoding_names[encode_box.get_active ()],
+                                           "UTF-8",
                                            path_entry.get_text (),
                                            command_entry.get_text (),
                                            name_entry.get_text (),

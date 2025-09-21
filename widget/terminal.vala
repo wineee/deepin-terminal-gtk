@@ -446,7 +446,6 @@ namespace Widgets {
 
             menu_content.append (new Menu.MenuItem ("switch_theme", _("Switch theme")));
             menu_content.append (new Menu.MenuItem ("rename_title", _("Rename title")));
-            menu_content.append (new Menu.MenuItem ("encoding", _("Encoding")));
             menu_content.append (new Menu.MenuItem ("custom_commands", _("Custom commands")));
             menu_content.append (new Menu.MenuItem ("remote_manage", _("Remote management")));
             if (is_in_remote_server ()) {
@@ -542,9 +541,6 @@ namespace Widgets {
                     break;
                 case "rename_title":
                     rename_title ();
-                    break;
-                case "encoding":
-                    workspace_manager.focus_workspace.show_encoding_panel (workspace_manager.focus_workspace);
                     break;
                 case "preference":
                     var preference = new Widgets.Preference ((Widgets.ConfigWindow) this.get_toplevel (), ((Gtk.Window) this.get_toplevel ()).get_focus ());
@@ -1561,8 +1557,6 @@ namespace Widgets {
                 // print("%s\n", ssh_script_content);
 
                 // Set term server info.
-                term.set_encoding(   config_file.get_value(   server_info, "Encode"));
-
                 remote_server_title = config_file.get_value (server_info, "Name");
 
                 var backspace_binding = config_file.get_value (server_info, "Backspace");

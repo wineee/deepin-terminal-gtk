@@ -194,7 +194,6 @@ namespace Widgets {
                         foreach (var workspace_entry in workspace_manager.workspace_map.entries) {
                             workspace_entry.value.remove_theme_panel ();
                             workspace_entry.value.remove_remote_panel ();
-                            workspace_entry.value.remove_encoding_panel ();
                             workspace_entry.value.remove_command_panel ();
                         }
 
